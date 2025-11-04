@@ -1,7 +1,12 @@
-﻿namespace Backend.Application.Interfaces
+﻿using Backend.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+
+namespace Backend.Application.Interfaces;
+
+public interface IAppDbContext
 {
-    public interface IAppDbContext
-    {
-        Task<int> SaveChangesAsync(CancellationToken cancellationToken);
-    }
+    DbSet<User> Users { get; set; }
+    DbSet<Account> Accounts { get; set; }
+
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
