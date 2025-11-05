@@ -10,7 +10,7 @@ public class AppDbContext : DbContext, IAppDbContext
 
     public DbSet<User> Users { get; set; }
     public DbSet<Account> Accounts { get; set; }
-
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -48,5 +48,13 @@ public class AppDbContext : DbContext, IAppDbContext
             .WithOne(a => a.User)
             .HasForeignKey(a => a.UserId)
             .OnDelete(DeleteBehavior.Restrict); // защита истории и ссылочной целостности
+
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasKey(r => r.Id);
+            entity.HasIndex(r => r.Token).IsUnique();
+            entity.Property(r => r.Token).IsRequired();
+            entity.Property(r => r.ExpiresAt).IsRequired();
+        });
     }
 }
