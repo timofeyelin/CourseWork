@@ -1,0 +1,222 @@
+.container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: 'Inter', sans-serif;
+}
+
+.loginCard {
+    width: 480px;
+    max-height: 95vh;
+    padding: 32px 40px !important;
+    border-radius: 12px !important;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+    overflow-y: auto;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.logoIcon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.buildingIcon {
+    width: 52px;
+    height: 52px;
+}
+
+.title {
+    font-weight: 700 !important;
+    color: #2C3E50;
+    margin-bottom: 6px !important;
+    font-size: 32px !important;
+}
+
+.subtitle {
+    font-weight: 500 !important;
+    color: #607D8B;
+    font-size: 16px !important;
+}
+
+.alert {
+    margin-bottom: 12px !important;
+    border-radius: 8px !important;
+    font-size: 0.813rem !important;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.formField {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form input:-webkit-autofill,
+.form input:-webkit-autofill:hover,
+.form input:-webkit-autofill:focus,
+.form input:-webkit-autofill:active {
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: #000;
+    transition: background-color 5000s ease-in-out 0s;
+    box-shadow: inset 0 0 20px 20px transparent;
+}
+
+.fieldLabel {
+    display: block;
+    color: #2C3E50;
+    font-weight: 500 !important;
+    font-size: 13px !important;
+}
+
+.formField :global(.MuiOutlinedInput-root) {
+    border-radius: 8px;
+}
+
+.formField :global(.MuiOutlinedInput-root):focus-within {
+    outline: none !important;
+}
+
+.formField :global(.MuiOutlinedInput-notchedOutline) {
+    border-radius: 8px;
+}
+
+.formField :global(.MuiIconButton-root):focus {
+    outline: none !important;
+}
+
+.formOptions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: -4px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.formOptions :global(.MuiCheckbox-root):focus {
+    outline: none !important;
+}
+
+.formOptions :global(.MuiTypography-root) {
+    font-size: 0.813rem !important;
+}
+
+.forgotLink {
+  color: #00BCD4;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.forgotLink:hover {
+  text-decoration: underline;
+}
+
+.submitButton {
+  padding: 10px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  border-radius: 8px !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s !important;
+}
+
+.submitButton:hover {
+  background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+  box-shadow: 0 4px 12px rgba(0, 80, 158, 0.3) !important;
+}
+
+.submitButton:focus,
+.submitButton:focus-visible {
+  outline: none !important;
+}
+
+.submitButton:disabled {
+  background: #BDBDBD !important;
+  box-shadow: none !important;
+}
+
+
+.divider {
+  position: relative;
+  text-align: center;
+  color: #999999;
+  font-size: 14px;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 45%;
+  height: 1px;
+  background-color: #e0e0e0;
+}
+
+.divider::before {
+  left: 0;
+}
+
+.divider::after {
+  right: 0;
+}
+
+.registerText {
+  text-align: center;
+  color: #666666;
+  font-size: 0.813rem !important;
+}
+
+.registerLink {
+  color: #00BCD4;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.registerLink:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .loginCard {
+    padding: 32px 24px !important;
+  }
+
+  .title {
+    font-size: 24px !important;
+  }
+
+  .subtitle {
+    font-size: 16px !important;
+  }
+
+  .formOptions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .buildingIcon {
+    width: 48px;
+    height: 48px;
+  }
+}
