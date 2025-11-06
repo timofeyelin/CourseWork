@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:5000/api';
+import { API_BASE_URL } from '../utils/constants';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -24,7 +23,7 @@ export const authService = {
     },
 
     async login(email, password) {
-        const response = await api.post('/auth/login', { email, password });
+        const response = await api.post('/auth/login', { emailOrPhone: email, password });
         if (response.data.accessToken) {
             localStorage.setItem('accessToken', response.data.accessToken);
             localStorage.setItem('refreshToken', response.data.refreshToken);

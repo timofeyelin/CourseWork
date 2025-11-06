@@ -74,6 +74,9 @@ const Login = () => {
             navigate('/'); 
 
         } catch (error) {
+            console.error('Полная ошибка:', error); 
+            console.error('Ответ сервера:', error.response?.data); 
+            
             const errorMessage = error.response?.data?.message || 'Ошибка входа. Проверьте email или пароль.';
             setApiError(errorMessage);
         } finally{
