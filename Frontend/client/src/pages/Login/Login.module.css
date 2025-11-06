@@ -3,68 +3,83 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #FFFFFF;
-    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: 'Inter', sans-serif;
 }
 
 .loginCard {
     width: 480px;
-    min-height: 640px;
-    padding: 48px 40px !important;
+    max-height: 95vh;
+    padding: 32px 40px !important;
     border-radius: 12px !important;
     box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+    overflow-y: auto;
 }
 
 .header {
     text-align: center;
-    margin-bottom: 32px;
+    margin-bottom: 20px;
 }
 
 .logoIcon {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .buildingIcon {
-    width: 64px;
-    height: 64px;
+    width: 52px;
+    height: 52px;
 }
 
 .title {
     font-weight: 700 !important;
     color: #2C3E50;
-    margin-bottom: 8px !important;
+    margin-bottom: 6px !important;
+    font-size: 32px !important;
 }
 
 .subtitle {
     font-weight: 500 !important;
     color: #607D8B;
+    font-size: 16px !important;
 }
 
 .alert {
-    margin-bottom: 10px !important;
+    margin-bottom: 12px !important;
     border-radius: 8px !important;
-    min-height: 32px;
+    font-size: 0.813rem !important;
 }
 
 .form {
     display: flex;
     flex-direction: column;
+    gap: 10px;
 }
 
 .formField {
-    margin-bottom: 5px;
-    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form input:-webkit-autofill,
+.form input:-webkit-autofill:hover,
+.form input:-webkit-autofill:focus,
+.form input:-webkit-autofill:active {
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: #000;
+    transition: background-color 5000s ease-in-out 0s;
+    box-shadow: inset 0 0 20px 20px transparent;
 }
 
 .fieldLabel {
     display: block;
-    margin-bottom: 8px;
     color: #2C3E50;
     font-weight: 500 !important;
-    font-size: 14px !important;
+    font-size: 13px !important;
 }
 
 .formField :global(.MuiOutlinedInput-root) {
@@ -87,7 +102,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-top: -4px;
+    margin-bottom: 8px;
     flex-wrap: wrap;
     gap: 8px;
 }
@@ -96,32 +112,35 @@
     outline: none !important;
 }
 
+.formOptions :global(.MuiTypography-root) {
+    font-size: 0.813rem !important;
+}
+
 .forgotLink {
   color: #00BCD4;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   transition: color 0.2s;
 }
 
 .forgotLink:hover {
-  color: #0077b6;
   text-decoration: underline;
 }
 
 .submitButton {
-  padding: 14px !important;
-  font-size: 16px !important;
+  padding: 10px !important;
+  font-size: 14px !important;
   font-weight: 600 !important;
   text-transform: none !important;
   border-radius: 8px !important;
-  background-color: #0D3B66 !important;
-  box-shadow: 0 2px 8px rgba(0, 80, 158, 0.2) !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
   transition: all 0.3s !important;
 }
 
 .submitButton:hover {
-  background-color: #1976D2 !important;
+  background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
   box-shadow: 0 4px 12px rgba(0, 80, 158, 0.3) !important;
 }
 
@@ -131,7 +150,7 @@
 }
 
 .submitButton:disabled {
-  background-color: #BDBDBD !important;
+  background: #BDBDBD !important;
   box-shadow: none !important;
 }
 
@@ -139,7 +158,6 @@
 .divider {
   position: relative;
   text-align: center;
-  margin: 24px 0;
   color: #999999;
   font-size: 14px;
 }
@@ -165,6 +183,7 @@
 .registerText {
   text-align: center;
   color: #666666;
+  font-size: 0.813rem !important;
 }
 
 .registerLink {
@@ -175,7 +194,6 @@
 }
 
 .registerLink:hover {
-  color: #0077b6;
   text-decoration: underline;
 }
 
