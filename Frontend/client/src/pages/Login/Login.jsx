@@ -2,13 +2,15 @@ import {useState} from 'react';
 import { TextField, Button, Checkbox, FormControlLabel, Alert, InputAdornment, IconButton, Typography, Box, Paper } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { Icon } from '@iconify/react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { authService } from '../../api';
 import { useFormValidation } from '../../hooks/useFormValidation';
 import { loginValidationSchema } from '../../utils/validationSchemas';
 import { ROUTES } from '../../utils/constants';
 import styles from './Login.module.css';
 
 const Login = () => {
+    const navigate = useNavigate();
 
     const [formData, setFormData] = useState ({
         email: '',
@@ -67,17 +69,13 @@ const Login = () => {
         setIsSubmitting(true);
 
         try {
-            console.log('Login attempt: ', {
-                email: formData.email,
-                rememberMe: formData.rememberMe
-            });
+            await authService.login(formData.email, formData.password);
 
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            navigate('/'); 
 
-            // Здесь будет вызов API
-            // const response = await authService.login(formData);
         } catch (error) {
-            setApiError('Произошла ошибка при входе. Пожалуйста, попробуйте позже.');
+            const errorMessage = error.response?.data?.message || 'Ошибка входа. Проверьте email или пароль.';
+            setApiError(errorMessage);
         } finally{
             setIsSubmitting(false);
         }
