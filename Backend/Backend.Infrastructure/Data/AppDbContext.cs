@@ -11,6 +11,9 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Account> Accounts { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<Bill> Bills { get; set; }
+    public DbSet<BillItem> BillItems { get; set; }
+    public DbSet<Payment> Payment { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
