@@ -15,4 +15,6 @@ public class Account
     public int UserId { get; set; }
     // Навигационное свойство для связи "многие к одному"
     public User? User { get; set; }
+
+    public ICollection<Bill> Bills { get; set; } = new List<Bill>();
 }
