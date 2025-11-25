@@ -45,6 +45,14 @@ export const userService = {
 
     async getAccounts() {
         return await api.get('/user/accounts');
+    },
+
+    async addAccount(accountNumber) {
+        return await api.post('/user/accounts', { accountNumber });
+    },
+
+    async deleteAccount(accountId) {
+        return await api.delete(`/user/accounts/${accountId}`);
     }
 };
 
