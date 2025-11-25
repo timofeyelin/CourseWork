@@ -1,20 +1,22 @@
 .container {
     min-height: 100vh;
     display: flex;
-    align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     font-family: 'Inter', sans-serif;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 .loginCard {
     width: 480px;
-    max-height: 95vh;
+    max-height: 90vh;
     padding: 32px 40px !important;
     border-radius: 12px !important;
     box-sizing: border-box;
     font-family: 'Inter', sans-serif;
     overflow-y: auto;
+    margin: auto;
 }
 
 .header {
@@ -199,7 +201,9 @@
 
 @media (max-width: 600px) {
   .loginCard {
-    padding: 32px 24px !important;
+    width: 100% !important;
+    max-height: none;
+    padding: 24px 20px !important;
   }
 
   .title {
@@ -207,16 +211,33 @@
   }
 
   .subtitle {
-    font-size: 16px !important;
+    font-size: 14px !important;
   }
 
   .formOptions {
     flex-direction: column;
     align-items: flex-start;
+    gap: 12px;
   }
 
   .buildingIcon {
     width: 48px;
     height: 48px;
+  }
+}
+
+@media (max-height: 700px) {
+  .loginCard {
+    max-height: none;
+    padding: 20px 24px !important;
+  }
+  
+  .logoIcon {
+    margin-bottom: 8px;
+  }
+  
+  .buildingIcon {
+    width: 40px;
+    height: 40px;
   }
 }

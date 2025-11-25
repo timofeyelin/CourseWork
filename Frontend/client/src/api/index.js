@@ -38,4 +38,14 @@ export const authService = {
     }
 };
 
+export const userService = {
+    async getProfile() {
+        return await api.get('/user/profile');
+    },
+
+    async getAccounts() {
+        return await api.get('/user/accounts');
+    }
+};
+
 export default api;
