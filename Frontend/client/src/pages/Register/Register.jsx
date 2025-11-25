@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../api';
 import { useFormValidation } from '../../hooks/useFormValidation';
 import { registerValidationSchema } from '../../utils/validationSchemas';
-import { ROUTES } from '../../utils/constants';
+import { ROUTES, ERROR_MESSAGES, VALIDATION_MESSAGES, PASSWORD_STRENGTH } from '../../utils/constants';
 import styles from './Register.module.css';
 
 const Register = () => {
@@ -70,7 +70,7 @@ const Register = () => {
         }
 
         if (!formData.agreeToTerms) {
-            setApiError('Необходимо согласиться с условиями обработки персональных данных');
+            setApiError(VALIDATION_MESSAGES.AGREE_TO_TERMS);
             return;
         }
 
@@ -86,7 +86,7 @@ const Register = () => {
 
             navigate(ROUTES.LOGIN);
         } catch (error) {
-            const errorMessage = error.response?.data?.message || 'Ошибка регистрации. Попробуйте снова.';
+            const errorMessage = error.response?.data?.message || ERROR_MESSAGES.REGISTRATION_FAILED;
             setApiError(errorMessage);
         } finally {
             setIsSubmitting(false);
@@ -113,11 +113,11 @@ const Register = () => {
         if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
         
         if (strength <= 2) {
-            return { strength: 'Слабый', color: '#f44336', width: 33 };
+            return { strength: PASSWORD_STRENGTH.WEAK, color: '#f44336', width: 33 };
         } else if (strength <= 4) {
-            return { strength: 'Средний', color: '#ff9800', width: 66 };
+            return { strength: PASSWORD_STRENGTH.MEDIUM, color: '#ff9800', width: 66 };
         } else {
-            return { strength: 'Сильный', color: '#4caf50', width: 100 };
+            return { strength: PASSWORD_STRENGTH.STRONG, color: '#4caf50', width: 100 };
         }
     };
 

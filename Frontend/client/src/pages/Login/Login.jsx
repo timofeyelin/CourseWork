@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../api';
 import { useFormValidation } from '../../hooks/useFormValidation';
 import { loginValidationSchema } from '../../utils/validationSchemas';
-import { ROUTES } from '../../utils/constants';
+import { ROUTES, ERROR_MESSAGES } from '../../utils/constants';
 import styles from './Login.module.css';
 
 const Login = () => {
@@ -77,7 +77,7 @@ const Login = () => {
             console.error('Полная ошибка:', error); 
             console.error('Ответ сервера:', error.response?.data); 
             
-            const errorMessage = error.response?.data?.message || 'Ошибка входа. Проверьте email или пароль.';
+            const errorMessage = error.response?.data?.message || ERROR_MESSAGES.LOGIN_FAILED;
             setApiError(errorMessage);
         } finally{
             setIsSubmitting(false);
