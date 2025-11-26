@@ -95,3 +95,19 @@ export const accountValidationSchema = (accountNumber) => {
 
     return true;
 }
+
+export const paymentValidationSchema = (amount, maxAmount) => {
+    const errors = {};
+
+    if (!amount || isNaN(amount) || Number(amount) <= 0) {
+        errors.amount = VALIDATION_MESSAGES.INVALID_PAYMENT_AMOUNT;
+    } else if (Number(amount) > maxAmount) {
+        errors.amount = VALIDATION_MESSAGES.PAYMENT_AMOUNT_EXCEEDS;
+    }
+
+    if (Object.keys(errors).length > 0) {
+        throw errors;
+    }
+
+    return true;
+}

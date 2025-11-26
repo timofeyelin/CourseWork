@@ -90,7 +90,7 @@ const Login = () => {
 
     return (
         <div className={styles.container}>
-            <Paper elevation={3} className={styles.loginCard}>
+            <Paper elevation={3} className={`${styles.loginCard} glass-card`}>
                 <div className={styles.header}>
                         <div className={styles.logoIcon}>
                             <Icon icon="fluent-emoji-flat:office-building" className={styles.buildingIcon} />
@@ -110,7 +110,7 @@ const Login = () => {
                     )}
                     
                     <form onSubmit={handleSubmit} className={styles.form} noValidate>
-                        <Box className={styles.formField}>
+                        <Box className={`${styles.formField} glass-input`}>
                             <Typography variant='body2' className={styles.fieldLabel}>
                                 Email или номер телефона
                             </Typography>
@@ -132,7 +132,7 @@ const Login = () => {
                             />
                         </Box>
 
-                        <Box className={styles.formField}>
+                        <Box className={`${styles.formField} glass-input`}>
                             <Typography variant='body2' className={styles.fieldLabel}>
                                 Пароль
                             </Typography>
@@ -193,7 +193,7 @@ const Login = () => {
                         variant='contained'
                         size='large'
                         disabled={isSubmitting}
-                        className={styles.submitButton}
+                        className={`${styles.submitButton} btn-glass-primary`}
                         >
                             {isSubmitting ? 'Вход...' : 'Войти'}
                         </Button>

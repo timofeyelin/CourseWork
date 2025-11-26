@@ -2,8 +2,7 @@
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    font-family: 'Inter', sans-serif;
+    background: var(--color-bg-gradient);
     padding: 20px;
     box-sizing: border-box;
 }
@@ -12,9 +11,7 @@
     width: 480px;
     max-height: 90vh;
     padding: 32px 40px !important;
-    border-radius: 12px !important;
     box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
     overflow-y: auto;
     margin: auto;
 }
@@ -34,19 +31,20 @@
 .buildingIcon {
     width: 52px;
     height: 52px;
+    color: var(--color-primary);
 }
 
 .title {
     font-weight: 700 !important;
-    color: #2C3E50;
+    color: var(--color-text-main);
     margin-bottom: 6px !important;
-    font-size: 32px !important;
+    font-size: 1.75rem !important;
 }
 
 .subtitle {
     font-weight: 500 !important;
-    color: #607D8B;
-    font-size: 16px !important;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem !important;
 }
 
 .alert {
@@ -72,29 +70,19 @@
 .form input:-webkit-autofill:focus,
 .form input:-webkit-autofill:active {
     -webkit-background-clip: text;
-    -webkit-text-fill-color: #000;
+    -webkit-text-fill-color: var(--color-text-main);
     transition: background-color 5000s ease-in-out 0s;
     box-shadow: inset 0 0 20px 20px transparent;
 }
 
 .fieldLabel {
     display: block;
-    color: #2C3E50;
+    color: var(--color-text-main);
     font-weight: 500 !important;
     font-size: 13px !important;
 }
 
-.formField :global(.MuiOutlinedInput-root) {
-    border-radius: 8px;
-}
 
-.formField :global(.MuiOutlinedInput-root):focus-within {
-    outline: none !important;
-}
-
-.formField :global(.MuiOutlinedInput-notchedOutline) {
-    border-radius: 8px;
-}
 
 .formField :global(.MuiIconButton-root):focus {
     outline: none !important;
@@ -110,16 +98,25 @@
     gap: 8px;
 }
 
+.formOptions :global(.MuiCheckbox-root) {
+    color: var(--color-text-secondary);
+}
+
+.formOptions :global(.MuiCheckbox-root.Mui-checked) {
+    color: var(--color-primary);
+}
+
 .formOptions :global(.MuiCheckbox-root):focus {
     outline: none !important;
 }
 
 .formOptions :global(.MuiTypography-root) {
     font-size: 0.813rem !important;
+    color: var(--color-text-secondary);
 }
 
 .forgotLink {
-  color: #00BCD4;
+  color: var(--color-primary);
   text-decoration: none;
   font-size: 13px;
   font-weight: 500;
@@ -128,22 +125,17 @@
 
 .forgotLink:hover {
   text-decoration: underline;
+  color: var(--color-primary-hover);
 }
 
 .submitButton {
-  padding: 10px !important;
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  text-transform: none !important;
-  border-radius: 8px !important;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-  transition: all 0.3s !important;
+  margin-top: 8px;
+  width: 100%;
 }
 
 .submitButton:hover {
-  background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
-  box-shadow: 0 4px 12px rgba(0, 80, 158, 0.3) !important;
+  background: var(--color-primary-hover) !important;
+  box-shadow: 0 4px 12px rgba(2, 119, 189, 0.4) !important;
 }
 
 .submitButton:focus,
@@ -160,7 +152,7 @@
 .divider {
   position: relative;
   text-align: center;
-  color: #999999;
+  color: var(--color-text-secondary);
   font-size: 14px;
 }
 
@@ -171,7 +163,7 @@
   top: 50%;
   width: 45%;
   height: 1px;
-  background-color: #e0e0e0;
+  background-color: var(--color-border);
 }
 
 .divider::before {
@@ -184,12 +176,12 @@
 
 .registerText {
   text-align: center;
-  color: #666666;
+  color: var(--color-text-secondary);
   font-size: 0.813rem !important;
 }
 
 .registerLink {
-  color: #00BCD4;
+  color: var(--color-primary);
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s;
@@ -197,6 +189,7 @@
 
 .registerLink:hover {
   text-decoration: underline;
+  color: var(--color-primary-hover);
 }
 
 @media (max-width: 600px) {

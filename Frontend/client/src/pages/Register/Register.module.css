@@ -2,40 +2,34 @@
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    font-family: 'Inter', sans-serif;
+    background: var(--color-bg-gradient);
     padding: 20px;
     box-sizing: border-box;
 }
 
 .registerCard {
-    width: 520px;
-    max-height: 90vh;
-    padding: 32px 40px !important;
-    border-radius: 12px !important;
+    width: 480px;
+    padding: 20px 32px !important;
     box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
-    overflow-y: auto;
     margin: auto;
 }
 
 .header {
     text-align: center;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
 }
 
 .title {
-    color: #2C3E50;
-    margin-bottom: 6px !important;
-    font-size: 32px !important;
+    color: var(--color-text-main);
+    margin-bottom: 4px !important;
+    font-size: 1.75rem !important;
     font-weight: 700 !important;
-    font-family: 'Inter' !important;
 }
 
 .subtitle {
-    color: #607D8B;
+    color: var(--color-text-secondary);
     margin-bottom: 0;
-    font-size: 16px !important;
+    font-size: 0.9rem !important;
     font-weight: 500 !important;
 }
 
@@ -47,7 +41,7 @@
 .form {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
 }
 
 .formField {
@@ -56,16 +50,8 @@
     gap: 4px;
 }
 
-.formField :global(.MuiOutlinedInput-root) {
-    border-radius: 8px;
-}
-
 .formField :global(.MuiOutlinedInput-root):focus-within {
     outline: none !important;
-}
-
-.formField :global(.MuiOutlinedInput-notchedOutline) {
-    border-radius: 8px;
 }
 
 .formField :global(.MuiIconButton-root):focus {
@@ -74,12 +60,12 @@
 
 .fieldLabel {
     font-weight: 500;
-    color: #333;
-    font-size: 13px;
+    color: var(--color-text-main);
+    font-size: 13px !important;
 }
 
 .required {
-    color: #d32f2f;
+    color: var(--color-error);
 }
 
 .passwordStrength {
@@ -112,11 +98,24 @@
 }
 
 .formOptions {
-    margin-top: -4px;
+    margin-top: 4px;
+}
+
+.formOptions :global(.MuiFormControlLabel-root) {
+    align-items: flex-start;
+    margin-left: -8px;
+}
+
+.formOptions :global(.MuiCheckbox-root) {
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 2px;
 }
 
 .formOptions :global(.MuiTypography-root) {
     font-size: 0.813rem !important;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
 }
 
 .form input:-webkit-autofill,
@@ -124,35 +123,29 @@
 .form input:-webkit-autofill:focus,
 .form input:-webkit-autofill:active {
     -webkit-background-clip: text;
-    -webkit-text-fill-color: #000;
+    -webkit-text-fill-color: var(--color-text-main);
     transition: background-color 5000s ease-in-out 0s;
     box-shadow: inset 0 0 20px 20px transparent;
 }
 
 .link {
-    color: #00BCD4;
+    color: var(--color-primary);
     text-decoration: none;
 }
 
 .link:hover {
     text-decoration: underline;
+    color: var(--color-primary-hover);
 }
 
 .submitButton {
-    margin-top: 4px;
-    padding: 10px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    text-transform: none !important;
-    border-radius: 8px !important;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    transition: all 0.3s !important;
+    margin-top: 8px;
+    width: 100%;
 }
 
 .submitButton:hover {
-    background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    background: var(--color-primary-hover) !important;
+    box-shadow: 0 6px 20px rgba(2, 119, 189, 0.4);
 }
 
 .submitButton:focus,
@@ -168,18 +161,19 @@
 .loginText {
     text-align: center;
     margin-top: 8px;
-    color: #666;
+    color: var(--color-text-secondary);
     font-size: 0.813rem;
 }
 
 .loginLink {
-    color: #00BCD4;
+    color: var(--color-primary);
     text-decoration: none;
     font-weight: 600;
 }
 
 .loginLink:hover {
     text-decoration: underline;
+    color: var(--color-primary-hover);
 }
 
 @media (max-width: 600px) {
@@ -201,14 +195,14 @@
 @media (max-height: 800px) {
     .registerCard {
         max-height: none;
-        padding: 20px 32px !important;
+        padding: 16px 24px !important;
     }
     
     .header {
-        margin-bottom: 12px;
+        margin-bottom: 8px;
     }
     
     .form {
-        gap: 8px;
+        gap: 10px;
     }
 }
