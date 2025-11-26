@@ -3,6 +3,7 @@ using System;
 using Backend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Backend.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251126180046_AddMeterEntities")]
+    partial class AddMeterEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -268,108 +271,6 @@ namespace Backend.Infrastructure.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
-            modelBuilder.Entity("Backend.Domain.Entities.Request", b =>
-                {
-                    b.Property<int>("RequestId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("RequestId"));
-
-                    b.Property<int>("AccountId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime?>("ClosedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Comment")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("Rating")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.HasKey("RequestId");
-
-                    b.HasIndex("AccountId");
-
-                    b.ToTable("Requests");
-                });
-
-            modelBuilder.Entity("Backend.Domain.Entities.RequestAttachment", b =>
-                {
-                    b.Property<int>("AttachmentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("AttachmentId"));
-
-                    b.Property<string>("FileType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("FileUri")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("RequestId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("AttachmentId");
-
-                    b.HasIndex("RequestId");
-
-                    b.ToTable("RequestAttachments");
-                });
-
-            modelBuilder.Entity("Backend.Domain.Entities.RequestComment", b =>
-                {
-                    b.Property<int>("CommentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CommentId"));
-
-                    b.Property<int>("AuthorId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("RequestId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("CommentId");
-
-                    b.HasIndex("AuthorId");
-
-                    b.HasIndex("RequestId");
-
-                    b.ToTable("RequestComments");
-                });
-
             modelBuilder.Entity("Backend.Domain.Entities.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -492,47 +393,6 @@ namespace Backend.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Backend.Domain.Entities.Request", b =>
-                {
-                    b.HasOne("Backend.Domain.Entities.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Account");
-                });
-
-            modelBuilder.Entity("Backend.Domain.Entities.RequestAttachment", b =>
-                {
-                    b.HasOne("Backend.Domain.Entities.Request", "Request")
-                        .WithMany("Attachments")
-                        .HasForeignKey("RequestId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Request");
-                });
-
-            modelBuilder.Entity("Backend.Domain.Entities.RequestComment", b =>
-                {
-                    b.HasOne("Backend.Domain.Entities.User", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Backend.Domain.Entities.Request", "Request")
-                        .WithMany("Comments")
-                        .HasForeignKey("RequestId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Author");
-
-                    b.Navigation("Request");
-                });
-
             modelBuilder.Entity("Backend.Domain.Entities.Account", b =>
                 {
                     b.Navigation("Bills");
@@ -545,17 +405,9 @@ namespace Backend.Infrastructure.Migrations
                     b.Navigation("Payment");
                 });
 
-
-            modelBuilder.Entity("Backend.Domain.Entities.Request", b =>
-                {
-                    b.Navigation("Attachments");
-
-                    b.Navigation("Comments");
-
             modelBuilder.Entity("Backend.Domain.Entities.Meter", b =>
                 {
                     b.Navigation("Readings");
-
                 });
 
             modelBuilder.Entity("Backend.Domain.Entities.User", b =>
