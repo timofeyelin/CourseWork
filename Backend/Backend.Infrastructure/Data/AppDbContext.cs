@@ -14,6 +14,8 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<Bill> Bills { get; set; }
     public DbSet<BillItem> BillItems { get; set; }
     public DbSet<Payment> Payment { get; set; }
+    public DbSet<Meter> Meters { get; set; }
+    public DbSet<MeterReading> MeterReadings { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -58,6 +60,31 @@ public class AppDbContext : DbContext, IAppDbContext
             entity.HasIndex(r => r.Token).IsUnique();
             entity.Property(r => r.Token).IsRequired();
             entity.Property(r => r.ExpiresAt).IsRequired();
+        });
+
+        // Конфигурация Meter
+        modelBuilder.Entity<Meter>(entity =>
+        {
+            entity.HasKey(m => m.MeterId);
+            entity.Property(m => m.SerialNumber).IsRequired().HasMaxLength(50);
+
+            entity.HasOne(m => m.Account)
+                  .WithMany()
+                  .HasForeignKey(m => m.AccountId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Конфигурация MeterReading
+        modelBuilder.Entity<MeterReading>(entity =>
+        {
+            entity.HasKey(mr => mr.ReadingId);
+            entity.Property(mr => mr.Value).HasPrecision(18, 4);
+
+            // Связь с Meter
+            entity.HasOne(mr => mr.Meter)
+                  .WithMany(m => m.Readings)
+                  .HasForeignKey(mr => mr.MeterId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
