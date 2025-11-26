@@ -18,6 +18,7 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<IAppDbContext, AppDbContext>();
 builder.Services.AddScoped<IUserService,UserService>();
 builder.Services.AddScoped<IBillService, BillService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<JwtService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterUserValidator>();
