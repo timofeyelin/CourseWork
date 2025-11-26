@@ -14,8 +14,12 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<Bill> Bills { get; set; }
     public DbSet<BillItem> BillItems { get; set; }
     public DbSet<Payment> Payment { get; set; }
+    public DbSet<Request> Requests { get; set; }
+    public DbSet<RequestComment> RequestComments { get; set; }
+    public DbSet<RequestAttachment> RequestAttachments { get; set; }
     public DbSet<Meter> Meters { get; set; }
     public DbSet<MeterReading> MeterReadings { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -62,6 +66,60 @@ public class AppDbContext : DbContext, IAppDbContext
             entity.Property(r => r.ExpiresAt).IsRequired();
         });
 
+        modelBuilder.Entity<Request>(entity =>
+        {
+            entity.HasKey(r => r.RequestId);
+
+            entity.Property(r => r.Category)
+                  .IsRequired()
+                  .HasMaxLength(100);
+
+            entity.Property(r => r.Description)
+                  .IsRequired();
+
+            entity.Property(r => r.Rating)
+                  .HasColumnType("integer");
+
+            entity.HasOne(r => r.Account)
+                  .WithMany()
+                  .HasForeignKey(r => r.AccountId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<RequestComment>(entity =>
+        {
+            entity.HasKey(c => c.CommentId);
+
+            entity.Property(c => c.Text)
+                  .IsRequired();
+
+            entity.HasOne(c => c.Request)
+                  .WithMany(r => r.Comments)
+                  .HasForeignKey(c => c.RequestId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(c => c.Author)
+                  .WithMany()
+                  .HasForeignKey(c => c.AuthorId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<RequestAttachment>(entity =>
+        {
+            entity.HasKey(a => a.AttachmentId);
+
+            entity.Property(a => a.FileUri)
+                  .IsRequired();
+
+            entity.Property(a => a.FileType)
+                  .IsRequired()
+                  .HasMaxLength(50);
+
+            entity.HasOne(a => a.Request)
+                  .WithMany(r => r.Attachments)
+                  .HasForeignKey(a => a.RequestId)
+
+
         // Конфигурация Meter
         modelBuilder.Entity<Meter>(entity =>
         {
@@ -84,6 +142,7 @@ public class AppDbContext : DbContext, IAppDbContext
             entity.HasOne(mr => mr.Meter)
                   .WithMany(m => m.Readings)
                   .HasForeignKey(mr => mr.MeterId)
+
                   .OnDelete(DeleteBehavior.Cascade);
         });
     }

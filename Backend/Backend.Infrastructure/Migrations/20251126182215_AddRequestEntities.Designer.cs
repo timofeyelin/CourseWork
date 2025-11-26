@@ -3,6 +3,7 @@ using System;
 using Backend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Backend.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251126182215_AddRequestEntities")]
+    partial class AddRequestEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -132,72 +135,6 @@ namespace Backend.Infrastructure.Migrations
                     b.HasIndex("BillId");
 
                     b.ToTable("BillItems");
-                });
-
-            modelBuilder.Entity("Backend.Domain.Entities.Meter", b =>
-                {
-                    b.Property<int>("MeterId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MeterId"));
-
-                    b.Property<int>("AccountId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("InstallationDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("LastVerified")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("SerialNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.HasKey("MeterId");
-
-                    b.HasIndex("AccountId");
-
-                    b.ToTable("Meters");
-                });
-
-            modelBuilder.Entity("Backend.Domain.Entities.MeterReading", b =>
-                {
-                    b.Property<int>("ReadingId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ReadingId"));
-
-                    b.Property<int>("MeterId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("Period")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("SubmittedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("Validated")
-                        .HasColumnType("boolean");
-
-                    b.Property<decimal>("Value")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("numeric(18,4)");
-
-                    b.HasKey("ReadingId");
-
-                    b.HasIndex("MeterId");
-
-                    b.ToTable("MeterReadings");
                 });
 
             modelBuilder.Entity("Backend.Domain.Entities.Payment", b =>
@@ -448,28 +385,6 @@ namespace Backend.Infrastructure.Migrations
                     b.Navigation("Bill");
                 });
 
-            modelBuilder.Entity("Backend.Domain.Entities.Meter", b =>
-                {
-                    b.HasOne("Backend.Domain.Entities.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Account");
-                });
-
-            modelBuilder.Entity("Backend.Domain.Entities.MeterReading", b =>
-                {
-                    b.HasOne("Backend.Domain.Entities.Meter", "Meter")
-                        .WithMany("Readings")
-                        .HasForeignKey("MeterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Meter");
-                });
-
             modelBuilder.Entity("Backend.Domain.Entities.Payment", b =>
                 {
                     b.HasOne("Backend.Domain.Entities.Bill", "Bill")
@@ -545,17 +460,11 @@ namespace Backend.Infrastructure.Migrations
                     b.Navigation("Payment");
                 });
 
-
             modelBuilder.Entity("Backend.Domain.Entities.Request", b =>
                 {
                     b.Navigation("Attachments");
 
                     b.Navigation("Comments");
-
-            modelBuilder.Entity("Backend.Domain.Entities.Meter", b =>
-                {
-                    b.Navigation("Readings");
-
                 });
 
             modelBuilder.Entity("Backend.Domain.Entities.User", b =>
