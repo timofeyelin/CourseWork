@@ -11,5 +11,8 @@ public interface IAppDbContext
     DbSet<BillItem> BillItems { get; set; } 
     DbSet<Payment> Payment { get; set; }
     DbSet<RefreshToken> RefreshTokens { get; set; }
+    DbSet<Request> Requests { get; set; }
+    DbSet<RequestComment> RequestComments { get; set; }
+    DbSet<RequestAttachment> RequestAttachments { get; set; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
