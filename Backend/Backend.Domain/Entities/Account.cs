@@ -12,7 +12,7 @@ public class Account
     public bool IsActive { get; set; }
 
     // Внешний ключ для связи с User
-    public int UserId { get; set; }
+    public int? UserId { get; set; }
     // Навигационное свойство для связи "многие к одному"
     public User? User { get; set; }
 

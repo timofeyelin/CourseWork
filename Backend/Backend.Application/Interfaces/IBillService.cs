@@ -1,0 +1,12 @@
+using Backend.Domain.Entities;
+
+namespace Backend.Application.Interfaces
+{
+    public interface IBillService
+    {
+        Task<List<Bill>> GetUserBillsAsync(CancellationToken ct, int userId);
+        Task<List<Bill>> GetAccountBillsAsync(CancellationToken ct, int userId, int accountId);
+        Task<Bill> GetBillDetailsAsync(CancellationToken ct, int userId, int billId);
+        Task<bool> ValidateUserAccessAsync(CancellationToken ct, int userId, int billId);
+    }
+}
