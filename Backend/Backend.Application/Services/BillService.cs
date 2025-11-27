@@ -1,16 +1,58 @@
 using Backend.Application.Interfaces;
 using Backend.Domain.Entities;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
 
 namespace Backend.Application.Services
 {
     public class BillService : IBillService
     {
         private readonly IAppDbContext _context;
+        private readonly IPdfGeneratorService _pdfGeneratorService;
+        private readonly IWebHostEnvironment _hostingEnvironment;
 
-        public BillService(IAppDbContext context)
+        public BillService(IAppDbContext context, IPdfGeneratorService pdfGeneratorService, IWebHostEnvironment hostingEnvironment)
         {
             _context = context;
+            _pdfGeneratorService = pdfGeneratorService;
+            _hostingEnvironment = hostingEnvironment;
+        }
+
+        // Предполагается, что объект newBill приходит с уже заполненными BillItems.
+        public async Task<Bill> CreateBillWithPdfAsync(Bill newBill, CancellationToken ct)
+        {
+            _context.Bills.Add(newBill);
+            await _context.SaveChangesAsync(ct);
+
+            var billWithDetails = await _context.Bills
+                .Include(b => b.Account)
+                .Include(b => b.BillItems)
+                .FirstAsync(b => b.BillId == newBill.BillId, ct);
+
+            var pdfBytes = _pdfGeneratorService.GenerateBillPdf(billWithDetails);
+
+            var fileName = $"bill_{newBill.BillId}_{System.Guid.NewGuid()}.pdf";
+            var directoryPath = Path.Combine(_hostingEnvironment.WebRootPath, "bills");
+            
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            var filePath = Path.Combine(directoryPath, fileName);
+            await File.WriteAllBytesAsync(filePath, pdfBytes, ct);
+
+            billWithDetails.PdfLink = $"/bills/{fileName}";
+            _context.Bills.Update(billWithDetails);
+            await _context.SaveChangesAsync(ct);
+
+            return billWithDetails;
         }
 
         public async Task<List<Bill>> GetUserBillsAsync(CancellationToken ct, int userId)
