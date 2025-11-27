@@ -8,24 +8,23 @@ namespace Backend.Application.Services
     public class PaymentService : IPaymentService
     {
         private readonly IAppDbContext _context;
-        private readonly IBillService _billService;
-
-        public PaymentService(IAppDbContext context, IBillService billService)
+    
+        public PaymentService(IAppDbContext context)
         {
             _context = context;
-            _billService = billService;
         }
 
         public async Task<Payment> CreatePaymentAsync(int userId, int billId, decimal amount, CancellationToken ct)
         {
-            var hasAccess = await _billService.ValidateUserAccessAsync(ct, userId, billId);
-            if (!hasAccess)
+            var bill = await _context.Bills
+                .Include(b => b.Account)
+                .FirstOrDefaultAsync(b => b.BillId == billId, ct)
+                ?? throw new KeyNotFoundException("Счет не найден.");
+
+            if (bill.Account?.UserId != userId)
             {
                 throw new UnauthorizedAccessException("У вас нет доступа к этому счету для создания платежа.");
             }
-
-            var bill = await _context.Bills.FindAsync(new object[] { billId }, ct) 
-                ?? throw new KeyNotFoundException("Счет не найден.");
 
             if (amount <= 0 || amount > bill.TotalAmount)
             {
@@ -38,7 +37,7 @@ namespace Backend.Application.Services
                 Amount = amount,
                 Date = DateTime.UtcNow,
                 Status = PaymentStatus.Pending,
-                TransactionId = "TEST_" + Guid.NewGuid().ToString()
+                TransactionId = null 
             };
 
             _context.Payment.Add(payment);
@@ -47,28 +46,22 @@ namespace Backend.Application.Services
             return payment;
         }
 
-        public async Task<PaymentStatus> GetPaymentStatusAsync(int userId, int paymentId, CancellationToken ct)
+        public async Task<Payment?> GetPaymentByIdAsync(int paymentId, CancellationToken ct)
         {
-            var payment = await _context.Payment
-                .Include(p => p.Bill)
-                .ThenInclude(b => b!.Account)
-                .FirstOrDefaultAsync(p => p.PaymentId == paymentId, ct)
-                ?? throw new KeyNotFoundException("Платеж не найден.");
-
-            if (payment.Bill?.Account?.UserId != userId)
-            {
-                throw new UnauthorizedAccessException("У вас нет доступа к этому платежу.");
-            }
-
-            return payment.Status;
+            // Этот метод просто получает платеж. Проверка владения происходит в контроллере.
+            return await _context.Payment
+                .FirstOrDefaultAsync(p => p.PaymentId == paymentId, ct);
         }
 
-        public async Task MarkAsPaidAsync(int paymentId, CancellationToken ct)
+        public async Task MarkAsPaidAsync(int paymentId, string transactionId, CancellationToken ct)
         {
             var payment = await _context.Payment.FindAsync(new object[] { paymentId }, ct)
                 ?? throw new KeyNotFoundException("Платеж не найден.");
+            
+            // В этом методе (заглушке) проверка владения не требуется по заданию.
 
             payment.Status = PaymentStatus.Paid;
+            payment.TransactionId = transactionId;
             await _context.SaveChangesAsync(ct);
         }
 

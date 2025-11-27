@@ -9,5 +9,6 @@ namespace Backend.Application.Interfaces
         Task<List<Bill>> GetAccountBillsAsync(CancellationToken ct, int userId, int accountId);
         Task<Bill> GetBillDetailsAsync(CancellationToken ct, int userId, int billId);
         Task<bool> ValidateUserAccessAsync(CancellationToken ct, int userId, int billId);
+        Task<Bill?> GetBillByIdAsync(int billId);
     }
 }

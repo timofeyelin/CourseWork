@@ -203,5 +203,11 @@ namespace Backend.Application.Services
             account.UserId = null;
             await _context.SaveChangesAsync(ct);
         }
+
+        public async Task<bool> DoesUserOwnAccount(int userId, int accountId)
+        {
+            return await _context.Accounts
+                .AnyAsync(a => a.AccountId == accountId && a.UserId == userId);
+        }
     }
 }

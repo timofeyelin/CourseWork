@@ -224,7 +224,6 @@ namespace Backend.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("TransactionId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("PaymentId");
@@ -545,17 +544,16 @@ namespace Backend.Infrastructure.Migrations
                     b.Navigation("Payment");
                 });
 
+            modelBuilder.Entity("Backend.Domain.Entities.Meter", b =>
+                {
+                    b.Navigation("Readings");
+                });
 
             modelBuilder.Entity("Backend.Domain.Entities.Request", b =>
                 {
                     b.Navigation("Attachments");
 
                     b.Navigation("Comments");
-
-            modelBuilder.Entity("Backend.Domain.Entities.Meter", b =>
-                {
-                    b.Navigation("Readings");
-
                 });
 
             modelBuilder.Entity("Backend.Domain.Entities.User", b =>
