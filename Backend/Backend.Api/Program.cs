@@ -3,6 +3,7 @@ using Backend.Application.Interfaces;
 using Backend.Application.Services;
 using Backend.Infrastructure.Data;
 using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -19,14 +20,12 @@ builder.Services.AddScoped<IAppDbContext, AppDbContext>();
 builder.Services.AddScoped<IUserService,UserService>();
 builder.Services.AddScoped<IBillService, BillService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IMeterReadingService, MeterReadingService>();
 builder.Services.AddScoped<IPdfGeneratorService, PdfGeneratorService>();
 builder.Services.AddScoped<JwtService>();
 
-builder.Services.AddValidatorsFromAssemblyContaining<RegisterUserValidator>();
-builder.Services.AddValidatorsFromAssemblyContaining<LoginValidator>();
-builder.Services.AddValidatorsFromAssemblyContaining<UpdateProfileValidator>(); 
-builder.Services.AddValidatorsFromAssemblyContaining<LinkAccountValidator>();
-builder.Services.AddValidatorsFromAssemblyContaining<CreatePaymentValidator>();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));

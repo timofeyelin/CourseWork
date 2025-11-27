@@ -1,6 +1,5 @@
 ﻿using Backend.Api.Dtos;
 using Backend.Application.Interfaces;
-using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Api.Controllers;
@@ -10,27 +9,17 @@ namespace Backend.Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IUserService _userService;
-    private readonly IValidator<LoginRequest> _loginValidator;
-    private readonly IValidator<RegisterUserRequest> _registerValidator;
     private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IUserService userService, IValidator<RegisterUserRequest> regvalidator, IValidator<LoginRequest> logvalidator, ILogger<AuthController> logger)
+    public AuthController(IUserService userService, ILogger<AuthController> logger)
     {
         _userService = userService;
-        _registerValidator = regvalidator;
-        _loginValidator = logvalidator;
         _logger = logger;
     }
 
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterUserRequest request, CancellationToken ct)
     {
-        var validationResult = await _registerValidator.ValidateAsync(request);
-        if (!validationResult.IsValid)
-        {
-            return BadRequest(validationResult.Errors);
-        }
-
         try
         {
             var user = await _userService.RegisterAsync(
@@ -57,12 +46,6 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken ct)
     {
-        var validationResult = await _loginValidator.ValidateAsync(request);
-        if (!validationResult.IsValid)
-        {
-            return BadRequest(validationResult.Errors);
-        }
-
         try
         {
             var (accessToken, refreshToken) = await _userService.LoginAsync(ct,
