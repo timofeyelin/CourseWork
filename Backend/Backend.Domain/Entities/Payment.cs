@@ -8,7 +8,7 @@ namespace Backend.Domain.Entities
         public decimal Amount { get; set; }
         public DateTime Date {  get; set; }
         public PaymentStatus Status { get; set; }
-        public string TransactionId { get; set; } = string.Empty;
+        public string? TransactionId { get; set; }
         public Boolean IsTest { get; set; }
 
         public int BillId { get; set; }

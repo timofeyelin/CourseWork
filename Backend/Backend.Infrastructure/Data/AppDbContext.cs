@@ -117,13 +117,14 @@ public class AppDbContext : DbContext, IAppDbContext
 
             entity.HasOne(a => a.Request)
                   .WithMany(r => r.Attachments)
-                  .HasForeignKey(a => a.RequestId)
-
+                  .HasForeignKey(a => a.RequestId);
+        });
 
         // Конфигурация Meter
         modelBuilder.Entity<Meter>(entity =>
         {
             entity.HasKey(m => m.MeterId);
+
             entity.Property(m => m.SerialNumber).IsRequired().HasMaxLength(50);
 
             entity.HasOne(m => m.Account)

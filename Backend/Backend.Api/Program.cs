@@ -25,7 +25,9 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterUserValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<LoginValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<UpdateProfileValidator>(); 
-builder.Services.AddValidatorsFromAssemblyContaining<LinkAccountValidator>();   
+builder.Services.AddValidatorsFromAssemblyContaining<LinkAccountValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreatePaymentValidator>();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 

@@ -2,11 +2,6 @@ using Backend.Application.Interfaces;
 using Backend.Domain.Entities;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 
 namespace Backend.Application.Services
@@ -59,6 +54,7 @@ namespace Backend.Application.Services
         {
             return await _context.Bills
                 .Include(b => b.Account) 
+                .Include(b => b.Payment)
                 .Where(b => b.Account != null && b.Account.UserId == userId)
                 .OrderByDescending(b => b.Period) 
                 .ToListAsync(ct);
@@ -75,6 +71,7 @@ namespace Backend.Application.Services
             }
 
             return await _context.Bills
+                .Include(b => b.Payment)
                 .Where(b => b.AccountId == accountId)
                 .OrderByDescending(b => b.Period)
                 .ToListAsync(ct);
@@ -85,6 +82,7 @@ namespace Backend.Application.Services
             var bill = await _context.Bills
                 .Include(b => b.BillItems) 
                 .Include(b => b.Account) 
+                .Include(b => b.Payment)
                 .FirstOrDefaultAsync(b => b.BillId == billId, ct);
 
             if (bill == null)
@@ -105,6 +103,13 @@ namespace Backend.Application.Services
             return await _context.Bills
                 .Include(b => b.Account)
                 .AnyAsync(b => b.BillId == billId && b.Account != null && b.Account.UserId == userId, ct);
+        }
+
+        public async Task<Bill?> GetBillByIdAsync(int billId)
+        {
+            return await _context.Bills
+                .Include(b => b.Account)
+                .FirstOrDefaultAsync(b => b.BillId == billId);
         }
     }
 }
