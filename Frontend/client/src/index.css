@@ -1,25 +1,36 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --color-primary: #0288D1;
+  --color-primary-hover: #0277BD;
+  --color-secondary: #E1F5FE;
+  
+  --color-accent: #FF9800;
+  --color-accent-hover: #F57C00;
+
+  --color-success: #4CAF50;
+  --color-error: #F44336;
+  --color-warning: #FFC107;
+
+  --color-bg-main: #F5F7FA;
+  --color-bg-gradient: linear-gradient(135deg, #E3F2FD 0%, #F5F7FA 100%);
+  --color-bg-card: rgba(255, 255, 255, 0.75);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.8);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  
+  --color-text-main: #263238;
+  --color-text-secondary: #607D8B;
+  --color-border: #E0E0E0;
+
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: var(--color-text-main);
+  background-color: var(--color-bg-main);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
 }
 
 body {
@@ -28,41 +39,232 @@ body {
   min-width: 320px;
   min-height: 100vh;
   width: 100%;
+  background-color: var(--color-bg-main);
+  color: var(--color-text-main);
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-text-main);
+  margin-top: 0;
+}
+
+a {
+  font-weight: 500;
+  color: var(--color-primary);
+  text-decoration: inherit;
+  transition: color 0.2s;
+}
+a:hover {
+  color: var(--color-primary-hover);
 }
 
 button {
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--color-primary);
+  color: white;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: background-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  background-color: var(--color-primary-hover);
 }
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.card {
+  background-color: var(--color-bg-card);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  padding: 20px;
+  border: 1px solid var(--color-border);
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.btn-accent {
+  background-color: var(--color-accent);
+  color: white;
+}
+.btn-accent:hover {
+  background-color: var(--color-accent-hover);
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.glass-card {
+  background-color: var(--color-bg-card) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow) !important;
+  border-radius: 16px !important;
+}
+
+.glass-input .MuiOutlinedInput-root {
+  border-radius: 12px !important;
+}
+
+.glass-input .MuiOutlinedInput-notchedOutline {
+  border-radius: 12px !important;
+  border-color: var(--color-border);
+}
+
+.glass-input .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: var(--color-primary);
+}
+
+.glass-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--color-primary);
+}
+
+.glass-input .MuiOutlinedInput-input {
+  font-size: 0.95rem !important;
+}
+
+.glass-input .MuiOutlinedInput-input::placeholder {
+  font-size: 0.9rem !important;
+}
+
+.glass-dialog .MuiDialog-paper {
+  border-radius: 24px !important;
+  padding: 24px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+  overflow-x: hidden !important;
+}
+
+.glass-dialog .MuiDialogContent-root {
+  overflow-x: hidden !important;
+  padding: 20px 0 !important;
+}
+
+.glass-dialog-title {
+  font-weight: 800 !important;
+  color: var(--color-text-main) !important;
+  font-size: 1.75rem !important;
+  padding: 0 0 1rem 0 !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.glass-dialog-actions {
+  padding: 1rem 0 0 0 !important;
+  gap: 1rem;
+  justify-content: flex-end !important;
+}
+
+.btn-glass-primary {
+  background: var(--color-primary) !important;
+  color: white !important;
+  padding: 10px 24px !important;
+  border-radius: 12px !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  box-shadow: 0 4px 15px rgba(2, 136, 209, 0.3) !important;
+  transition: all 0.3s !important;
+}
+
+.btn-glass-primary:hover {
+  background: var(--color-primary-hover) !important;
+  box-shadow: 0 6px 20px rgba(2, 119, 189, 0.4) !important;
+  transform: translateY(-2px);
+}
+
+.btn-glass-primary:focus,
+.btn-glass-primary:focus-visible {
+  outline: none !important;
+}
+
+.btn-glass-secondary {
+  color: var(--color-text-secondary) !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  border-radius: 12px !important;
+  padding: 10px 24px !important;
+}
+
+.btn-glass-secondary:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.btn-glass-secondary:focus,
+.btn-glass-secondary:focus-visible {
+  outline: none !important;
+}
+
+.btn-glass-icon {
+  color: var(--color-primary) !important;
+  background-color: rgba(2, 136, 209, 0.1) !important;
+  margin-left: 8px !important;
+  transition: all 0.2s !important;
+}
+
+.btn-glass-icon:hover {
+  background-color: rgba(2, 136, 209, 0.2) !important;
+  transform: translateY(-2px);
+}
+
+.btn-glass-icon:focus,
+.btn-glass-icon:focus-visible {
+  outline: none !important;
+}
+
+.btn-glass-error {
+  background: var(--color-error) !important;
+  color: white !important;
+  padding: 10px 24px !important;
+  border-radius: 12px !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  box-shadow: 0 4px 15px rgba(211, 47, 47, 0.3) !important;
+  transition: all 0.3s !important;
+}
+
+.btn-glass-error:hover {
+  background: #c62828 !important;
+  box-shadow: 0 6px 20px rgba(198, 40, 40, 0.4) !important;
+  transform: translateY(-2px);
+}
+
+.btn-glass-error:focus,
+.btn-glass-error:focus-visible {
+  outline: none !important;
+}
+
+.status-pill {
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  color: white;
+}
+
+.status-pill.paid {
+  background: linear-gradient(135deg, #43a047, #2e7d32);
+  box-shadow: 0 4px 10px rgba(46, 125, 50, 0.2);
+}
+
+.status-pill.unpaid {
+  background: linear-gradient(135deg, #e53935, #c62828);
+  box-shadow: 0 4px 10px rgba(198, 40, 40, 0.2);
 }

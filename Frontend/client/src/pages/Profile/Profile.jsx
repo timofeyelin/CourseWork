@@ -298,7 +298,7 @@ const Profile = () => {
 
     return (
         <div className={styles.container}>
-            <Paper className={styles.profileCard} elevation={0}>
+            <Paper className={`${styles.profileCard} glass-card`} elevation={0}>
                 {/* Заголовок профиля */}
                 <div className={styles.headerSection}>
                     <div className={styles.headerContent}>
@@ -317,7 +317,7 @@ const Profile = () => {
                         <Button 
                             variant="contained" 
                             startIcon={<EditIcon />}
-                            className={styles.editButton}
+                            className="btn-glass-primary"
                             onClick={handleEditProfile}
                         >
                             Редактировать
@@ -335,7 +335,7 @@ const Profile = () => {
                         <Button
                             variant="contained"
                             startIcon={<AddIcon />}
-                            className={styles.addButton}
+                            className="btn-glass-primary"
                             onClick={handleOpenAddAccount}
                         >
                             Добавить счет
@@ -386,9 +386,9 @@ const Profile = () => {
             <Dialog 
                 open={openAddAccount} 
                 onClose={handleCloseAddAccount}
-                className={styles.dialog}
+                className="glass-dialog"
             >
-                <DialogTitle className={styles.dialogTitle}>
+                <DialogTitle className="glass-dialog-title">
                     Добавить лицевой счет
                 </DialogTitle>
                 <DialogContent>
@@ -409,15 +409,15 @@ const Profile = () => {
                         className={styles.textField}
                     />
                 </DialogContent>
-                <DialogActions className={styles.dialogActions}>
-                    <Button onClick={handleCloseAddAccount} className={styles.cancelButton}>
+                <DialogActions className="glass-dialog-actions">
+                    <Button onClick={handleCloseAddAccount} className="btn-glass-secondary">
                         Отмена
                     </Button>
                     <Button 
                         onClick={handleAddAccount} 
                         variant="contained"
                         disabled={isSubmitting}
-                        className={styles.modalButton}
+                        className="btn-glass-primary"
                     >
                         {isSubmitting ? <CircularProgress size={24} /> : 'Привязать'}
                     </Button>
@@ -428,9 +428,9 @@ const Profile = () => {
             <Dialog
                 open={deleteConfirmation.open}
                 onClose={handleCloseDeleteConfirmation}
-                className={styles.dialog}
+                className="glass-dialog"
             >
-                <DialogTitle className={styles.dialogTitle}>
+                <DialogTitle className="glass-dialog-title">
                     Удаление счета
                 </DialogTitle>
                 <DialogContent>
@@ -438,8 +438,8 @@ const Profile = () => {
                         Вы действительно хотите удалить этот лицевой счет? Это действие нельзя будет отменить.
                     </Typography>
                 </DialogContent>
-                <DialogActions className={styles.dialogActions}>
-                    <Button onClick={handleCloseDeleteConfirmation} className={styles.cancelButton}>
+                <DialogActions className="glass-dialog-actions">
+                    <Button onClick={handleCloseDeleteConfirmation} className="btn-glass-secondary">
                         Отмена
                     </Button>
                     <Button 
@@ -447,7 +447,7 @@ const Profile = () => {
                         variant="contained" 
                         color="error"
                         disabled={isDeleting}
-                        className={styles.deleteConfirmButton}
+                        className="btn-glass-error"
                     >
                         {isDeleting ? <CircularProgress size={24} color="inherit" /> : 'Удалить'}
                     </Button>

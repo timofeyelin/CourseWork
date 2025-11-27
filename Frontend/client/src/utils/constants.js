@@ -5,6 +5,7 @@ export const ROUTES = {
     LOGIN: '/login',
     REGISTER: '/register',
     PROFILE: '/profile',
+    BILLS: '/bills',
     FORGOT_PASSWORD: '/forgot-password'
 }
 
@@ -20,7 +21,9 @@ export const VALIDATION_MESSAGES = {
     PASSWORD_REQUIREMENTS: 'Должен содержать заглавную букву, строчную букву и цифру',
     CONFIRM_PASSWORD: 'Подтвердите пароль',
     PASSWORDS_DO_NOT_MATCH: 'Пароли не совпадают',
-    AGREE_TO_TERMS: 'Необходимо согласиться с условиями обработки персональных данных'
+    AGREE_TO_TERMS: 'Необходимо согласиться с условиями обработки персональных данных',
+    INVALID_PAYMENT_AMOUNT: 'Введите корректную сумму',
+    PAYMENT_AMOUNT_EXCEEDS: 'Сумма платежа не может превышать сумму счета'
 }
 
 export const ERROR_MESSAGES = {
@@ -29,18 +32,24 @@ export const ERROR_MESSAGES = {
     GENERIC_ERROR: 'Произошла ошибка. Попробуйте позже.',
     PROFILE_LOAD_FAILED: 'Не удалось загрузить данные профиля',
     ADD_ACCOUNT_FAILED: 'Не удалось добавить лицевой счет',
-    DELETE_ACCOUNT_FAILED: 'Не удалось удалить лицевой счет'
+    DELETE_ACCOUNT_FAILED: 'Не удалось удалить лицевой счет',
+    BILLS_LOAD_FAILED: 'Не удалось загрузить список счетов',
+    DOWNLOAD_RECEIPT_FAILED: 'Не удалось скачать квитанцию',
+    PAYMENT_FAILED: 'Ошибка при проведении платежа'
 }
 
 export const SUCCESS_MESSAGES = {
     ACCOUNT_ADDED: 'Лицевой счет успешно добавлен',
-    ACCOUNT_DELETED: 'Лицевой счет успешно удален'
+    ACCOUNT_DELETED: 'Лицевой счет успешно удален',
+    PAYMENT_SUCCESS: 'Платеж успешно проведен'
 }
 
 export const INFO_MESSAGES = {
     EDIT_PROFILE_UNAVAILABLE: 'Функционал редактирования профиля будет доступен позже',
     DEFAULT_USER_NAME: 'Пользователь',
-    ADDRESS_NOT_FOUND: 'Адрес не найден'
+    ADDRESS_NOT_FOUND: 'Адрес не найден',
+    DOWNLOAD_RECEIPT_MOCK: 'Скачивание квитанции... (Mock)',
+    PAYMENT_SUCCESS_MOCK: 'Платеж успешно проведен (Mock)'
 }
 
 export const PASSWORD_STRENGTH = {

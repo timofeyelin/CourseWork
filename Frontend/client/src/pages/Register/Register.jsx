@@ -125,7 +125,7 @@ const Register = () => {
 
     return (
         <div className={styles.container}>
-            <Paper elevation={3} className={styles.registerCard}>
+            <Paper elevation={3} className={`${styles.registerCard} glass-card`}>
                 <div className={styles.header}>
                     <Typography variant='h4' component='h1' className={styles.title}>
                         Регистрация
@@ -142,7 +142,7 @@ const Register = () => {
                 )}
                 
                 <form onSubmit={handleSubmit} className={styles.form} noValidate>
-                    <Box className={styles.formField}>
+                    <Box className={`${styles.formField} glass-input`}>
                         <Typography variant='body2' className={styles.fieldLabel}>
                             Фамилия Имя Отчество <span className={styles.required}>*</span>
                         </Typography>
@@ -164,7 +164,7 @@ const Register = () => {
                         />
                     </Box>
 
-                    <Box className={styles.formField}>
+                    <Box className={`${styles.formField} glass-input`}>
                         <Typography variant='body2' className={styles.fieldLabel}>
                             Email <span className={styles.required}>*</span>
                         </Typography>
@@ -185,7 +185,7 @@ const Register = () => {
                         />
                     </Box>
 
-                    <Box className={styles.formField}>
+                    <Box className={`${styles.formField} glass-input`}>
                         <Typography variant='body2' className={styles.fieldLabel}>
                             Номер телефона
                         </Typography>
@@ -206,7 +206,7 @@ const Register = () => {
                         />
                     </Box>
 
-                    <Box className={styles.formField}>
+                    <Box className={`${styles.formField} glass-input`}>
                         <Typography variant='body2' className={styles.fieldLabel}>
                             Пароль <span className={styles.required}>*</span>
                         </Typography>
@@ -262,7 +262,7 @@ const Register = () => {
                         )}
                     </Box>
 
-                    <Box className={styles.formField}>
+                    <Box className={`${styles.formField} glass-input`}>
                         <Typography variant='body2' className={styles.fieldLabel}>
                             Подтвердите пароль <span className={styles.required}>*</span>
                         </Typography>
@@ -331,7 +331,7 @@ const Register = () => {
                         variant='contained'
                         size='large'
                         disabled={isSubmitting}
-                        className={styles.submitButton}
+                        className={`${styles.submitButton} btn-glass-primary`}
                     >
                         {isSubmitting ? 'Регистрация...' : 'Зарегистрироваться'}
                     </Button>
