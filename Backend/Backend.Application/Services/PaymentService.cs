@@ -58,8 +58,6 @@ namespace Backend.Application.Services
             var payment = await _context.Payment.FindAsync(new object[] { paymentId }, ct)
                 ?? throw new KeyNotFoundException("Платеж не найден.");
             
-            // В этом методе (заглушке) проверка владения не требуется по заданию.
-
             payment.Status = PaymentStatus.Paid;
             payment.TransactionId = transactionId;
             await _context.SaveChangesAsync(ct);
