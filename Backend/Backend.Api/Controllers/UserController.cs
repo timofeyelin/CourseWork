@@ -13,15 +13,11 @@ namespace Backend.Api.Controllers;
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
-    private readonly ILogger<UserController> _logger;
-    private readonly IValidator<UpdateProfileRequest> _updateProfileValidator;
-    private readonly IValidator<LinkAccountRequest> _linkAccountValidator;    
-    public UserController(IUserService userService, ILogger<UserController> logger, IValidator<UpdateProfileRequest> updateProfileValidator, IValidator<LinkAccountRequest> linkAccountValidator)
+    private readonly ILogger<UserController> _logger;  
+    public UserController(IUserService userService, ILogger<UserController> logger)
     {
         _userService = userService;
-        _logger = logger;
-        _updateProfileValidator = updateProfileValidator; 
-        _linkAccountValidator = linkAccountValidator;     
+        _logger = logger;    
     }
 
     private int GetCurrentUserId()
@@ -68,12 +64,6 @@ public class UserController : ControllerBase
     [HttpPut("profile")]
     public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request, CancellationToken ct)
     {
-        var validationResult = await _updateProfileValidator.ValidateAsync(request, ct);
-        if (!validationResult.IsValid)
-        {
-            return BadRequest(validationResult.Errors);
-        }
-
         try
         {
             var userId = GetCurrentUserId();
@@ -128,12 +118,6 @@ public class UserController : ControllerBase
     [HttpPost("accounts")]
     public async Task<IActionResult> LinkAccount([FromBody] LinkAccountRequest request, CancellationToken ct)
     {
-        var validationResult = await _linkAccountValidator.ValidateAsync(request, ct);
-        if (!validationResult.IsValid)
-        {
-            return BadRequest(validationResult.Errors);
-        }
-
         try
         {
             var userId = GetCurrentUserId();
