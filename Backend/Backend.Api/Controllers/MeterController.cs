@@ -20,6 +20,21 @@ namespace Backend.Api.Controllers
             _userService = userService;
         }
 
+        [HttpGet]
+        public async Task<ActionResult<List<MeterDto>>> GetUserMeters(CancellationToken ct)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var meters = await _meterService.GetUserMetersAsync(userId, ct);
+            var dtos = meters.Select(m => new MeterDto
+            {
+                MeterId = m.MeterId,
+                AccountId = m.AccountId,
+                Type = m.Type,
+                SerialNumber = m.SerialNumber
+            }).ToList();
+            return Ok(dtos);
+        }
+
         [HttpGet("account/{accountId}")]
         public async Task<ActionResult<List<MeterDto>>> GetAccountMeters(int accountId, CancellationToken ct)
         {
@@ -41,8 +56,8 @@ namespace Backend.Api.Controllers
             return Ok(dtos);
         }
         
-        [HttpGet("{meterId}/history")]
-        public async Task<ActionResult<List<MeterReadingDto>>> GetMeterHistory(int meterId, CancellationToken ct)
+        [HttpGet("{meterId}/readings")]
+        public async Task<ActionResult<List<MeterReadingDto>>> GetMeterReadings(int meterId, CancellationToken ct)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var userMeters = await _meterService.GetUserMetersAsync(userId, ct);
@@ -64,6 +79,36 @@ namespace Backend.Api.Controllers
             return Ok(dtos);
         }
 
+        [HttpGet("{meterId}/readings/{readingId}")]
+        public async Task<ActionResult<MeterReadingDto>> GetReadingDetails(int meterId, int readingId, CancellationToken ct)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            try
+            {
+                var reading = await _meterService.GetReadingByIdAsync(userId, readingId, ct);
+
+                if (reading == null || reading.MeterId != meterId)
+                {
+                    return NotFound();
+                }
+
+                var dto = new MeterReadingDto
+                {
+                    ReadingId = reading.ReadingId,
+                    Value = reading.Value,
+                    Period = reading.Period,
+                    SubmittedAt = reading.SubmittedAt,
+                    Validated = reading.Validated
+                };
+                
+                return Ok(dto);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message });
+            }
+        }
+
         [HttpPost("{meterId}/readings")]
         public async Task<ActionResult<MeterReadingDto>> SubmitReading(int meterId, [FromBody] SubmitReadingRequest request, CancellationToken ct)
         {
@@ -82,7 +127,23 @@ namespace Backend.Api.Controllers
                 return Ok(dto);
             }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
-            catch (UnauthorizedAccessException ex) { return Forbid(ex.Message); }
+            catch (UnauthorizedAccessException ex) { return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message }); }
+            catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+        }
+
+         [HttpPut("{meterId}/readings/{readingId}")]
+        public async Task<IActionResult> UpdateReading(int meterId, int readingId, [FromBody] SubmitReadingRequest request, CancellationToken ct)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+            try
+            {
+                await _meterService.UpdateMeterReadingAsync(userId, meterId, readingId, request.Value, ct);
+                
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
+            catch (UnauthorizedAccessException ex) { return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message }); }
             catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
         }
     }

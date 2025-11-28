@@ -87,6 +87,61 @@ namespace Backend.Application.Services
             }
         }
         
+        public async Task<MeterReading?> GetReadingByIdAsync(int userId, int readingId, CancellationToken ct)
+        {
+            var reading = await _context.MeterReadings
+                .Include(r => r.Meter)
+                .ThenInclude(m => m.Account)
+                .FirstOrDefaultAsync(r => r.ReadingId == readingId, ct);
+
+            if (reading == null)
+            {
+                return null; 
+            }
+
+            if (reading.Meter?.Account?.UserId != userId)
+            {
+                throw new UnauthorizedAccessException("У вас нет доступа к этому показанию.");
+            }
+
+            return reading;
+        }
+
+        public async Task<MeterReading> UpdateMeterReadingAsync(int userId, int meterId, int readingId, decimal value, CancellationToken ct)
+        {
+            var readingToUpdate = await _context.MeterReadings
+                .Include(r => r.Meter)
+                .ThenInclude(m => m.Account)
+                .FirstOrDefaultAsync(r => r.ReadingId == readingId, ct);
+
+            if (readingToUpdate == null)
+                throw new KeyNotFoundException("Показание не найдено.");
+
+            if (readingToUpdate.Meter?.Account?.UserId != userId)
+                throw new UnauthorizedAccessException("У вас нет доступа к этому показанию.");
+
+            if (readingToUpdate.MeterId != meterId)
+                throw new InvalidOperationException("Показание не относится к указанному счетчику.");
+                
+            if (readingToUpdate.Validated)
+                throw new InvalidOperationException("Нельзя редактировать уже проверенное показание.");
+            
+            // Валидация: новое значение не может быть меньше показания за предыдущий месяц
+            var previousMonthReading = await _context.MeterReadings
+                .Where(r => r.MeterId == readingToUpdate.MeterId && r.Period < readingToUpdate.Period)
+                .OrderByDescending(r => r.Period)
+                .FirstOrDefaultAsync(ct);
+
+            if (previousMonthReading != null && value < previousMonthReading.Value)
+                throw new InvalidOperationException("Значение не может быть меньше показания за предыдущий период.");
+
+            readingToUpdate.Value = value;
+            readingToUpdate.SubmittedAt = DateTime.UtcNow; 
+
+            await _context.SaveChangesAsync(ct);
+            return readingToUpdate;
+        }
+
         public async Task ValidateMeterReadingAsync(int readingId, CancellationToken ct)
         {
             var reading = await _context.MeterReadings.FindAsync(new object[] { readingId }, ct);
