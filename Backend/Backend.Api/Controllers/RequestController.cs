@@ -169,11 +169,11 @@ namespace Backend.Api.Controllers
         {
             try
             {
-                // Сначала проверка прав, потом загрузка файла
-                if(!await _requestService.ValidateUserAccessAsync(GetUserId(), requestId, ct))
+                if (!await _requestService.ValidateUserAccessAsync(GetUserId(), requestId, ct))
                     return Forbid();
 
-                var fileUri = await _fileUploadService.UploadFileAsync(file, "attachments");
+                var fileUri = await _fileUploadService.UploadFileAsync(file, ct);
+
                 var attachment = await _requestService.AddAttachmentAsync(GetUserId(), requestId, fileUri, file.ContentType, ct);
 
                 var dto = new RequestAttachmentDto
@@ -185,7 +185,6 @@ namespace Backend.Api.Controllers
                 };
                 return Ok(dto);
             }
-            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
             catch (ArgumentException ex) { return BadRequest(new { message = ex.Message }); }
         }
@@ -198,17 +197,16 @@ namespace Backend.Api.Controllers
             try
             {
                 var request = await _requestService.GetRequestDetailsAsync(userId, requestId, ct);
-                var attachment = request.Attachments.FirstOrDefault(a => a.AttachmentId == attachmentId);
+                if (request.Attachments.All(a => a.AttachmentId != attachmentId))
+                {
+                    return Forbid();
+                }
 
-                if (attachment == null)
-                    return NotFound(new { message = "Вложение не найдено." });
-
-                _fileUploadService.DeleteFile(attachment.FileUri);
-                await _requestService.DeleteAttachmentAsync(userId, requestId, attachmentId, ct);
+                await _fileUploadService.DeleteFileAsync(attachmentId, ct);
 
                 return NoContent();
             }
-            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message });}
+            catch (KeyNotFoundException) { return NotFound(new { message = "Заявка не найдена." }); }
             catch (UnauthorizedAccessException) { return Forbid(); }
         }
     }

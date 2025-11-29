@@ -174,21 +174,5 @@ namespace Backend.Application.Services
             await _context.SaveChangesAsync(ct);
             return attachment;
         }
-
-        public async Task DeleteAttachmentAsync(int userId, int requestId, int attachmentId, CancellationToken ct)
-        {
-            if (!await ValidateUserAccessAsync(userId, requestId, ct))
-                throw new UnauthorizedAccessException("У вас нет доступа к этой заявке.");
-            
-            var attachment = await _context.RequestAttachments
-                .FirstOrDefaultAsync(a => a.AttachmentId == attachmentId && a.RequestId == requestId, ct);
-
-            if (attachment == null)
-                throw new KeyNotFoundException("Вложение не найдено.");
-
-            // Здесь мы не удаляется файл с диска. Контроллер должен сделать это ПЕРЕД вызовом этого метода.
-            _context.RequestAttachments.Remove(attachment);
-            await _context.SaveChangesAsync(ct);
-        }
     }
 }

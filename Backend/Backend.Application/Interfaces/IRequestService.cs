@@ -12,7 +12,6 @@ namespace Backend.Application.Interfaces
         Task<Request> RateRequestAsync(int userId, int requestId, int rating, string? comment, CancellationToken ct);
         Task<RequestComment> AddCommentAsync(int userId, UserRole userRole, int requestId, string text, CancellationToken ct);
         Task<bool> ValidateUserAccessAsync(int userId, int requestId, CancellationToken ct);
-        Task<RequestAttachment> AddAttachmentAsync(int userId, int requestId, string fileUri, string fileType, CancellationToken ct);
-        Task DeleteAttachmentAsync(int userId, int requestId, int attachmentId, CancellationToken ct);
+         Task<RequestAttachment> AddAttachmentAsync(int userId, int requestId, string fileUri, string fileType, CancellationToken ct);
     }
 }
