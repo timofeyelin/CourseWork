@@ -156,5 +156,23 @@ namespace Backend.Application.Services
             
             return request;
         }
+
+        public async Task<RequestAttachment> AddAttachmentAsync(int userId, int requestId, string fileUri, string fileType, CancellationToken ct)
+        {
+            if (!await ValidateUserAccessAsync(userId, requestId, ct))
+                throw new UnauthorizedAccessException("У вас нет доступа к этой заявке.");
+
+            var attachment = new RequestAttachment
+            {
+                RequestId = requestId,
+                FileUri = fileUri,
+                FileType = fileType,
+                UploadedAt = DateTime.UtcNow
+            };
+
+            _context.RequestAttachments.Add(attachment);
+            await _context.SaveChangesAsync(ct);
+            return attachment;
+        }
     }
 }

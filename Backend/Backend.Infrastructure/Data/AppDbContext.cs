@@ -113,7 +113,7 @@ public class AppDbContext : DbContext, IAppDbContext
 
             entity.Property(a => a.FileType)
                   .IsRequired()
-                  .HasMaxLength(50);
+                  .HasMaxLength(256);
 
             entity.HasOne(a => a.Request)
                   .WithMany(r => r.Attachments)
