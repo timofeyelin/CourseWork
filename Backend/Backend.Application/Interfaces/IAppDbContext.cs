@@ -16,6 +16,8 @@ public interface IAppDbContext
     DbSet<RequestAttachment> RequestAttachments { get; set; }
     DbSet<Meter> Meters { get; set; }
     DbSet<MeterReading> MeterReadings { get; set; }
+    DbSet<Announcement> Announcements { get; set; }
+    DbSet<AnnouncementRead> AnnouncementReads { get; set; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

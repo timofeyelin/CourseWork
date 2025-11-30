@@ -19,7 +19,8 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<RequestAttachment> RequestAttachments { get; set; }
     public DbSet<Meter> Meters { get; set; }
     public DbSet<MeterReading> MeterReadings { get; set; }
-
+    public DbSet<Announcement> Announcements { get; set; }
+    public DbSet<AnnouncementRead> AnnouncementReads { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -145,6 +146,30 @@ public class AppDbContext : DbContext, IAppDbContext
                   .HasForeignKey(mr => mr.MeterId)
 
                   .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Announcement>(entity =>
+        {
+            entity.HasKey(a => a.AnnouncementId);
+            entity.Property(a => a.Title).IsRequired().HasMaxLength(200);
+            entity.Property(a => a.Content).IsRequired();
+
+            // Связь с AnnouncementRead (каскадное удаление)
+            entity.HasMany(a => a.Reads)
+                  .WithOne(ar => ar.Announcement)
+                  .HasForeignKey(ar => ar.AnnouncementId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<AnnouncementRead>(entity =>
+        {
+            entity.HasKey(ar => ar.Id);
+
+            
+            entity.HasOne(ar => ar.User)
+                  .WithMany()
+                  .HasForeignKey(ar => ar.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
         });
     }
 }
