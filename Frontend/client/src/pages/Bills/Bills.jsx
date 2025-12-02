@@ -38,10 +38,41 @@ import {
     Numbers as NumbersIcon,
     CreditCard as CardIcon
 } from '@mui/icons-material';
+import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill } from '../../components/StyledComponents';
 import { billsService, userService } from '../../api';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES, INFO_MESSAGES, VALIDATION_MESSAGES } from '../../utils/constants';
 import { paymentValidationSchema } from '../../utils/validationSchemas';
-import styles from './Bills.module.css';
+import {
+    PageContainer,
+    PageCard,
+    HeaderSection,
+    PageTitle,
+    ContentSection,
+    FilterSection,
+    FilterControl,
+    StyledTableContainer,
+    StyledTableHeadCell,
+    StyledTableRow,
+    StyledTableCell,
+    LoadingContainer,
+    ErrorContainer,
+    ErrorCard,
+    ModalInfoSection,
+    ModalInfoRow,
+    BillDetailsTable,
+    ModalTableCellHead,
+    ModalTableCell,
+    ModalTableRow,
+    TotalAmount,
+    PaymentInput,
+    RetryButton,
+    PaymentModalContent,
+    PaymentAmountContainer,
+    PaymentWalletIconWrapper,
+    PaymentInfoRowContent,
+    PaymentInfoAvatar,
+    PaymentInfoText
+} from './Bills.styles';
 
 const Bills = () => {
     const [bills, setBills] = useState([]);
@@ -66,52 +97,6 @@ const Bills = () => {
     });
 
     const fetchData = async () => {
-        // Начало MOCK данных
-        setTimeout(() => {
-            setBills([
-                {
-                    id: 1,
-                    period: '2025-10-01',
-                    accountNumber: '1234567890',
-                    amount: 5400.50,
-                    isPaid: false,
-                    items: [
-                        { service: 'Водоснабжение', tariff: 50.0, volume: 10, amount: 500.0 },
-                        { service: 'Электричество', tariff: 5.5, volume: 200, amount: 1100.0 },
-                        { service: 'Отопление', tariff: 2500.0, volume: 1.5, amount: 3750.0 },
-                        { service: 'Содержание жилья', tariff: 30.0, volume: 54.5, amount: 50.5 } 
-                    ]
-                },
-                {
-                    id: 2,
-                    period: '2025-09-01',
-                    accountNumber: '1234567890',
-                    amount: 5200.00,
-                    isPaid: true,
-                    items: [
-                         { service: 'Водоснабжение', tariff: 50.0, volume: 10, amount: 500.0 },
-                         { service: 'Электричество', tariff: 5.5, volume: 200, amount: 1100.0 },
-                    ]
-                },
-                {
-                    id: 3,
-                    period: '2025-10-01',
-                    accountNumber: '0987654321',
-                    amount: 3100.00,
-                    isPaid: false,
-                    items: []
-                }
-            ]);
-
-            setAccounts([
-                { id: 1, accountNumber: '1234567890' },
-                { id: 2, accountNumber: '0987654321' }
-            ]);
-            setLoading(false);
-        }, 800);
-        // Конец MOCK данных
-
-        /* Настоящий вызов API
         try {
             setLoading(true);
             const [billsRes, accountsRes] = await Promise.all([
@@ -119,15 +104,28 @@ const Bills = () => {
                 userService.getAccounts()
             ]);
             
-            setBills(billsRes.data);
-            setAccounts(accountsRes.data || []);
+            const accountsData = accountsRes.data || [];
+            setAccounts(accountsData);
+
+            const billsData = billsRes.data.map(bill => {
+                const account = accountsData.find(a => a.id === bill.accountId);
+                return {
+                    id: bill.billId,
+                    period: bill.period,
+                    accountNumber: account ? account.accountNumber : 'Н/Д',
+                    amount: bill.totalAmount,
+                    isPaid: bill.status === 1 || bill.status === 'Paid',
+                    items: [] // Будут загружены при просмотре деталей
+                };
+            });
+            
+            setBills(billsData);
         } catch (err) {
             console.error('Error fetching bills data:', err);
             setError(ERROR_MESSAGES.BILLS_LOAD_FAILED);
         } finally {
             setLoading(false);
         }
-        */
     };
 
     useEffect(() => {
@@ -142,9 +140,29 @@ const Bills = () => {
         ? bills 
         : bills.filter(bill => bill.accountNumber === selectedAccount);
 
-    const handleViewDetails = (bill) => {
-        setSelectedBill(bill);
-        setDetailsModalOpen(true);
+    const handleViewDetails = async (bill) => {
+        try {
+            const res = await billsService.getBillDetails(bill.id);
+            const details = res.data;
+            
+            setSelectedBill({
+                ...bill,
+                items: details.billItems.map(item => ({
+                    service: item.serviceName,
+                    tariff: item.tariff,
+                    volume: item.consumption,
+                    amount: item.amount
+                }))
+            });
+            setDetailsModalOpen(true);
+        } catch (err) {
+            console.error('Error fetching bill details:', err);
+            setSnackbar({
+                open: true,
+                message: 'Не удалось загрузить детали счета',
+                severity: 'error'
+            });
+        }
     };
 
     const handleCloseDetails = () => {
@@ -153,14 +171,6 @@ const Bills = () => {
     };
 
     const handleDownloadPdf = async (billId) => {
-        // MOCK скачивания
-        setSnackbar({
-            open: true,
-            message: INFO_MESSAGES.DOWNLOAD_RECEIPT_MOCK,
-            severity: 'info'
-        });
-        
-        /* Настоящий вызов API
         try {
             const response = await billsService.getBillPdf(billId);
             const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -178,7 +188,6 @@ const Bills = () => {
                 severity: 'error'
             });
         }
-        */
     };
 
     const handleOpenPayment = (bill) => {
@@ -204,25 +213,6 @@ const Bills = () => {
 
         setIsPaying(true);
         
-        // MOCK оплаты
-        setTimeout(() => {
-            setSnackbar({
-                open: true,
-                message: INFO_MESSAGES.PAYMENT_SUCCESS_MOCK,
-                severity: 'success'
-            });
-            
-            setBills(bills.map(b => 
-                b.id === selectedBill.id 
-                    ? { ...b, isPaid: true }
-                    : b
-            ));
-
-            handleClosePayment();
-            setIsPaying(false);
-        }, 1000);
-
-        /* Настоящий вызов API
         try {
             await billsService.payBill({
                 billId: selectedBill.id,
@@ -243,7 +233,6 @@ const Bills = () => {
         } finally {
             setIsPaying(false);
         }
-        */
     };
 
     const formatDate = (dateString) => {
@@ -257,37 +246,39 @@ const Bills = () => {
 
     if (loading) {
         return (
-            <div className={styles.loadingContainer}>
+            <LoadingContainer>
                 <CircularProgress />
-            </div>
+            </LoadingContainer>
         );
     }
 
     if (error) {
         return (
-            <div className={styles.errorContainer}>
-                <div className={styles.errorCard}>
+            <ErrorContainer>
+                <ErrorCard>
                     <Typography color="error" variant="h6">{error}</Typography>
-                    <Button onClick={() => window.location.reload()} sx={{ mt: 2 }}>Повторить</Button>
-                </div>
-            </div>
+                    <RetryButton onClick={() => window.location.reload()}>Повторить</RetryButton>
+                </ErrorCard>
+            </ErrorContainer>
         );
     }
 
     return (
-        <div className={styles.container}>
-            <Paper className={`${styles.pageCard} glass-card`}>
-                <div className={styles.headerSection}>
-                    <h1 className={styles.title}>
-                        <BillIcon className={styles.titleIcon} fontSize="large" />
+        <PageContainer>
+            <PageCard>
+                {/* Заголовок страницы */}
+                <HeaderSection>
+                    <PageTitle>
+                        <BillIcon fontSize="large" />
                         Мои счета
-                    </h1>
-                </div>
+                    </PageTitle>
+                </HeaderSection>
 
-                <div className={styles.contentSection}>
-                    <div className={styles.filterSection}>
+                {/* Фильтры и таблица */}
+                <ContentSection>
+                    <FilterSection>
                         <FilterIcon color="action" />
-                        <FormControl variant="outlined" size="small" className={styles.filterControl}>
+                        <FilterControl variant="outlined" size="small">
                             <InputLabel>Лицевой счет</InputLabel>
                             <Select
                                 value={selectedAccount}
@@ -301,204 +292,201 @@ const Bills = () => {
                                     </MenuItem>
                                 ))}
                             </Select>
-                        </FormControl>
-                    </div>
+                        </FilterControl>
+                    </FilterSection>
 
-                    <TableContainer className={styles.tableContainer}>
+                    <StyledTableContainer>
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell className={styles.tableHeadCell}>Период</TableCell>
-                                    <TableCell className={styles.tableHeadCell}>Лицевой счет</TableCell>
-                                    <TableCell className={styles.tableHeadCell}>Сумма</TableCell>
-                                    <TableCell className={styles.tableHeadCell}>Статус</TableCell>
-                                    <TableCell align="right" className={styles.tableHeadCell}>Действия</TableCell>
+                                    <StyledTableHeadCell>Период</StyledTableHeadCell>
+                                    <StyledTableHeadCell>Лицевой счет</StyledTableHeadCell>
+                                    <StyledTableHeadCell>Сумма</StyledTableHeadCell>
+                                    <StyledTableHeadCell>Статус</StyledTableHeadCell>
+                                    <StyledTableHeadCell align="right">Действия</StyledTableHeadCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {filteredBills.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={5} align="center" className={styles.tableCell}>
+                                        <StyledTableCell colSpan={5} align="center">
                                             Счетов не найдено
-                                        </TableCell>
+                                        </StyledTableCell>
                                     </TableRow>
                                 ) : (
                                     filteredBills.map((bill) => (
-                                        <TableRow key={bill.id} hover className={styles.tableRow}>
-                                            <TableCell className={styles.tableCell}>{formatDate(bill.period)}</TableCell>
-                                            <TableCell className={styles.tableCell}>{bill.accountNumber}</TableCell>
-                                            <TableCell className={styles.tableCell}>{formatCurrency(bill.amount)}</TableCell>
-                                            <TableCell className={styles.tableCell}>
-                                                <span className={bill.isPaid ? "status-pill paid" : "status-pill unpaid"}>
+                                        <StyledTableRow key={bill.id} hover>
+                                            <StyledTableCell>{formatDate(bill.period)}</StyledTableCell>
+                                            <StyledTableCell>{bill.accountNumber}</StyledTableCell>
+                                            <StyledTableCell>{formatCurrency(bill.amount)}</StyledTableCell>
+                                            <StyledTableCell>
+                                                <StatusPill status={bill.isPaid ? 'paid' : 'unpaid'}>
                                                     {bill.isPaid ? 'Оплачено' : 'Не оплачено'}
-                                                </span>
-                                            </TableCell>
-                                            <TableCell align="right" className={styles.tableCell}>
+                                                </StatusPill>
+                                            </StyledTableCell>
+                                            <StyledTableCell align="right">
                                                 <Tooltip title="Детали">
-                                                    <IconButton 
+                                                    <GlassIconButton 
                                                         size="small" 
-                                                        className="btn-glass-icon"
                                                         onClick={() => handleViewDetails(bill)}
                                                     >
                                                         <ViewIcon fontSize="small" />
-                                                    </IconButton>
+                                                    </GlassIconButton>
                                                 </Tooltip>
                                                 <Tooltip title="Скачать квитанцию">
-                                                    <IconButton 
+                                                    <GlassIconButton 
                                                         size="small" 
-                                                        className="btn-glass-icon"
                                                         onClick={() => handleDownloadPdf(bill.id)}
                                                     >
                                                         <DownloadIcon fontSize="small" />
-                                                    </IconButton>
+                                                    </GlassIconButton>
                                                 </Tooltip>
                                                 {!bill.isPaid && (
                                                     <Tooltip title="Оплатить">
-                                                        <IconButton 
+                                                        <GlassIconButton 
                                                             size="small" 
-                                                            className="btn-glass-icon"
                                                             onClick={() => handleOpenPayment(bill)}
                                                         >
                                                             <PaymentIcon fontSize="small" />
-                                                        </IconButton>
+                                                        </GlassIconButton>
                                                     </Tooltip>
                                                 )}
-                                            </TableCell>
-                                        </TableRow>
+                                            </StyledTableCell>
+                                        </StyledTableRow>
                                     ))
                                 )}
                             </TableBody>
                         </Table>
-                    </TableContainer>
-                </div>
-            </Paper>
+                    </StyledTableContainer>
+                </ContentSection>
+            </PageCard>
 
             {/* Модальное окно деталей счета */}
-            <Dialog 
+            <GlassDialog 
                 open={detailsModalOpen} 
                 onClose={handleCloseDetails}
                 maxWidth="md"
                 fullWidth
-                className="glass-dialog"
             >
-                <DialogTitle className="glass-dialog-title">
+                <GlassDialogTitle>
                     Детали счета за {selectedBill && formatDate(selectedBill.period)}
-                </DialogTitle>
+                </GlassDialogTitle>
                 <DialogContent>
                     {selectedBill && (
                         <>
-                            <div className={styles.modalInfoSection}>
-                                <div className={styles.modalInfoRow}>
+                            <ModalInfoSection>
+                                <ModalInfoRow>
                                     <Typography variant="body2" color="textSecondary">Лицевой счет</Typography>
                                     <Typography variant="body1" fontWeight="600">{selectedBill.accountNumber}</Typography>
-                                </div>
-                            </div>
+                                </ModalInfoRow>
+                            </ModalInfoSection>
                             
-                            <TableContainer component={Paper} variant="outlined" className={styles.billDetailsTable}>
+                            <BillDetailsTable component={Paper} variant="outlined">
                                 <Table size="small">
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell className={styles.modalTableCellHead}>Услуга</TableCell>
-                                            <TableCell align="right" className={styles.modalTableCellHead}>Тариф</TableCell>
-                                            <TableCell align="right" className={styles.modalTableCellHead}>Объем</TableCell>
-                                            <TableCell align="right" className={styles.modalTableCellHead}>Сумма</TableCell>
+                                            <ModalTableCellHead>Услуга</ModalTableCellHead>
+                                            <ModalTableCellHead align="right">Тариф</ModalTableCellHead>
+                                            <ModalTableCellHead align="right">Объем</ModalTableCellHead>
+                                            <ModalTableCellHead align="right">Сумма</ModalTableCellHead>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
                                         {selectedBill.items && selectedBill.items.map((item, index) => (
-                                            <TableRow key={index} className={styles.modalTableRow}>
-                                                <TableCell className={styles.modalTableCell}>{item.service}</TableCell>
-                                                <TableCell align="right" className={styles.modalTableCell}>{item.tariff}</TableCell>
-                                                <TableCell align="right" className={styles.modalTableCell}>{item.volume}</TableCell>
-                                                <TableCell align="right" className={styles.modalTableCell}>{formatCurrency(item.amount)}</TableCell>
-                                            </TableRow>
+                                            <ModalTableRow key={index}>
+                                                <ModalTableCell>{item.service}</ModalTableCell>
+                                                <ModalTableCell align="right">{item.tariff}</ModalTableCell>
+                                                <ModalTableCell align="right">{item.volume}</ModalTableCell>
+                                                <ModalTableCell align="right">{formatCurrency(item.amount)}</ModalTableCell>
+                                            </ModalTableRow>
                                         ))}
                                     </TableBody>
                                 </Table>
-                            </TableContainer>
+                            </BillDetailsTable>
                             
-                            <div className={styles.totalAmount}>
+                            <TotalAmount>
                                 <Typography variant="body1" color="textSecondary">Итого к оплате</Typography>
                                 <Typography variant="h5" color="primary" fontWeight="700">
                                     {formatCurrency(selectedBill.amount)}
                                 </Typography>
-                            </div>
+                            </TotalAmount>
                         </>
                     )}
                 </DialogContent>
-                <DialogActions className="glass-dialog-actions">
-                    <Button 
+                <GlassDialogActions>
+                    <GlassButton 
                         onClick={() => handleDownloadPdf(selectedBill.id)}
                         startIcon={<DownloadIcon />}
-                        className="btn-glass-secondary"
+                        variant="text"
                     >
                         Скачать квитанцию
-                    </Button>
-                    <Button onClick={handleCloseDetails} className="btn-glass-secondary">
+                    </GlassButton>
+                    <GlassButton onClick={handleCloseDetails} variant="text">
                         Закрыть
-                    </Button>
+                    </GlassButton>
                     {selectedBill && !selectedBill.isPaid && (
-                        <Button 
+                        <GlassButton 
                             variant="contained" 
+                            color="primary"
                             onClick={() => {
                                 handleCloseDetails();
                                 handleOpenPayment(selectedBill);
                             }}
-                            className="btn-glass-primary"
                         >
                             Оплатить
-                        </Button>
+                        </GlassButton>
                     )}
-                </DialogActions>
-            </Dialog>
+                </GlassDialogActions>
+            </GlassDialog>
 
             {/* Модальное окно оплаты */}
-            <Dialog 
+            <GlassDialog 
                 open={paymentModalOpen} 
                 onClose={handleClosePayment}
-                className="glass-dialog"
                 maxWidth="sm"
                 fullWidth
             >
-                <DialogTitle className="glass-dialog-title">Оплата счета</DialogTitle>
+                <GlassDialogTitle>Оплата счета</GlassDialogTitle>
                 <DialogContent>
-                    <Box sx={{ textAlign: 'center', py: 2 }}>
-                        <Box sx={{ mb: 3 }}>
-                            <WalletIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1, opacity: 0.8 }} />
+                    <PaymentModalContent>
+                        <PaymentAmountContainer>
+                            <PaymentWalletIconWrapper>
+                                <WalletIcon />
+                            </PaymentWalletIconWrapper>
                             <Typography variant="body2" color="textSecondary" gutterBottom>
                                 Сумма к оплате
                             </Typography>
                             <Typography variant="h3" color="primary" fontWeight="700">
                                 {selectedBill && formatCurrency(selectedBill.amount)}
                             </Typography>
-                        </Box>
+                        </PaymentAmountContainer>
 
-                        <div className={styles.modalInfoSection}>
-                            <div className={styles.modalInfoRow}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-                                    <Avatar sx={{ bgcolor: 'rgba(2, 136, 209, 0.1)', color: 'primary.main', width: 40, height: 40 }}>
+                        <ModalInfoSection>
+                            <ModalInfoRow>
+                                <PaymentInfoRowContent>
+                                    <PaymentInfoAvatar>
                                         <NumbersIcon fontSize="small" />
-                                    </Avatar>
-                                    <Box sx={{ textAlign: 'left' }}>
+                                    </PaymentInfoAvatar>
+                                    <PaymentInfoText>
                                         <Typography variant="caption" color="textSecondary" display="block">Лицевой счет</Typography>
                                         <Typography variant="body1" fontWeight="600">{selectedBill?.accountNumber}</Typography>
-                                    </Box>
-                                </Box>
-                            </div>
-                            <div className={styles.modalInfoRow}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-                                    <Avatar sx={{ bgcolor: 'rgba(2, 136, 209, 0.1)', color: 'primary.main', width: 40, height: 40 }}>
+                                    </PaymentInfoText>
+                                </PaymentInfoRowContent>
+                            </ModalInfoRow>
+                            <ModalInfoRow>
+                                <PaymentInfoRowContent>
+                                    <PaymentInfoAvatar>
                                         <CalendarIcon fontSize="small" />
-                                    </Avatar>
-                                    <Box sx={{ textAlign: 'left' }}>
+                                    </PaymentInfoAvatar>
+                                    <PaymentInfoText>
                                         <Typography variant="caption" color="textSecondary" display="block">Период оплаты</Typography>
                                         <Typography variant="body1" fontWeight="600">{selectedBill && formatDate(selectedBill.period)}</Typography>
-                                    </Box>
-                                </Box>
-                            </div>
-                        </div>
+                                    </PaymentInfoText>
+                                </PaymentInfoRowContent>
+                            </ModalInfoRow>
+                        </ModalInfoSection>
                         
-                        <TextField
+                        <PaymentInput
                             autoFocus
                             margin="dense"
                             label="Сумма платежа"
@@ -509,7 +497,6 @@ const Bills = () => {
                             onChange={(e) => setPaymentAmount(e.target.value)}
                             error={!!paymentError}
                             helperText={paymentError}
-                            className={`${styles.paymentInput} glass-input`}
                             slotProps={{
                                 input: {
                                     startAdornment: (
@@ -526,26 +513,27 @@ const Bills = () => {
                                 }
                             }}
                         />
-                    </Box>
+                    </PaymentModalContent>
                 </DialogContent>
-                <DialogActions className="glass-dialog-actions">
-                    <Button onClick={handleClosePayment} className="btn-glass-secondary">
+                <GlassDialogActions>
+                    <GlassButton onClick={handleClosePayment} variant="text">
                         Отмена
-                    </Button>
-                    <Button 
+                    </GlassButton>
+                    <GlassButton 
                         onClick={handlePaymentSubmit} 
                         variant="contained"
+                        color="primary"
                         disabled={isPaying}
-                        className="btn-glass-primary"
                     >
                         {isPaying ? <CircularProgress size={24} /> : 'Оплатить'}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                    </GlassButton>
+                </GlassDialogActions>
+            </GlassDialog>
 
+            {/* Снэкбар для уведомлений */}
             <Snackbar 
                 open={snackbar.open} 
-                autoHideDuration={6000} 
+                autoHideDuration={6000}  
                 onClose={() => setSnackbar({ ...snackbar, open: false })}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             >
@@ -553,7 +541,7 @@ const Bills = () => {
                     {snackbar.message}
                 </Alert>
             </Snackbar>
-        </div>
+        </PageContainer>
     );
 };
 

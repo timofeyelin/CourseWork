@@ -1,4 +1,4 @@
-import { VALIDATION_MESSAGES } from "./constants";
+import { VALIDATION_MESSAGES, PASSWORD_STRENGTH } from "./constants";
 
 export const loginValidationSchema = (data) => {
     const errors = {};
@@ -111,3 +111,23 @@ export const paymentValidationSchema = (amount, maxAmount) => {
 
     return true;
 }
+
+export const getPasswordStrength = (password) => {
+    if (!password) return { strength: '', color: '', width: 0 };
+    
+    let strength = 0;
+    
+    if (password.length >= 8) strength++;
+    if (password.length >= 12) strength++;
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+    if (/\d/.test(password)) strength++;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
+    
+    if (strength <= 2) {
+        return { strength: PASSWORD_STRENGTH.WEAK, color: '#f44336', width: 33 };
+    } else if (strength <= 4) {
+        return { strength: PASSWORD_STRENGTH.MEDIUM, color: '#ff9800', width: 66 };
+    } else {
+        return { strength: PASSWORD_STRENGTH.STRONG, color: '#4caf50', width: 100 };
+    }
+};

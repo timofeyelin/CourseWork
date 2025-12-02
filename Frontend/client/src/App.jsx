@@ -4,8 +4,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
 import Bills from './pages/Bills';
+import PaymentHistory from './pages/PaymentHistory';
 import { ROUTES } from './utils/constants';
-import './App.css'
 
 function App() {
   return (
@@ -16,6 +16,7 @@ function App() {
         <Route path={ROUTES.REGISTER} element={<Register/>}/>
         <Route path={ROUTES.PROFILE} element={<Profile/>}/>
         <Route path={ROUTES.BILLS} element={<Bills/>}/>
+        <Route path={ROUTES.PAYMENT_HISTORY} element={<PaymentHistory/>}/>
       </Routes>
     </Router>
   );

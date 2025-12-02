@@ -61,12 +61,76 @@ export const billsService = {
         return await api.get('/bills', { params });
     },
 
+    async getBillDetails(billId) {
+        return await api.get(`/bills/${billId}`);
+    },
+
     async getBillPdf(billId) {
         return await api.get(`/bills/${billId}/pdf`, { responseType: 'blob' });
     },
 
     async payBill(paymentData) {
         return await api.post('/payments', paymentData);
+    }
+};
+
+export const paymentsService = {
+    async getHistory(params) {
+        return await api.get('/payments/mine', { params });
+    },
+
+    async markAsPaid(paymentId) {
+        return await api.post(`/payments/${paymentId}/mark-paid`);
+    },
+
+    async cancelPayment(paymentId) {
+        return await api.post(`/payments/${paymentId}/cancel`);
+    }
+};
+
+export const requestsService = {
+    async getUserRequests() {
+        return await api.get('/requests');
+    },
+
+    async getRequestDetails(requestId) {
+        return await api.get(`/requests/${requestId}`);
+    },
+
+    async createRequest(requestData) {
+        return await api.post('/requests', requestData);
+    },
+
+    async addComment(requestId, commentData) {
+        return await api.post(`/requests/${requestId}/comments`, commentData);
+    },
+
+    async rateRequest(requestId, ratingData) {
+        return await api.post(`/requests/${requestId}/rate`, ratingData);
+    },
+
+    async uploadAttachment(requestId, file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        return await api.post(`/requests/${requestId}/attachments`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+    }
+};
+
+export const announcementsService = {
+    async getAll() {
+        return await api.get('/announcements');
+    },
+
+    async getUnread() {
+        return await api.get('/announcements/unread');
+    },
+
+    async markAsRead(announcementId) {
+        return await api.post(`/announcements/${announcementId}/mark-read`);
     }
 };
 
