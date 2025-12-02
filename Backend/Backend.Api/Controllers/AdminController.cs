@@ -1,7 +1,9 @@
+using Backend.Api.Dtos;
 using Backend.Application.Interfaces;
 using Backend.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Api.Controllers
 {
@@ -19,6 +21,26 @@ namespace Backend.Api.Controllers
             _context = context;
         }
 
+        [HttpPost("create-account")]
+        public async Task<IActionResult> CreateAccount([FromBody] CreateAccountDto dto, CancellationToken ct)
+        {
+            var account = new Account
+            {
+                AccountNumber = dto.AccountNumber,
+                Address = dto.Address,
+                Area = dto.Area,
+                OccupantsCount = dto.OccupantsCount,
+                HouseType = dto.HouseType ?? "Многоквартирный",
+                UkName = dto.UkName ?? "ООО 'УК Горизонт'",
+                IsActive = true
+            };
+
+            _context.Accounts.Add(account);
+            await _context.SaveChangesAsync(ct);
+
+            return Ok(new { message = "Account created", accountId = account.AccountId });
+        }
+
         [HttpPost("generate-test-bill")]
         public async Task<IActionResult> GenerateTestBill([FromQuery] int accountId, CancellationToken ct)
         {
@@ -28,11 +50,22 @@ namespace Backend.Api.Controllers
                 return NotFound($"Account with ID {accountId} not found.");
             }
 
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var period = new DateOnly(today.Year, today.Month, 1);
+
+            var existingBill = await _context.Bills
+                .FirstOrDefaultAsync(b => b.AccountId == accountId && b.Period == period, ct);
+
+            if (existingBill != null)
+            {
+                return Ok(new { message = "Test bill already exists for this month", billId = existingBill.BillId, pdfLink = existingBill.PdfLink });
+            }
+
             // Тестовый счет
             var newBill = new Bill
             {
                 AccountId = accountId,
-                Period = DateOnly.FromDateTime(DateTime.UtcNow),
+                Period = period,
                 TotalAmount = 1500.75m,
                 CreatedAt = DateTime.UtcNow,
                 BillItems = new List<BillItem>

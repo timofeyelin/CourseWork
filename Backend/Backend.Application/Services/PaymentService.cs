@@ -36,8 +36,8 @@ namespace Backend.Application.Services
                 BillId = billId,
                 Amount = amount,
                 Date = DateTime.UtcNow,
-                Status = PaymentStatus.Pending,
-                TransactionId = null 
+                Status = PaymentStatus.Paid, // Сразу оплачено для демонстрации
+                TransactionId = Guid.NewGuid().ToString() 
             };
 
             _context.Payment.Add(payment);
