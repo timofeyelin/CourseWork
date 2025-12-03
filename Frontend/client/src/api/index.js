@@ -17,6 +17,19 @@ api.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
+// Перехватчик для обработки ошибок ответов (например, 401 Unauthorized)
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && error.response.status === 401) {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            window.location.href = '/';
+        }
+        return Promise.reject(error);
+    }
+);
+
 export const authService = {
     async register(userData) {
         return await api.post('/auth/register', userData);
@@ -34,7 +47,7 @@ export const authService = {
     logout() {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
+        window.location.href = '/';
     }
 };
 

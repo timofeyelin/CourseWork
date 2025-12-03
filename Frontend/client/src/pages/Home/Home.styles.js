@@ -1,15 +1,22 @@
 import { styled } from '@mui/material/styles';
 import { Box, Typography, CardActionArea, Alert, DialogContentText } from '@mui/material';
-import { GlassCard, GlassButton } from '../components/StyledComponents';
+import { GlassCard, GlassButton } from '../../components/common';
 
 export const HomeContainer = styled('div')(({ theme }) => ({
     minHeight: '100vh',
     background: theme.custom.gradients.mainBg,
-    padding: '40px 20px',
+    padding: '20px',
+    display: 'flex',
+    justifyContent: 'center',
     boxSizing: 'border-box',
     [theme.breakpoints.down('md')]: {
-        padding: '20px 10px',
+        padding: '1rem',
     },
+}));
+
+export const HomeContent = styled(Box)(({ theme }) => ({
+    width: '100%',
+    maxWidth: '1000px',
 }));
 
 export const DashboardContainer = styled(Box)(({ theme }) => ({

@@ -1,15 +1,13 @@
 import { useState } from 'react';
-import { TextField, Checkbox, FormControlLabel, InputAdornment, IconButton, Typography } from '@mui/material';
+import { Checkbox, FormControlLabel, InputAdornment, IconButton, Typography } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../../api';
 import { useFormValidation } from '../../hooks/useFormValidation';
 import { registerValidationSchema, getPasswordStrength } from '../../utils/validationSchemas';
 import { ROUTES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../utils/constants';
-import { GlassInput } from '../../components/StyledComponents';
+import { GlassInput } from '../common';
 import {
-    RegisterContainer,
-    RegisterCard,
     Header,
     Title,
     Subtitle,
@@ -22,14 +20,15 @@ import {
     StrengthBarContainer,
     StrengthBar,
     StrengthText,
-    FormOptions,
+    RegisterFormOptions as FormOptions,
     StyledLink,
     SubmitButton,
-    LoginText,
-    LoginLink
-} from './Register.styles';
+    BottomText as LoginText,
+    StyledLink as LoginLink
+} from './Auth.styles';
+import { StyledDialog, ModalRegisterCard } from './Modal.styles';
 
-const Register = () => {
+const RegisterModal = ({ open, onClose, onSwitchToLogin }) => {
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
@@ -47,7 +46,7 @@ const Register = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [touched, setTouched] = useState({});
 
-    const { errors, validate, validateField, clearError } = useFormValidation(registerValidationSchema);
+    const { errors, validate, validateField } = useFormValidation(registerValidationSchema);
 
     const handleChange = (e) => {
         const { name, value, checked } = e.target;
@@ -105,7 +104,8 @@ const Register = () => {
                 phone: formData.phone
             });
 
-            navigate(ROUTES.LOGIN);
+            onClose();
+            onSwitchToLogin();
         } catch (error) {
             const errorMessage = error.response?.data?.message || ERROR_MESSAGES.REGISTRATION_FAILED;
             setApiError(errorMessage);
@@ -125,8 +125,14 @@ const Register = () => {
     const passwordStrength = getPasswordStrength(formData.password);
 
     return (
-        <RegisterContainer>
-            <RegisterCard elevation={3}>
+        <StyledDialog 
+            open={open} 
+            onClose={onClose}
+            maxWidth="sm"
+            fullWidth
+            scroll="body"
+        >
+            <ModalRegisterCard elevation={3}>
                 <Header>
                     <Title variant='h4' component='h1'>
                         Регистрация
@@ -312,11 +318,11 @@ const Register = () => {
                             label={
                                 <Typography variant='body2'>
                                     Я согласен с{' '}
-                                    <StyledLink to='/privacy'>
+                                    <StyledLink to='/privacy' onClick={onClose}>
                                         условиями обработки персональных данных
                                     </StyledLink>
                                     {' '}и{' '}
-                                    <StyledLink to='/terms'>
+                                    <StyledLink to='/terms' onClick={onClose}>
                                         пользовательским соглашением
                                     </StyledLink>
                                 </Typography>
@@ -337,14 +343,14 @@ const Register = () => {
                     
                     <LoginText variant='body2'>
                         Уже есть аккаунт?{' '}
-                        <LoginLink to={ROUTES.LOGIN}>
+                        <LoginLink to="#" onClick={(e) => { e.preventDefault(); onSwitchToLogin(); }}>
                             Войти
                         </LoginLink>
                     </LoginText>
                 </Form>
-            </RegisterCard>
-        </RegisterContainer>
+            </ModalRegisterCard>
+        </StyledDialog>
     );
 };
 
-export default Register;
+export default RegisterModal;

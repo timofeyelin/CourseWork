@@ -1,15 +1,13 @@
-import {useState} from 'react';
-import { TextField, Checkbox, FormControlLabel, InputAdornment, IconButton } from '@mui/material';
+import { useState } from 'react';
+import { Checkbox, FormControlLabel, InputAdornment, IconButton } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../../api';
 import { useFormValidation } from '../../hooks/useFormValidation';
 import { loginValidationSchema } from '../../utils/validationSchemas';
 import { ROUTES, ERROR_MESSAGES } from '../../utils/constants';
-import { GlassInput } from '../../components/StyledComponents';
+import { GlassInput } from '../common';
 import {
-    LoginContainer,
-    LoginCard,
     Header,
     LogoIconWrapper,
     StyledIcon,
@@ -19,96 +17,81 @@ import {
     Form,
     FormField,
     FieldLabel,
-    FormOptions,
+    LoginFormOptions as FormOptions,
     ForgotLink,
     SubmitButton,
     Divider,
-    RegisterText,
-    RegisterLink
-} from './Login.styles';
+    BottomText as RegisterText,
+    StyledLink as RegisterLink
+} from './Auth.styles';
+import { StyledDialog, ModalLoginCard } from './Modal.styles';
 
-const Login = () => {
+const LoginModal = ({ open, onClose, onSwitchToRegister }) => {
     const navigate = useNavigate();
-
-    const [formData, setFormData] = useState ({
+    const [formData, setFormData] = useState({
         email: '',
         password: '',
         rememberMe: false,
     });
-
     const [showPassword, setShowPassword] = useState(false);
     const [apiError, setApiError] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [touched, setTouched] = useState({});
 
-    const { errors, validate, validateField, clearError } = useFormValidation(loginValidationSchema);
+    const { errors, validate, validateField } = useFormValidation(loginValidationSchema);
 
     const handleChange = (e) => {
         const { name, value, checked } = e.target;
-        const filedValue = name === 'rememberMe' ? checked : value;
+        const fieldValue = name === 'rememberMe' ? checked : value;
 
-        const updatedFormData = {
-            ...formData,
-            [name]: filedValue,
-        };
-
+        const updatedFormData = { ...formData, [name]: fieldValue };
         setFormData(updatedFormData);
 
         if (touched[name] && name !== 'rememberMe') {
-            validateField(name, filedValue, updatedFormData);
+            validateField(name, fieldValue, updatedFormData);
         }
-
-        if (apiError) {
-            setApiError(null);
-        }
+        if (apiError) setApiError(null);
     };
 
     const handleBlur = (e) => {
         const { name, value } = e.target;
-        
-        setTouched(prev => ({
-            ...prev,
-            [name]: true
-        }));
-
-        if (name !== 'rememberMe') {
-            validateField(name, value, formData);
-        }
+        setTouched(prev => ({ ...prev, [name]: true }));
+        if (name !== 'rememberMe') validateField(name, value, formData);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setApiError(null);
 
-        if (!validate(formData)) {
-            return;
-        }
+        if (!validate(formData)) return;
 
         setIsSubmitting(true);
-
         try {
             await authService.login(formData.email, formData.password);
-
-            navigate('/'); 
-
+            onClose();
+            navigate(ROUTES.HOME);
+            window.location.reload();
         } catch (error) {
-            console.error('Полная ошибка:', error); 
-            console.error('Ответ сервера:', error.response?.data); 
-            
             const errorMessage = error.response?.data?.message || ERROR_MESSAGES.LOGIN_FAILED;
             setApiError(errorMessage);
-        } finally{
+        } finally {
             setIsSubmitting(false);
         }
     };
 
     const handleTogglePasswordVisibility = () => {
         setShowPassword(prev => !prev);
-    }
+    };
 
     return (
-        <LoginContainer>
-            <LoginCard elevation={3}>
+        <StyledDialog 
+            open={open} 
+            onClose={onClose}
+            maxWidth="sm"
+            fullWidth
+            scroll="body"
+        >
+            <ModalLoginCard elevation={3}>
                 <Header>
                     <LogoIconWrapper>
                         <StyledIcon icon="fluent-emoji-flat:office-building" />
@@ -200,7 +183,7 @@ const Login = () => {
                             }
                             label='Запомнить меня'
                         />
-                        <ForgotLink to={ROUTES.FORGOT_PASSWORD}>
+                        <ForgotLink to={ROUTES.FORGOT_PASSWORD} onClick={onClose}>
                             Забыли пароль?
                         </ForgotLink>
                     </FormOptions>
@@ -222,14 +205,14 @@ const Login = () => {
                     
                     <RegisterText variant='body2'>
                         Нет аккаунта?{' '}
-                        <RegisterLink to={ROUTES.REGISTER}>
+                        <RegisterLink to="#" onClick={(e) => { e.preventDefault(); onSwitchToRegister(); }}>
                             Зарегистрироваться
                         </RegisterLink>
                     </RegisterText>
                 </Form>
-            </LoginCard>
-        </LoginContainer>
+            </ModalLoginCard>
+        </StyledDialog>
     );
-    }
+};
 
-export default Login;
+export default LoginModal;

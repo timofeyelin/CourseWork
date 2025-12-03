@@ -38,10 +38,16 @@ namespace Backend.Application.Services
             await _context.SaveChangesAsync(ct);
         }
 
-        public async Task<List<Announcement>> GetAllAnnouncementsAsync(int userId, CancellationToken ct)
+        public async Task<List<Announcement>> GetAllAnnouncementsAsync(int? userId, CancellationToken ct)
         {
-            return await _context.Announcements
-                .Include(a => a.Reads.Where(r => r.UserId == userId)) 
+            var query = _context.Announcements.AsQueryable();
+
+            if (userId.HasValue)
+            {
+                query = query.Include(a => a.Reads.Where(r => r.UserId == userId.Value));
+            }
+
+            return await query
                 .OrderByDescending(a => a.IsEmergency) 
                 .ThenByDescending(a => a.CreatedAt)    
                 .ToListAsync(ct);

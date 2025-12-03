@@ -73,6 +73,13 @@ export const registerValidationSchema = (data) => {
         errors.confirmPassword = VALIDATION_MESSAGES.PASSWORDS_DO_NOT_MATCH;
     }
 
+    // Валидация лицевого счета (если указан)
+    if (data.accountNumber && data.accountNumber.trim() !== '') {
+        if (!/^\d+$/.test(data.accountNumber)) {
+            errors.accountNumber = VALIDATION_MESSAGES.INVALID_ACCOUNT_NUMBER;
+        }
+    }
+
     if (Object.keys(errors).length > 0) {
         throw errors;
     }

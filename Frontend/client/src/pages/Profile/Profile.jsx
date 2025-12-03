@@ -28,7 +28,7 @@ import {
 import { userService } from '../../api';
 import { ROUTES, ERROR_MESSAGES, SUCCESS_MESSAGES, INFO_MESSAGES } from '../../utils/constants';
 import { accountValidationSchema } from '../../utils/validationSchemas';
-import { GlassButton, GlassDialog, GlassDialogTitle, GlassDialogActions, GlassInput } from '../../components/StyledComponents';
+import { GlassButton, GlassDialog, GlassDialogTitle, GlassDialogActions, GlassInput } from '../../components/common';
 import {
     ProfileContainer,
     ProfileCard,

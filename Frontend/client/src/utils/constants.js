@@ -38,7 +38,11 @@ export const ERROR_MESSAGES = {
     PAYMENT_HISTORY_LOAD_FAILED: 'Не удалось загрузить историю платежей',
     DOWNLOAD_RECEIPT_FAILED: 'Не удалось скачать квитанцию',
     PAYMENT_FAILED: 'Ошибка при проведении платежа',
-    PAYMENT_CANCEL_FAILED: 'Не удалось отменить платеж'
+    PAYMENT_CANCEL_FAILED: 'Не удалось отменить платеж',
+    BALANCE_LOAD_FAILED: 'Не удалось загрузить баланс',
+    REQUESTS_LOAD_FAILED: 'Не удалось загрузить заявки',
+    NEWS_LOAD_FAILED: 'Не удалось загрузить новости',
+    MARK_READ_FAILED: 'Не удалось отметить новость как прочитанную'
 }
 
 export const SUCCESS_MESSAGES = {
