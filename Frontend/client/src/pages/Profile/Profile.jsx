@@ -28,7 +28,36 @@ import {
 import { userService } from '../../api';
 import { ROUTES, ERROR_MESSAGES, SUCCESS_MESSAGES, INFO_MESSAGES } from '../../utils/constants';
 import { accountValidationSchema } from '../../utils/validationSchemas';
-import styles from './Profile.module.css';
+import { GlassButton, GlassDialog, GlassDialogTitle, GlassDialogActions, GlassInput } from '../../components/StyledComponents';
+import {
+    ProfileContainer,
+    ProfileCard,
+    HeaderSection,
+    HeaderContent,
+    UserInfo,
+    StyledAvatar,
+    UserDetails,
+    UserEmail,
+    RegistrationDate,
+    ContentSection,
+    SectionHeader,
+    SectionTitle,
+    EmptyAccounts,
+    AccountsGrid,
+    AccountCard,
+    AccountHeader,
+    AccountNumberLabel,
+    AccountNumber,
+    DeleteButton,
+    AccountDetails,
+    AccountAddress,
+    AccountArea,
+    LoadingContainer,
+    ErrorContainer,
+    ErrorCard,
+    StyledAlert,
+    AddAccountDescription
+} from './Profile.styles';
 
 const Profile = () => {
     const navigate = useNavigate();
@@ -55,39 +84,6 @@ const Profile = () => {
     });
 
     const fetchProfileData = async () => {
-        // Начало MOCK данных
-        setTimeout(() => {
-            setProfile({
-                fullName: 'Иванов Иван Иванович',
-                email: 'ivanov@example.com',
-                createdAt: '2024-01-15T10:00:00.000Z'
-            });
-
-            setAccounts([
-                {
-                    id: 1,
-                    accountNumber: '1234567890',
-                    area: 54.5,
-                    address: 'г. Москва, ул. Строителей, д. 10, кв. 5'
-                },
-                {
-                    id: 2,
-                    accountNumber: '0987654321',
-                    area: 32.0,
-                    address: 'г. Москва, ул. Ленина, д. 5, кв. 12'
-                },
-                {
-                    id: 3,
-                    accountNumber: '1122334455',
-                    area: 78.2,
-                    address: 'г. Санкт-Петербург, Невский пр., д. 1, кв. 1'
-                }
-            ]);
-            setLoading(false);
-        }, 800);
-        // Конец MOCK данных
-
-        /* Настоящий вызов API
         try {
             const token = localStorage.getItem('accessToken');
             if (!token) {
@@ -95,6 +91,7 @@ const Profile = () => {
                 return;
             }
 
+            setLoading(true);
             const [profileRes, accountsRes] = await Promise.all([
                 userService.getProfile(),
                 userService.getAccounts()
@@ -112,7 +109,6 @@ const Profile = () => {
         } finally {
             setLoading(false);
         }
-        */
     };
 
     useEffect(() => {
@@ -147,27 +143,6 @@ const Profile = () => {
 
             setIsSubmitting(true);
 
-            // MOCK добавления счета
-            setTimeout(() => {
-                const newAccount = {
-                    id: Date.now(),
-                    accountNumber: newAccountNumber,
-                    area: 0,
-                    address: `${INFO_MESSAGES.ADDRESS_NOT_FOUND} (Mock)`
-                };
-                setAccounts([...accounts, newAccount]);
-                
-                setSnackbar({
-                    open: true,
-                    message: SUCCESS_MESSAGES.ACCOUNT_ADDED,
-                    severity: 'success'
-                });
-                
-                handleCloseAddAccount();
-                setIsSubmitting(false);
-            }, 500);
-
-            /* Настоящий вызов API
             await userService.addAccount(newAccountNumber);
             
             setSnackbar({
@@ -180,7 +155,6 @@ const Profile = () => {
             // Refresh accounts list
             const accountsRes = await userService.getAccounts();
             setAccounts(accountsRes.data);
-            */
         } catch (err) {
             console.error('Ошибка при добавлении счета:', err);
             if (err.response || err.message) {
@@ -191,6 +165,7 @@ const Profile = () => {
                     severity: 'error'
                 });
             }
+        } finally {
             setIsSubmitting(false);
         }
     };
@@ -213,19 +188,6 @@ const Profile = () => {
         const accountId = deleteConfirmation.accountId;
         setIsDeleting(true);
 
-        // MOCK удаления счета
-        setTimeout(() => {
-            setAccounts(accounts.filter(a => a.id !== accountId));
-            setSnackbar({
-                open: true,
-                message: SUCCESS_MESSAGES.ACCOUNT_DELETED,
-                severity: 'success'
-            });
-            setIsDeleting(false);
-            handleCloseDeleteConfirmation();
-        }, 500);
-
-        /* Настоящий вызов API
         try {
             await userService.deleteAccount(accountId);
             
@@ -249,7 +211,6 @@ const Profile = () => {
         } finally {
             setIsDeleting(false);
         }
-        */
     };
 
     const handleCloseSnackbar = () => {
@@ -268,16 +229,16 @@ const Profile = () => {
 
     if (loading) {
         return (
-            <div className={styles.loadingContainer}>
-                <CircularProgress className={styles.loadingSpinner} />
-            </div>
+            <LoadingContainer>
+                <CircularProgress />
+            </LoadingContainer>
         );
     }
 
     if (error) {
         return (
-            <div className={styles.errorContainer}>
-                <div className={styles.errorCard}>
+            <ErrorContainer>
+                <ErrorCard>
                     <Typography color="error" variant="h6" gutterBottom>
                         Ошибка
                     </Typography>
@@ -287,115 +248,112 @@ const Profile = () => {
                     <Button 
                         variant="contained" 
                         onClick={() => window.location.reload()}
-                        className={styles.retryButton}
                     >
                         Повторить
                     </Button>
-                </div>
-            </div>
+                </ErrorCard>
+            </ErrorContainer>
         );
     }
 
     return (
-        <div className={styles.container}>
-            <Paper className={`${styles.profileCard} glass-card`} elevation={0}>
+        <ProfileContainer>
+            <ProfileCard elevation={0}>
                 {/* Заголовок профиля */}
-                <div className={styles.headerSection}>
-                    <div className={styles.headerContent}>
-                        <div className={styles.userInfo}>
-                            <Avatar className={styles.avatar}>
+                <HeaderSection>
+                    <HeaderContent>
+                        <UserInfo>
+                            <StyledAvatar>
                                 {profile ? getInitials(profile.fullName) : 'U'}
-                            </Avatar>
-                            <div className={styles.userDetails}>
+                            </StyledAvatar>
+                            <UserDetails>
                                 <h1>{profile?.fullName || INFO_MESSAGES.DEFAULT_USER_NAME}</h1>
-                                <p className={styles.email}>{profile?.email}</p>
-                                <p className={styles.registrationDate}>
+                                <UserEmail>{profile?.email}</UserEmail>
+                                <RegistrationDate>
                                     На сайте с {new Date(profile?.createdAt).toLocaleDateString('ru-RU')}
-                                </p>
-                            </div>
-                        </div>
-                        <Button 
+                                </RegistrationDate>
+                            </UserDetails>
+                        </UserInfo>
+                        <GlassButton 
                             variant="contained" 
                             startIcon={<EditIcon />}
-                            className="btn-glass-primary"
+                            color="primary"
                             onClick={handleEditProfile}
                         >
                             Редактировать
-                        </Button>
-                    </div>
-                </div>
+                        </GlassButton>
+                    </HeaderContent>
+                </HeaderSection>
 
                 {/* Секция с лицевыми счетами */}
-                <div className={styles.contentSection}>
-                    <div className={styles.sectionHeader}>
-                        <Typography variant="h5" className={styles.sectionTitle}>
-                            <WalletIcon className={styles.walletIcon} />
+                <ContentSection>
+                    <SectionHeader>
+                        <SectionTitle variant="h5">
+                            <WalletIcon />
                             Мои лицевые счета
-                        </Typography>
-                        <Button
+                        </SectionTitle>
+                        <GlassButton
                             variant="contained"
                             startIcon={<AddIcon />}
-                            className="btn-glass-primary"
+                            color="primary"
                             onClick={handleOpenAddAccount}
                         >
                             Добавить счет
-                        </Button>
-                    </div>
+                        </GlassButton>
+                    </SectionHeader>
 
                     {accounts.length === 0 ? (
-                        <Box className={styles.emptyAccounts}>
+                        <EmptyAccounts>
                             <Typography>У вас пока нет привязанных лицевых счетов.</Typography>
-                        </Box>
+                        </EmptyAccounts>
                     ) : (
-                        <div className={styles.accountsGrid}>
+                        <AccountsGrid>
                             {accounts.map((account) => (
-                                <div key={account.id} className={styles.accountCard}>
-                                    <div className={styles.accountHeader}>
+                                <AccountCard key={account.id}>
+                                    <AccountHeader>
                                         <div>
-                                            <div className={styles.accountNumberLabel}>Лицевой счет</div>
-                                            <div className={styles.accountNumber}>{account.accountNumber}</div>
+                                            <AccountNumberLabel>Лицевой счет</AccountNumberLabel>
+                                            <AccountNumber>{account.accountNumber}</AccountNumber>
                                         </div>
                                         <Tooltip title="Удалить счет">
-                                            <IconButton 
+                                            <DeleteButton 
                                                 size="small" 
                                                 onClick={() => handleDeleteClick(account.id)}
-                                                className={styles.deleteButton}
                                             >
                                                 <DeleteIcon fontSize="small" />
-                                            </IconButton>
+                                            </DeleteButton>
                                         </Tooltip>
-                                    </div>
-                                    <div className={styles.accountDetails}>
-                                        <div className={styles.accountAddress}>
-                                            <HomeIcon className={styles.addressIcon} fontSize="small" />
+                                    </AccountHeader>
+                                    <AccountDetails>
+                                        <AccountAddress>
+                                            <HomeIcon fontSize="small" />
                                             {account.address}
-                                        </div>
-                                        <div className={styles.accountArea}>
-                                            <AreaIcon className={styles.areaIcon} />
+                                        </AccountAddress>
+                                        <AccountArea>
+                                            <AreaIcon />
                                             {account.area} м²
-                                        </div>
-                                    </div>
-                                </div>
+                                        </AccountArea>
+                                    </AccountDetails>
+                                </AccountCard>
                             ))}
-                        </div>
+                        </AccountsGrid>
                     )}
-                </div>
-            </Paper>
+                </ContentSection>
+            </ProfileCard>
 
             {/* Модальное окно добавления счета */}
-            <Dialog 
+            <GlassDialog 
                 open={openAddAccount} 
                 onClose={handleCloseAddAccount}
-                className="glass-dialog"
             >
-                <DialogTitle className="glass-dialog-title">
+                <GlassDialogTitle>
                     Добавить лицевой счет
-                </DialogTitle>
+                </GlassDialogTitle>
                 <DialogContent>
-                    <Typography variant="body2" className={styles.dialogContentText}>
+                    <AddAccountDescription variant="body2">
                         Введите номер вашего лицевого счета для привязки к профилю.
-                    </Typography>
-                    <TextField
+                    </AddAccountDescription>
+                    <GlassInput
                         autoFocus
                         margin="dense"
                         label="Номер лицевого счета"
@@ -406,53 +364,50 @@ const Profile = () => {
                         onChange={(e) => setNewAccountNumber(e.target.value)}
                         error={!!addAccountError}
                         helperText={addAccountError}
-                        className={styles.textField}
                     />
                 </DialogContent>
-                <DialogActions className="glass-dialog-actions">
-                    <Button onClick={handleCloseAddAccount} className="btn-glass-secondary">
+                <GlassDialogActions>
+                    <GlassButton onClick={handleCloseAddAccount} variant="text">
                         Отмена
-                    </Button>
-                    <Button 
+                    </GlassButton>
+                    <GlassButton 
                         onClick={handleAddAccount} 
                         variant="contained"
                         disabled={isSubmitting}
-                        className="btn-glass-primary"
+                        color="primary"
                     >
                         {isSubmitting ? <CircularProgress size={24} /> : 'Привязать'}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                    </GlassButton>
+                </GlassDialogActions>
+            </GlassDialog>
 
             {/* Модальное окно подтверждения удаления */}
-            <Dialog
+            <GlassDialog
                 open={deleteConfirmation.open}
                 onClose={handleCloseDeleteConfirmation}
-                className="glass-dialog"
             >
-                <DialogTitle className="glass-dialog-title">
+                <GlassDialogTitle>
                     Удаление счета
-                </DialogTitle>
+                </GlassDialogTitle>
                 <DialogContent>
-                    <Typography variant="body1" className={styles.deleteDialogText}>
+                    <Typography variant="body1">
                         Вы действительно хотите удалить этот лицевой счет? Это действие нельзя будет отменить.
                     </Typography>
                 </DialogContent>
-                <DialogActions className="glass-dialog-actions">
-                    <Button onClick={handleCloseDeleteConfirmation} className="btn-glass-secondary">
+                <GlassDialogActions>
+                    <GlassButton onClick={handleCloseDeleteConfirmation} variant="text">
                         Отмена
-                    </Button>
-                    <Button 
+                    </GlassButton>
+                    <GlassButton 
                         onClick={handleConfirmDelete} 
                         variant="contained" 
                         color="error"
                         disabled={isDeleting}
-                        className="btn-glass-error"
                     >
                         {isDeleting ? <CircularProgress size={24} color="inherit" /> : 'Удалить'}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                    </GlassButton>
+                </GlassDialogActions>
+            </GlassDialog>
 
             {/* Снэкбар для уведомлений */}
             <Snackbar 
@@ -461,16 +416,15 @@ const Profile = () => {
                 onClose={handleCloseSnackbar}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             >
-                <Alert 
+                <StyledAlert 
                     onClose={handleCloseSnackbar} 
                     severity={snackbar.severity} 
-                    className={styles.alert}
                     variant="filled"
                 >
                     {snackbar.message}
-                </Alert>
+                </StyledAlert>
             </Snackbar>
-        </div>
+        </ProfileContainer>
     );
 };
 

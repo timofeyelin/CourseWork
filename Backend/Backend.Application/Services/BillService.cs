@@ -33,7 +33,8 @@ namespace Backend.Application.Services
             var pdfBytes = _pdfGeneratorService.GenerateBillPdf(billWithDetails);
 
             var fileName = $"bill_{newBill.BillId}_{System.Guid.NewGuid()}.pdf";
-            var directoryPath = Path.Combine(_hostingEnvironment.WebRootPath, "bills");
+            var webRootPath = _hostingEnvironment.WebRootPath ?? Path.Combine(_hostingEnvironment.ContentRootPath, "wwwroot");
+            var directoryPath = Path.Combine(webRootPath, "bills");
             
             if (!Directory.Exists(directoryPath))
             {

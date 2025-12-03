@@ -1,13 +1,31 @@
 import {useState} from 'react';
-import { TextField, Button, Checkbox, FormControlLabel, Alert, InputAdornment, IconButton, Typography, Box, Paper } from '@mui/material';
+import { TextField, Checkbox, FormControlLabel, InputAdornment, IconButton } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { Icon } from '@iconify/react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '../../api';
 import { useFormValidation } from '../../hooks/useFormValidation';
 import { loginValidationSchema } from '../../utils/validationSchemas';
 import { ROUTES, ERROR_MESSAGES } from '../../utils/constants';
-import styles from './Login.module.css';
+import { GlassInput } from '../../components/StyledComponents';
+import {
+    LoginContainer,
+    LoginCard,
+    Header,
+    LogoIconWrapper,
+    StyledIcon,
+    Title,
+    Subtitle,
+    StyledAlert,
+    Form,
+    FormField,
+    FieldLabel,
+    FormOptions,
+    ForgotLink,
+    SubmitButton,
+    Divider,
+    RegisterText,
+    RegisterLink
+} from './Login.styles';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -89,32 +107,32 @@ const Login = () => {
     }
 
     return (
-        <div className={styles.container}>
-            <Paper elevation={3} className={`${styles.loginCard} glass-card`}>
-                <div className={styles.header}>
-                        <div className={styles.logoIcon}>
-                            <Icon icon="fluent-emoji-flat:office-building" className={styles.buildingIcon} />
-                        </div>
-                        <Typography variant='h4' component='h1' className={styles.title}>
-                            Горизонт онлайн
-                        </Typography>
-                        <Typography variant='h6' component='h2' className={styles.subtitle}>
-                            Вход в личный кабинет
-                        </Typography>
-                    </div>
+        <LoginContainer>
+            <LoginCard elevation={3}>
+                <Header>
+                    <LogoIconWrapper>
+                        <StyledIcon icon="fluent-emoji-flat:office-building" />
+                    </LogoIconWrapper>
+                    <Title variant='h4' component='h1'>
+                        Горизонт онлайн
+                    </Title>
+                    <Subtitle variant='h6' component='h2'>
+                        Вход в личный кабинет
+                    </Subtitle>
+                </Header>
 
-                    {apiError && (
-                        <Alert severity='error' className={styles.alert}>
-                            {apiError}
-                        </Alert>
-                    )}
-                    
-                    <form onSubmit={handleSubmit} className={styles.form} noValidate>
-                        <Box className={`${styles.formField} glass-input`}>
-                            <Typography variant='body2' className={styles.fieldLabel}>
-                                Email или номер телефона
-                            </Typography>
-                            <TextField
+                {apiError && (
+                    <StyledAlert severity='error'>
+                        {apiError}
+                    </StyledAlert>
+                )}
+                
+                <Form onSubmit={handleSubmit} noValidate>
+                    <FormField>
+                        <FieldLabel variant='body2'>
+                            Email или номер телефона
+                        </FieldLabel>
+                        <GlassInput
                             fullWidth
                             id='email' 
                             name='email'
@@ -129,14 +147,14 @@ const Login = () => {
                             variant='outlined'
                             autoComplete='email'
                             autoFocus
-                            />
-                        </Box>
+                        />
+                    </FormField>
 
-                        <Box className={`${styles.formField} glass-input`}>
-                            <Typography variant='body2' className={styles.fieldLabel}>
-                                Пароль
-                            </Typography>
-                            <TextField
+                    <FormField>
+                        <FieldLabel variant='body2'>
+                            Пароль
+                        </FieldLabel>
+                        <GlassInput
                             fullWidth
                             id='password'
                             name='password'
@@ -155,9 +173,9 @@ const Login = () => {
                                     endAdornment: (
                                         <InputAdornment position='end'>
                                             <IconButton
-                                            aria-label='toggle password visibility'
-                                            onClick={handleTogglePasswordVisibility}
-                                            edge='end'
+                                                aria-label='toggle password visibility'
+                                                onClick={handleTogglePasswordVisibility}
+                                                edge='end'
                                             >
                                                 {showPassword ? <VisibilityOff/> : <Visibility/>}
                                             </IconButton>
@@ -165,53 +183,53 @@ const Login = () => {
                                     ),
                                 }
                             }}
-                            />
-                        </Box>
+                        />
+                    </FormField>
 
-                        <Box className={styles.formOptions}>
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
+                    <FormOptions>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
                                     id='rememberMe'
                                     name='rememberMe'
                                     checked={formData.rememberMe}
                                     onChange={handleChange}
                                     color='primary'
                                     disabled={isSubmitting}
-                                    />
-                                }
-                                label='Запомнить меня'
-                            />
-                            <Link to={ROUTES.FORGOT_PASSWORD} className={styles.forgotLink}>
-                                Забыли пароль?
-                            </Link>
-                        </Box>
+                                />
+                            }
+                            label='Запомнить меня'
+                        />
+                        <ForgotLink to={ROUTES.FORGOT_PASSWORD}>
+                            Забыли пароль?
+                        </ForgotLink>
+                    </FormOptions>
 
-                        <Button
+                    <SubmitButton
                         type='submit'
                         fullWidth
                         variant='contained'
                         size='large'
                         disabled={isSubmitting}
-                        className={`${styles.submitButton} btn-glass-primary`}
-                        >
-                            {isSubmitting ? 'Вход...' : 'Войти'}
-                        </Button>
-                        
-                        <div className={styles.divider}>
-                            <span>или</span>
-                        </div>
-                        
-                        <Typography variant='body2' className={styles.registerText}>
-                            Нет аккаунта?{' '}
-                            <Link to={ROUTES.REGISTER} className={styles.registerLink}>
-                                Зарегистрироваться
-                            </Link>
-                        </Typography>
-                    </form>
-                </Paper>
-            </div>
-        );
+                        color="primary"
+                    >
+                        {isSubmitting ? 'Вход...' : 'Войти'}
+                    </SubmitButton>
+                    
+                    <Divider>
+                        <span>или</span>
+                    </Divider>
+                    
+                    <RegisterText variant='body2'>
+                        Нет аккаунта?{' '}
+                        <RegisterLink to={ROUTES.REGISTER}>
+                            Зарегистрироваться
+                        </RegisterLink>
+                    </RegisterText>
+                </Form>
+            </LoginCard>
+        </LoginContainer>
+    );
     }
 
 export default Login;

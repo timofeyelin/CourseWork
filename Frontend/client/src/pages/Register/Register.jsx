@@ -1,12 +1,33 @@
 import { useState } from 'react';
-import { TextField, Button, Checkbox, FormControlLabel, Alert, InputAdornment, IconButton, Typography, Box, Paper } from '@mui/material';
+import { TextField, Checkbox, FormControlLabel, InputAdornment, IconButton, Typography } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '../../api';
 import { useFormValidation } from '../../hooks/useFormValidation';
-import { registerValidationSchema } from '../../utils/validationSchemas';
-import { ROUTES, ERROR_MESSAGES, VALIDATION_MESSAGES, PASSWORD_STRENGTH } from '../../utils/constants';
-import styles from './Register.module.css';
+import { registerValidationSchema, getPasswordStrength } from '../../utils/validationSchemas';
+import { ROUTES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../utils/constants';
+import { GlassInput } from '../../components/StyledComponents';
+import {
+    RegisterContainer,
+    RegisterCard,
+    Header,
+    Title,
+    Subtitle,
+    StyledAlert,
+    Form,
+    FormField,
+    FieldLabel,
+    RequiredStar,
+    PasswordStrength,
+    StrengthBarContainer,
+    StrengthBar,
+    StrengthText,
+    FormOptions,
+    StyledLink,
+    SubmitButton,
+    LoginText,
+    LoginLink
+} from './Register.styles';
 
 const Register = () => {
     const navigate = useNavigate();
@@ -101,52 +122,32 @@ const Register = () => {
         setShowConfirmPassword(prev => !prev);
     };
 
-    const getPasswordStrength = (password) => {
-        if (!password) return { strength: '', color: '', width: 0 };
-        
-        let strength = 0;
-        
-        if (password.length >= 8) strength++;
-        if (password.length >= 12) strength++;
-        if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
-        if (/\d/.test(password)) strength++;
-        if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
-        
-        if (strength <= 2) {
-            return { strength: PASSWORD_STRENGTH.WEAK, color: '#f44336', width: 33 };
-        } else if (strength <= 4) {
-            return { strength: PASSWORD_STRENGTH.MEDIUM, color: '#ff9800', width: 66 };
-        } else {
-            return { strength: PASSWORD_STRENGTH.STRONG, color: '#4caf50', width: 100 };
-        }
-    };
-
     const passwordStrength = getPasswordStrength(formData.password);
 
     return (
-        <div className={styles.container}>
-            <Paper elevation={3} className={`${styles.registerCard} glass-card`}>
-                <div className={styles.header}>
-                    <Typography variant='h4' component='h1' className={styles.title}>
+        <RegisterContainer>
+            <RegisterCard elevation={3}>
+                <Header>
+                    <Title variant='h4' component='h1'>
                         Регистрация
-                    </Typography>
-                    <Typography variant='body2' component='p' className={styles.subtitle}>
+                    </Title>
+                    <Subtitle variant='body2' component='p'>
                         Создайте аккаунт для доступа к услугам ЖКХ
-                    </Typography>
-                </div>
+                    </Subtitle>
+                </Header>
 
                 {apiError && (
-                    <Alert severity='error' className={styles.alert}>
+                    <StyledAlert severity='error'>
                         {apiError}
-                    </Alert>
+                    </StyledAlert>
                 )}
                 
-                <form onSubmit={handleSubmit} className={styles.form} noValidate>
-                    <Box className={`${styles.formField} glass-input`}>
-                        <Typography variant='body2' className={styles.fieldLabel}>
-                            Фамилия Имя Отчество <span className={styles.required}>*</span>
-                        </Typography>
-                        <TextField
+                <Form onSubmit={handleSubmit} noValidate>
+                    <FormField>
+                        <FieldLabel variant='body2'>
+                            Фамилия Имя Отчество <RequiredStar>*</RequiredStar>
+                        </FieldLabel>
+                        <GlassInput
                             fullWidth
                             id='fullName'
                             name='fullName'
@@ -162,13 +163,13 @@ const Register = () => {
                             autoComplete='name'
                             autoFocus
                         />
-                    </Box>
+                    </FormField>
 
-                    <Box className={`${styles.formField} glass-input`}>
-                        <Typography variant='body2' className={styles.fieldLabel}>
-                            Email <span className={styles.required}>*</span>
-                        </Typography>
-                        <TextField
+                    <FormField>
+                        <FieldLabel variant='body2'>
+                            Email <RequiredStar>*</RequiredStar>
+                        </FieldLabel>
+                        <GlassInput
                             fullWidth
                             id='email'
                             name='email'
@@ -183,13 +184,13 @@ const Register = () => {
                             variant='outlined'
                             autoComplete='email'
                         />
-                    </Box>
+                    </FormField>
 
-                    <Box className={`${styles.formField} glass-input`}>
-                        <Typography variant='body2' className={styles.fieldLabel}>
+                    <FormField>
+                        <FieldLabel variant='body2'>
                             Номер телефона
-                        </Typography>
-                        <TextField
+                        </FieldLabel>
+                        <GlassInput
                             fullWidth
                             id='phone'
                             name='phone'
@@ -204,13 +205,13 @@ const Register = () => {
                             variant='outlined'
                             autoComplete='tel'
                         />
-                    </Box>
+                    </FormField>
 
-                    <Box className={`${styles.formField} glass-input`}>
-                        <Typography variant='body2' className={styles.fieldLabel}>
-                            Пароль <span className={styles.required}>*</span>
-                        </Typography>
-                        <TextField
+                    <FormField>
+                        <FieldLabel variant='body2'>
+                            Пароль <RequiredStar>*</RequiredStar>
+                        </FieldLabel>
+                        <GlassInput
                             fullWidth
                             id='password'
                             name='password'
@@ -241,32 +242,30 @@ const Register = () => {
                             }}
                         />
                         {formData.password && (
-                            <Box className={styles.passwordStrength}>
-                                <Box className={styles.strengthBarContainer}>
-                                    <Box 
-                                        className={styles.strengthBar}
+                            <PasswordStrength>
+                                <StrengthBarContainer>
+                                    <StrengthBar 
                                         style={{ 
                                             width: `${passwordStrength.width}%`,
                                             backgroundColor: passwordStrength.color 
                                         }}
                                     />
-                                </Box>
-                                <Typography 
+                                </StrengthBarContainer>
+                                <StrengthText 
                                     variant='caption' 
-                                    className={styles.strengthText}
                                     style={{ color: passwordStrength.color }}
                                 >
                                     {passwordStrength.strength}
-                                </Typography>
-                            </Box>
+                                </StrengthText>
+                            </PasswordStrength>
                         )}
-                    </Box>
+                    </FormField>
 
-                    <Box className={`${styles.formField} glass-input`}>
-                        <Typography variant='body2' className={styles.fieldLabel}>
-                            Подтвердите пароль <span className={styles.required}>*</span>
-                        </Typography>
-                        <TextField
+                    <FormField>
+                        <FieldLabel variant='body2'>
+                            Подтвердите пароль <RequiredStar>*</RequiredStar>
+                        </FieldLabel>
+                        <GlassInput
                             fullWidth
                             id='confirmPassword'
                             name='confirmPassword'
@@ -296,9 +295,9 @@ const Register = () => {
                                 }
                             }}
                         />
-                    </Box>
+                    </FormField>
 
-                    <Box className={styles.formOptions}>
+                    <FormOptions>
                         <FormControlLabel
                             control={
                                 <Checkbox
@@ -313,38 +312,38 @@ const Register = () => {
                             label={
                                 <Typography variant='body2'>
                                     Я согласен с{' '}
-                                    <Link to='/privacy' className={styles.link}>
+                                    <StyledLink to='/privacy'>
                                         условиями обработки персональных данных
-                                    </Link>
+                                    </StyledLink>
                                     {' '}и{' '}
-                                    <Link to='/terms' className={styles.link}>
+                                    <StyledLink to='/terms'>
                                         пользовательским соглашением
-                                    </Link>
+                                    </StyledLink>
                                 </Typography>
                             }
                         />
-                    </Box>
+                    </FormOptions>
 
-                    <Button
+                    <SubmitButton
                         type='submit'
                         fullWidth
                         variant='contained'
                         size='large'
                         disabled={isSubmitting}
-                        className={`${styles.submitButton} btn-glass-primary`}
+                        color="primary"
                     >
                         {isSubmitting ? 'Регистрация...' : 'Зарегистрироваться'}
-                    </Button>
+                    </SubmitButton>
                     
-                    <Typography variant='body2' className={styles.loginText}>
+                    <LoginText variant='body2'>
                         Уже есть аккаунт?{' '}
-                        <Link to={ROUTES.LOGIN} className={styles.loginLink}>
+                        <LoginLink to={ROUTES.LOGIN}>
                             Войти
-                        </Link>
-                    </Typography>
-                </form>
-            </Paper>
-        </div>
+                        </LoginLink>
+                    </LoginText>
+                </Form>
+            </RegisterCard>
+        </RegisterContainer>
     );
 };
 

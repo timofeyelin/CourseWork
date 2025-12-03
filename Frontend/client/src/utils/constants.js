@@ -6,6 +6,7 @@ export const ROUTES = {
     REGISTER: '/register',
     PROFILE: '/profile',
     BILLS: '/bills',
+    PAYMENT_HISTORY: '/payment-history',
     FORGOT_PASSWORD: '/forgot-password'
 }
 
@@ -34,14 +35,18 @@ export const ERROR_MESSAGES = {
     ADD_ACCOUNT_FAILED: 'Не удалось добавить лицевой счет',
     DELETE_ACCOUNT_FAILED: 'Не удалось удалить лицевой счет',
     BILLS_LOAD_FAILED: 'Не удалось загрузить список счетов',
+    PAYMENT_HISTORY_LOAD_FAILED: 'Не удалось загрузить историю платежей',
     DOWNLOAD_RECEIPT_FAILED: 'Не удалось скачать квитанцию',
-    PAYMENT_FAILED: 'Ошибка при проведении платежа'
+    PAYMENT_FAILED: 'Ошибка при проведении платежа',
+    PAYMENT_CANCEL_FAILED: 'Не удалось отменить платеж'
 }
 
 export const SUCCESS_MESSAGES = {
     ACCOUNT_ADDED: 'Лицевой счет успешно добавлен',
     ACCOUNT_DELETED: 'Лицевой счет успешно удален',
-    PAYMENT_SUCCESS: 'Платеж успешно проведен'
+    PAYMENT_SUCCESS: 'Платеж успешно проведен',
+    PAYMENT_PROCESSED: 'Платеж успешно обработан',
+    PAYMENT_CANCELLED: 'Платеж успешно отменен'
 }
 
 export const INFO_MESSAGES = {
