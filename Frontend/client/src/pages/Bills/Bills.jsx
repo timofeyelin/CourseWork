@@ -38,7 +38,7 @@ import {
     Numbers as NumbersIcon,
     CreditCard as CardIcon
 } from '@mui/icons-material';
-import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill } from '../../components/StyledComponents';
+import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill } from '../../components/common';
 import { billsService, userService } from '../../api';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES, INFO_MESSAGES, VALIDATION_MESSAGES } from '../../utils/constants';
 import { paymentValidationSchema } from '../../utils/validationSchemas';

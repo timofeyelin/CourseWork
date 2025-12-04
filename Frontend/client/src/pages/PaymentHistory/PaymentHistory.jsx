@@ -32,7 +32,7 @@ import {
     CheckCircle as CheckCircleIcon,
     Info as InfoIcon
 } from '@mui/icons-material';
-import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill } from '../../components/StyledComponents';
+import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill } from '../../components/common';
 import { paymentsService, billsService, userService } from '../../api';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../utils/constants';
 import {

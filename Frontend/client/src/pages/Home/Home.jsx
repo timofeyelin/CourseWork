@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { 
-    Container, 
     Typography, 
     Box, 
     CircularProgress, 
     DialogContent, 
-    Chip
+    Chip,
+    Snackbar,
+    Alert
 } from '@mui/material';
 import { 
     AccountBalanceWallet, 
@@ -16,7 +17,8 @@ import {
     Close,
     CalendarMonth
 } from '@mui/icons-material';
-import { billsService, requestsService, announcementsService } from '../api';
+import { billsService, requestsService, announcementsService } from '../../api';
+import { ERROR_MESSAGES } from '../../utils/constants';
 import { 
     DashboardContainer, 
     WidgetsGrid, 
@@ -49,11 +51,12 @@ import {
     ReadMoreIcon,
     CloseButton,
     HomeContainer,
+    HomeContent,
     ModalHeader,
     ModalIconWrapper,
     ModalDateWrapper
 } from './Home.styles';
-import { GlassDialog, GlassDialogTitle, GlassDialogActions, GlassButton } from '../components/StyledComponents';
+import { GlassDialog, GlassDialogTitle, GlassDialogActions, GlassButton } from '../../components/common';
 
 const Home = () => {
     const [balance, setBalance] = useState(0);
@@ -64,6 +67,12 @@ const Home = () => {
     
     const [selectedNews, setSelectedNews] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: '',
+        severity: 'success'
+    });
 
     useEffect(() => {
         fetchData();
@@ -79,7 +88,11 @@ const Home = () => {
                 .reduce((sum, b) => sum + b.totalAmount, 0);
             setBalance(unpaid);
         } catch (e) {
-            console.error("Ошибка при загрузке баланса", e);
+            setSnackbar({
+                open: true,
+                message: ERROR_MESSAGES.BALANCE_LOAD_FAILED,
+                severity: 'error'
+            });
         }
 
         try {
@@ -87,7 +100,11 @@ const Home = () => {
             const open = requestsRes.data.filter(r => r.status === 1 || r.status === 2 || r.status === 'New' || r.status === 'InProgress').length;
             setOpenRequestsCount(open);
         } catch (e) {
-            console.error("Ошибка при загрузке заявок", e);
+            setSnackbar({
+                open: true,
+                message: ERROR_MESSAGES.REQUESTS_LOAD_FAILED,
+                severity: 'error'
+            });
         }
 
         try {
@@ -96,8 +113,12 @@ const Home = () => {
             setAnnouncements(sortedNews);
             setNewsError(false);
         } catch (e) {
-            console.error("Ошибка при загрузке новостей", e);
             setNewsError(true);
+            setSnackbar({
+                open: true,
+                message: ERROR_MESSAGES.NEWS_LOAD_FAILED,
+                severity: 'error'
+            });
         } finally {
             setLoading(false);
         }
@@ -116,7 +137,11 @@ const Home = () => {
                         : item
                 ));
             } catch (e) {
-                console.error("Ошибка при отметке новости как прочитанной", e);
+                setSnackbar({
+                    open: true,
+                    message: ERROR_MESSAGES.MARK_READ_FAILED,
+                    severity: 'error'
+                });
             }
         }
     };
@@ -138,7 +163,7 @@ const Home = () => {
 
     return (
         <HomeContainer>
-            <Container maxWidth="lg">
+            <HomeContent>
                 <DashboardContainer>
                     {/* Секция приветствия */}
                     <WelcomeSection>
@@ -212,7 +237,7 @@ const Home = () => {
 
                     {newsError && (
                         <StyledAlert severity="error">
-                            Не удалось загрузить новости. Попробуйте позже.
+                            {ERROR_MESSAGES.NEWS_LOAD_FAILED}
                         </StyledAlert>
                     )}
 
@@ -301,7 +326,18 @@ const Home = () => {
                     </GlassDialog>
 
                 </DashboardContainer>
-            </Container>
+            </HomeContent>
+
+            <Snackbar 
+                open={snackbar.open} 
+                autoHideDuration={6000} 
+                onClose={() => setSnackbar({ ...snackbar, open: false })}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </HomeContainer>
     );
 }

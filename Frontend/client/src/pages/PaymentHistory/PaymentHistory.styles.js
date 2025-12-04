@@ -8,7 +8,7 @@ import {
     TextField,
     Button
 } from '@mui/material';
-import { GlassCard, GlassInput } from '../../components/StyledComponents';
+import { GlassCard, GlassInput } from '../../components/common';
 
 export const PageContainer = styled('div')(({ theme }) => ({
     minHeight: '100vh',
@@ -25,7 +25,7 @@ export const PageContainer = styled('div')(({ theme }) => ({
 
 export const PageCard = styled(GlassCard)(({ theme }) => ({
     width: '100%',
-    maxWidth: '1200px',
+    maxWidth: '1000px',
     overflow: 'hidden',
     animation: 'fadeIn 0.5s ease-out',
     '@keyframes fadeIn': {

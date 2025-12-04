@@ -7,7 +7,7 @@ import {
     IconButton,
     Alert
 } from '@mui/material';
-import { GlassCard } from '../../components/StyledComponents';
+import { GlassCard } from '../../components/common';
 
 export const ProfileContainer = styled('div')(({ theme }) => ({
     minHeight: '100vh',

@@ -21,9 +21,16 @@ namespace Backend.Api.Controllers
         private int GetUserId() => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<List<AnnouncementDto>>> GetAllAnnouncements(CancellationToken ct)
         {
-            var announcements = await _announcementService.GetAllAnnouncementsAsync(GetUserId(), ct);
+            int? userId = null;
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                userId = GetUserId();
+            }
+
+            var announcements = await _announcementService.GetAllAnnouncementsAsync(userId, ct);
             var dtos = announcements.Select(MapToDto).ToList();
             return Ok(dtos);
         }
