@@ -55,6 +55,21 @@ export const theme = createTheme({
                 body: {
                     minHeight: '100vh',
                     minWidth: '320px',
+                    overflow: 'hidden',
+                },
+                '::-webkit-scrollbar': {
+                    width: '8px',
+                    height: '8px',
+                },
+                '::-webkit-scrollbar-track': {
+                    backgroundColor: 'transparent',
+                },
+                '::-webkit-scrollbar-thumb': {
+                    backgroundColor: 'rgba(2, 136, 209, 0.3)',
+                    borderRadius: '4px',
+                },
+                '::-webkit-scrollbar-thumb:hover': {
+                    backgroundColor: 'rgba(2, 136, 209, 0.5)',
                 },
                 '#root': {
                     display: 'flex',

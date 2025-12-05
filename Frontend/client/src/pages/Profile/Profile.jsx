@@ -1,20 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-    Paper, 
     Typography, 
     Button, 
-    Avatar, 
     CircularProgress,
-    Box,
-    Dialog,
-    DialogTitle,
     DialogContent,
-    DialogActions,
-    TextField,
     Snackbar,
-    Alert,
-    IconButton,
     Tooltip
 } from '@mui/material';
 import { 
@@ -152,7 +143,6 @@ const Profile = () => {
             });
             
             handleCloseAddAccount();
-            // Refresh accounts list
             const accountsRes = await userService.getAccounts();
             setAccounts(accountsRes.data);
         } catch (err) {
@@ -197,7 +187,6 @@ const Profile = () => {
                 severity: 'success'
             });
 
-            // Refresh accounts list
             const accountsRes = await userService.getAccounts();
             setAccounts(accountsRes.data);
             handleCloseDeleteConfirmation();
