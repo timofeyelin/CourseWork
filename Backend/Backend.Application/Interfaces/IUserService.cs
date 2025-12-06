@@ -13,5 +13,6 @@ namespace Backend.Application.Interfaces
         Task LinkAccountAsync(CancellationToken ct, int userId, string accountNumber);
         Task UnlinkAccountAsync(CancellationToken ct, int userId, int accountId);
         Task<bool> DoesUserOwnAccount(int userId, int accountId);
+        Task<(string accessToken, string refreshToken)> RefreshTokenAsync(CancellationToken ct, string token);
     }
 }
