@@ -209,5 +209,40 @@ namespace Backend.Application.Services
             return await _context.Accounts
                 .AnyAsync(a => a.AccountId == accountId && a.UserId == userId);
         }
+        public async Task<(string accessToken, string refreshToken)> RefreshTokenAsync(CancellationToken ct, string token)
+        {
+            var existingToken = await _context.RefreshTokens
+                .FirstOrDefaultAsync(r => r.Token == token, ct);
+
+            if (existingToken == null || existingToken.IsUsed || existingToken.ExpiresAt < DateTime.UtcNow)
+            {
+                throw new UnauthorizedAccessException("Invalid or expired refresh token");
+            }
+
+            var user = await _context.Users.FindAsync(new object[] { existingToken.UserId }, ct);
+            if (user == null) throw new UnauthorizedAccessException("User not found");
+
+            // Помечаем старый как использованный
+            existingToken.IsUsed = true;
+
+            var jwtService = new JwtService(_config);
+            var newAccessToken = jwtService.GenerateAccessToken(user.UserId, user.Email, user.Role.ToString());
+            var newRefreshToken = jwtService.GenerateRefreshToken(user.UserId);
+
+            // Сохраняем новый
+            var refreshTokenEntity = new RefreshToken
+            {
+                UserId = user.UserId,
+                Token = newRefreshToken,
+                ExpiresAt = DateTime.UtcNow.AddDays(7),
+                IsUsed = false,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.RefreshTokens.Add(refreshTokenEntity);
+            await _context.SaveChangesAsync(ct);
+
+            return (newAccessToken, newRefreshToken);
+        }
     }
 }

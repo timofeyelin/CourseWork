@@ -20,12 +20,45 @@ api.interceptors.request.use(
 // Перехватчик для обработки ошибок ответов (например, 401 Unauthorized)
 api.interceptors.response.use(
     (response) => response,
-    (error) => {
-        if (error.response && error.response.status === 401) {
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            window.location.href = '/';
+    async (error) => {
+        const originalRequest = error.config;
+
+        if (error.response && error.response.status === 401 && originalRequest && !originalRequest._isRetry) {
+            originalRequest._isRetry = true;
+
+            try {
+                const accessToken = localStorage.getItem('accessToken');
+                const refreshToken = localStorage.getItem('refreshToken');
+
+                if (!refreshToken) {
+                    throw new Error("No refresh token");
+                }
+
+                const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+                    accessToken: accessToken,
+                    refreshToken: refreshToken
+                });
+
+                const newAccessToken = response.data.accessToken;
+                const newRefreshToken = response.data.refreshToken;
+
+                localStorage.setItem('accessToken', newAccessToken);
+                localStorage.setItem('refreshToken', newRefreshToken);
+                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+
+                return api.request(originalRequest);
+
+            } catch (refreshError) {
+
+                console.log("Сессия истекла или ошибка обновления токена");
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+                window.location.href = '/';
+                return Promise.reject(refreshError);
+            }
         }
+        // Если это не 401 или уже пробовали обновить — возвращаем ошибку
         return Promise.reject(error);
     }
 );

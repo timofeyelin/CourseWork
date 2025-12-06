@@ -65,5 +65,18 @@ public class AuthController : ControllerBase
             return Unauthorized(new { error = ex.Message });
         }
     }
+    [HttpPost("refresh")]
+    public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request, CancellationToken ct)
+    {
+        try
+        {
+            var (accessToken, refreshToken) = await _userService.RefreshTokenAsync(ct, request.RefreshToken);
+            return Ok(new { accessToken, refreshToken });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Unauthorized(new { message = "Invalid token" });
+        }
+    }
 
 }
