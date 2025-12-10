@@ -69,13 +69,16 @@ const Header = () => {
     const guestLinks = [
         { title: 'О сервисе', path: '#for-whom' },
         { title: 'Преимущества', path: '#advantages' },
+        { title: 'Новости', path: '#news' },
         { title: 'О нас', path: '#about' },
         { title: 'Контакты', path: '#contacts' },
     ];
 
     const userLinks = [
         { title: 'Главная', path: ROUTES.HOME },
-        { title: 'Документы', path: '/documents' },
+        { title: 'Счетчики', path: ROUTES.METERS },
+        { title: 'Платежи', path: ROUTES.PAYMENTS },
+        { title: 'Заявки', path: ROUTES.REQUESTS },
     ];
 
     return (

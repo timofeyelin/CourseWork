@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Typography, Box } from '@mui/material';
 import { 
   Phone, 
@@ -14,6 +15,7 @@ import {
   Dashboard 
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
+import { announcementsService } from '../../api';
 import {
   LandingContainer,
   BackgroundDecoration,
@@ -35,6 +37,10 @@ import {
   FeatureCard,
   StepCard,
   StepNumber,
+  NewsGrid,
+  NewsCard,
+  NewsDate,
+  NewsContent,
   ContactGrid,
   ContactCard,
   IconWrapper,
@@ -47,6 +53,23 @@ import {
 
 const Landing = () => {
   const { openLogin, openRegister } = useAuth();
+  const [news, setNews] = useState([]);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const response = await announcementsService.getAll();
+        const sortedNews = response.data
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice(0, 3);
+        setNews(sortedNews);
+      } catch (error) {
+        console.error('Failed to fetch news:', error);
+      }
+    };
+
+    fetchNews();
+  }, []);
 
   const scrollToSection = (id) => {
     const element = document.getElementById(id);
@@ -205,6 +228,37 @@ const Landing = () => {
             <Typography variant="body2" color="textSecondary">Понятный интерфейс для всех</Typography>
           </FeatureCard>
         </GridSection>
+      </Section>
+
+      <Section id="news">
+        <SectionTitle variant="h4" component="h2">
+          Новости и объявления
+        </SectionTitle>
+        <NewsGrid>
+          {news.length > 0 ? (
+            news.map((item) => (
+              <NewsCard key={item.announcementId}>
+                <NewsDate variant="caption" color="primary">
+                  {new Date(item.createdAt).toLocaleDateString('ru-RU', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  })}
+                </NewsDate>
+                <Typography variant="h6" gutterBottom fontWeight="bold">
+                  {item.title}
+                </Typography>
+                <NewsContent variant="body2" color="textSecondary">
+                  {item.content}
+                </NewsContent>
+              </NewsCard>
+            ))
+          ) : (
+            <Typography variant="body1" color="textSecondary" align="center" sx={{ gridColumn: '1 / -1' }}>
+              Пока нет новостей
+            </Typography>
+          )}
+        </NewsGrid>
       </Section>
 
       <Section id="about">

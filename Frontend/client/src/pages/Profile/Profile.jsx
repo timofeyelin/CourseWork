@@ -14,7 +14,9 @@ import {
     AccountBalanceWallet as WalletIcon,
     Add as AddIcon,
     Delete as DeleteIcon,
-    SquareFoot as AreaIcon
+    SquareFoot as AreaIcon,
+    History as HistoryIcon,
+    Payment as PaymentIcon
 } from '@mui/icons-material';
 import { userService } from '../../api';
 import { ROUTES, ERROR_MESSAGES, SUCCESS_MESSAGES, INFO_MESSAGES } from '../../utils/constants';
@@ -43,6 +45,7 @@ import {
     AccountDetails,
     AccountAddress,
     AccountArea,
+    AccountActions,
     LoadingContainer,
     ErrorContainer,
     ErrorCard,
@@ -323,6 +326,28 @@ const Profile = () => {
                                             {account.area} м²
                                         </AccountArea>
                                     </AccountDetails>
+                                    <AccountActions>
+                                        <GlassButton
+                                            variant="contained"
+                                            color="primary"
+                                            size="small"
+                                            startIcon={<PaymentIcon />}
+                                            onClick={() => navigate(`${ROUTES.PAYMENTS}?tab=pay&account=${account.accountNumber}`)}
+                                            fullWidth
+                                        >
+                                            Оплатить
+                                        </GlassButton>
+                                        <GlassButton
+                                            variant="outlined"
+                                            color="primary"
+                                            size="small"
+                                            startIcon={<HistoryIcon />}
+                                            onClick={() => navigate(`${ROUTES.PAYMENTS}?tab=history&account=${account.accountNumber}`)}
+                                            fullWidth
+                                        >
+                                            История
+                                        </GlassButton>
+                                    </AccountActions>
                                 </AccountCard>
                             ))}
                         </AccountsGrid>
