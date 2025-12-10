@@ -10,7 +10,7 @@ import {
 import { GlassCard } from '../../components/common';
 
 export const ProfileContainer = styled('div')(({ theme }) => ({
-    minHeight: '100vh',
+    minHeight: '100%',
     background: theme.custom.gradients.mainBg,
     padding: '20px',
     display: 'flex',
@@ -245,6 +245,14 @@ export const AccountArea = styled('div')(({ theme }) => ({
         marginRight: '0.25rem',
         fontSize: '1rem',
     },
+}));
+
+export const AccountActions = styled('div')(({ theme }) => ({
+    display: 'flex',
+    gap: '0.5rem',
+    marginTop: '1.5rem',
+    paddingTop: '1rem',
+    borderTop: `1px solid ${theme.palette.divider}`,
 }));
 
 export const LoadingContainer = styled('div')(({ theme }) => ({

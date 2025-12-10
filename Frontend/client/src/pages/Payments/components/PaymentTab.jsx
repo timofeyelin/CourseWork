@@ -27,13 +27,12 @@ import {
     Numbers as NumbersIcon,
     CreditCard as CardIcon
 } from '@mui/icons-material';
-import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill } from '../../components/common';
-import { billsService, userService } from '../../api';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES, INFO_MESSAGES, VALIDATION_MESSAGES } from '../../utils/constants';
-import { paymentValidationSchema } from '../../utils/validationSchemas';
+import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill } from '../../../components/common';
+import { billsService, userService } from '../../../api';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES, INFO_MESSAGES, VALIDATION_MESSAGES } from '../../../utils/constants';
+import { paymentValidationSchema } from '../../../utils/validationSchemas';
 import {
-    PageContainer,
-    PageCard,
+    TabCard,
     HeaderSection,
     PageTitle,
     ContentSection,
@@ -61,9 +60,9 @@ import {
     PaymentInfoRowContent,
     PaymentInfoAvatar,
     PaymentInfoText
-} from './Bills.styles';
+} from './PaymentTab.styles';
 
-const Bills = () => {
+const PaymentTab = ({ initialAccount }) => {
     const [bills, setBills] = useState([]);
     const [accounts, setAccounts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -84,6 +83,12 @@ const Bills = () => {
         message: '',
         severity: 'success'
     });
+
+    useEffect(() => {
+        if (initialAccount) {
+            setSelectedAccount(initialAccount);
+        }
+    }, [initialAccount]);
 
     const fetchData = async () => {
         try {
@@ -253,102 +258,100 @@ const Bills = () => {
     }
 
     return (
-        <PageContainer>
-            <PageCard>
-                {/* Заголовок страницы */}
-                <HeaderSection>
-                    <PageTitle>
-                        <BillIcon fontSize="large" />
-                        Мои счета
-                    </PageTitle>
-                </HeaderSection>
+        <TabCard>
+            {/* Заголовок страницы */}
+            <HeaderSection>
+                <PageTitle>
+                    <BillIcon fontSize="large" />
+                    Мои счета
+                </PageTitle>
+            </HeaderSection>
 
-                {/* Фильтры и таблица */}
-                <ContentSection>
-                    <FilterSection>
-                        <FilterIcon color="action" />
-                        <FilterControl variant="outlined" size="small">
-                            <InputLabel>Лицевой счет</InputLabel>
-                            <Select
-                                value={selectedAccount}
-                                onChange={handleAccountFilterChange}
-                                label="Лицевой счет"
-                            >
-                                <MenuItem value="all">Все счета</MenuItem>
-                                {accounts.map(acc => (
-                                    <MenuItem key={acc.id} value={acc.accountNumber}>
-                                        {acc.accountNumber}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FilterControl>
-                    </FilterSection>
+            {/* Фильтры и таблица */}
+            <ContentSection>
+                <FilterSection>
+                    <FilterIcon color="action" />
+                    <FilterControl variant="outlined" size="small">
+                        <InputLabel>Лицевой счет</InputLabel>
+                        <Select
+                            value={selectedAccount}
+                            onChange={handleAccountFilterChange}
+                            label="Лицевой счет"
+                        >
+                            <MenuItem value="all">Все счета</MenuItem>
+                            {accounts.map(acc => (
+                                <MenuItem key={acc.id} value={acc.accountNumber}>
+                                    {acc.accountNumber}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FilterControl>
+                </FilterSection>
 
-                    <StyledTableContainer>
-                        <Table>
-                            <TableHead>
+                <StyledTableContainer>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <StyledTableHeadCell>Период</StyledTableHeadCell>
+                                <StyledTableHeadCell>Лицевой счет</StyledTableHeadCell>
+                                <StyledTableHeadCell>Сумма</StyledTableHeadCell>
+                                <StyledTableHeadCell>Статус</StyledTableHeadCell>
+                                <StyledTableHeadCell align="right">Действия</StyledTableHeadCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {filteredBills.length === 0 ? (
                                 <TableRow>
-                                    <StyledTableHeadCell>Период</StyledTableHeadCell>
-                                    <StyledTableHeadCell>Лицевой счет</StyledTableHeadCell>
-                                    <StyledTableHeadCell>Сумма</StyledTableHeadCell>
-                                    <StyledTableHeadCell>Статус</StyledTableHeadCell>
-                                    <StyledTableHeadCell align="right">Действия</StyledTableHeadCell>
+                                    <StyledTableCell colSpan={5} align="center">
+                                        Счетов не найдено
+                                    </StyledTableCell>
                                 </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {filteredBills.length === 0 ? (
-                                    <TableRow>
-                                        <StyledTableCell colSpan={5} align="center">
-                                            Счетов не найдено
+                            ) : (
+                                filteredBills.map((bill) => (
+                                    <StyledTableRow key={bill.id} hover>
+                                        <StyledTableCell>{formatDate(bill.period)}</StyledTableCell>
+                                        <StyledTableCell>{bill.accountNumber}</StyledTableCell>
+                                        <StyledTableCell>{formatCurrency(bill.amount)}</StyledTableCell>
+                                        <StyledTableCell>
+                                            <StatusPill status={bill.isPaid ? 'paid' : 'unpaid'}>
+                                                {bill.isPaid ? 'Оплачено' : 'Не оплачено'}
+                                            </StatusPill>
                                         </StyledTableCell>
-                                    </TableRow>
-                                ) : (
-                                    filteredBills.map((bill) => (
-                                        <StyledTableRow key={bill.id} hover>
-                                            <StyledTableCell>{formatDate(bill.period)}</StyledTableCell>
-                                            <StyledTableCell>{bill.accountNumber}</StyledTableCell>
-                                            <StyledTableCell>{formatCurrency(bill.amount)}</StyledTableCell>
-                                            <StyledTableCell>
-                                                <StatusPill status={bill.isPaid ? 'paid' : 'unpaid'}>
-                                                    {bill.isPaid ? 'Оплачено' : 'Не оплачено'}
-                                                </StatusPill>
-                                            </StyledTableCell>
-                                            <StyledTableCell align="right">
-                                                <Tooltip title="Детали">
+                                        <StyledTableCell align="right">
+                                            <Tooltip title="Детали">
+                                                <GlassIconButton 
+                                                    size="small" 
+                                                    onClick={() => handleViewDetails(bill)}
+                                                >
+                                                    <ViewIcon fontSize="small" />
+                                                </GlassIconButton>
+                                            </Tooltip>
+                                            <Tooltip title="Скачать квитанцию">
+                                                <GlassIconButton 
+                                                    size="small" 
+                                                    onClick={() => handleDownloadPdf(bill.id)}
+                                                >
+                                                    <DownloadIcon fontSize="small" />
+                                                </GlassIconButton>
+                                            </Tooltip>
+                                            {!bill.isPaid && (
+                                                <Tooltip title="Оплатить">
                                                     <GlassIconButton 
                                                         size="small" 
-                                                        onClick={() => handleViewDetails(bill)}
+                                                        onClick={() => handleOpenPayment(bill)}
                                                     >
-                                                        <ViewIcon fontSize="small" />
+                                                        <PaymentIcon fontSize="small" />
                                                     </GlassIconButton>
                                                 </Tooltip>
-                                                <Tooltip title="Скачать квитанцию">
-                                                    <GlassIconButton 
-                                                        size="small" 
-                                                        onClick={() => handleDownloadPdf(bill.id)}
-                                                    >
-                                                        <DownloadIcon fontSize="small" />
-                                                    </GlassIconButton>
-                                                </Tooltip>
-                                                {!bill.isPaid && (
-                                                    <Tooltip title="Оплатить">
-                                                        <GlassIconButton 
-                                                            size="small" 
-                                                            onClick={() => handleOpenPayment(bill)}
-                                                        >
-                                                            <PaymentIcon fontSize="small" />
-                                                        </GlassIconButton>
-                                                    </Tooltip>
-                                                )}
-                                            </StyledTableCell>
-                                        </StyledTableRow>
-                                    ))
-                                )}
-                            </TableBody>
-                        </Table>
-                    </StyledTableContainer>
-                </ContentSection>
-            </PageCard>
+                                            )}
+                                        </StyledTableCell>
+                                    </StyledTableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </StyledTableContainer>
+            </ContentSection>
 
             {/* Модальное окно деталей счета */}
             <GlassDialog 
@@ -530,8 +533,8 @@ const Bills = () => {
                     {snackbar.message}
                 </Alert>
             </Snackbar>
-        </PageContainer>
+        </TabCard>
     );
 };
 
-export default Bills;
+export default PaymentTab;

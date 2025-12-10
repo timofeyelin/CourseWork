@@ -1,43 +1,30 @@
 import { useState, useEffect } from 'react';
 import { 
-    Paper, 
     Typography, 
     Table, 
     TableBody, 
-    TableCell, 
-    TableContainer, 
     TableHead, 
     TableRow, 
-    Button, 
-    IconButton, 
     Tooltip, 
     CircularProgress,
     Select,
     MenuItem,
-    FormControl,
     InputLabel,
-    Dialog,
-    DialogTitle,
     DialogContent,
-    DialogActions,
     Snackbar,
     Alert,
-    TextField,
-    Box
 } from '@mui/material';
 import { 
     History as HistoryIcon, 
     FilterList as FilterIcon,
     Cancel as CancelIcon,
-    CheckCircle as CheckCircleIcon,
     Info as InfoIcon
 } from '@mui/icons-material';
-import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill } from '../../components/common';
-import { paymentsService, billsService, userService } from '../../api';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../utils/constants';
+import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill } from '../../../components/common';
+import { paymentsService, billsService, userService } from '../../../api';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../../utils/constants';
 import {
-    PageContainer,
-    PageCard,
+    TabCard,
     HeaderSection,
     PageTitle,
     ContentSection,
@@ -52,14 +39,16 @@ import {
     ErrorContainer,
     ErrorCard,
     RetryButton
-} from './PaymentHistory.styles';
+} from './HistoryTab.styles';
 
-const PaymentHistory = () => {
+const HistoryTab = ({ initialAccount }) => {
     const [payments, setPayments] = useState([]);
+    const [accounts, setAccounts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     
     const [statusFilter, setStatusFilter] = useState('all');
+    const [accountFilter, setAccountFilter] = useState('all');
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
     
@@ -73,6 +62,12 @@ const PaymentHistory = () => {
         severity: 'success'
     });
 
+    useEffect(() => {
+        if (initialAccount) {
+            setAccountFilter(initialAccount);
+        }
+    }, [initialAccount]);
+
     const fetchData = async () => {
         try {
             setLoading(true);
@@ -83,11 +78,12 @@ const PaymentHistory = () => {
             ]);
 
             const bills = billsRes.data;
-            const accounts = accountsRes.data;
+            const accountsData = accountsRes.data;
+            setAccounts(accountsData);
             
             const paymentsData = paymentsRes.data.map(payment => {
                 const bill = bills.find(b => b.billId === payment.billId);
-                const account = bill ? accounts.find(a => a.id === bill.accountId) : null;
+                const account = bill ? accountsData.find(a => a.id === bill.accountId) : null;
                 
                 let statusStr = 'Pending';
                 if (payment.status === 1) statusStr = 'Paid';
@@ -119,8 +115,13 @@ const PaymentHistory = () => {
         setStatusFilter(event.target.value);
     };
 
+    const handleAccountFilterChange = (event) => {
+        setAccountFilter(event.target.value);
+    };
+
     const filteredPayments = payments.filter(payment => {
         const matchesStatus = statusFilter === 'all' || payment.status === statusFilter;
+        const matchesAccount = accountFilter === 'all' || payment.accountNumber === accountFilter;
         
         let matchesDate = true;
         const paymentDate = new Date(payment.date);
@@ -135,7 +136,7 @@ const PaymentHistory = () => {
             matchesDate = matchesDate && paymentDate <= toDate;
         }
 
-        return matchesStatus && matchesDate;
+        return matchesStatus && matchesDate && matchesAccount;
     });
 
     const handleCancelClick = (payment) => {
@@ -218,112 +219,127 @@ const PaymentHistory = () => {
     }
 
     return (
-        <PageContainer>
-            <PageCard>
-                {/* Заголовок страницы */}
-                <HeaderSection>
-                    <PageTitle>
-                        <HistoryIcon fontSize="large" />
-                        История платежей
-                    </PageTitle>
-                </HeaderSection>
+        <TabCard>
+            {/* Заголовок страницы */}
+            <HeaderSection>
+                <PageTitle>
+                    <HistoryIcon fontSize="large" />
+                    История платежей
+                </PageTitle>
+            </HeaderSection>
 
-                {/* Фильтры и таблица */}
-                <ContentSection>
-                    <FilterSection>
-                        <FilterIcon color="action" />
-                        <StyledFormControl variant="outlined" size="small">
-                            <InputLabel>Статус</InputLabel>
-                            <Select
-                                value={statusFilter}
-                                onChange={handleStatusFilterChange}
-                                label="Статус"
-                            >
-                                <MenuItem value="all">Все статусы</MenuItem>
-                                <MenuItem value="Pending">Ожидает обработки</MenuItem>
-                                <MenuItem value="Paid">Оплачено</MenuItem>
-                                <MenuItem value="Cancelled">Отменено</MenuItem>
-                            </Select>
-                        </StyledFormControl>
-                        
-                        <StyledTextField
-                            label="С даты"
-                            type="date"
-                            size="small"
-                            value={dateFrom}
-                            onChange={(e) => setDateFrom(e.target.value)}
-                            InputLabelProps={{ shrink: true }}
-                        />
-                        
-                        <StyledTextField
-                            label="По дату"
-                            type="date"
-                            size="small"
-                            value={dateTo}
-                            onChange={(e) => setDateTo(e.target.value)}
-                            InputLabelProps={{ shrink: true }}
-                        />
-                    </FilterSection>
+            {/* Фильтры и таблица */}
+            <ContentSection>
+                <FilterSection>
+                    <FilterIcon color="action" />
+                    
+                    <StyledFormControl variant="outlined" size="small">
+                        <InputLabel>Лицевой счет</InputLabel>
+                        <Select
+                            value={accountFilter}
+                            onChange={handleAccountFilterChange}
+                            label="Лицевой счет"
+                        >
+                            <MenuItem value="all">Все счета</MenuItem>
+                            {accounts.map(acc => (
+                                <MenuItem key={acc.id} value={acc.accountNumber}>
+                                    {acc.accountNumber}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </StyledFormControl>
 
-                    <StyledTableContainer>
-                        <Table>
-                            <TableHead>
+                    <StyledFormControl variant="outlined" size="small">
+                        <InputLabel>Статус</InputLabel>
+                        <Select
+                            value={statusFilter}
+                            onChange={handleStatusFilterChange}
+                            label="Статус"
+                        >
+                            <MenuItem value="all">Все статусы</MenuItem>
+                            <MenuItem value="Pending">Ожидает обработки</MenuItem>
+                            <MenuItem value="Paid">Оплачено</MenuItem>
+                            <MenuItem value="Cancelled">Отменено</MenuItem>
+                        </Select>
+                    </StyledFormControl>
+                    
+                    <StyledTextField
+                        label="С даты"
+                        type="date"
+                        size="small"
+                        value={dateFrom}
+                        onChange={(e) => setDateFrom(e.target.value)}
+                        InputLabelProps={{ shrink: true }}
+                    />
+                    
+                    <StyledTextField
+                        label="По дату"
+                        type="date"
+                        size="small"
+                        value={dateTo}
+                        onChange={(e) => setDateTo(e.target.value)}
+                        InputLabelProps={{ shrink: true }}
+                    />
+                </FilterSection>
+
+                <StyledTableContainer>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <StyledTableHeadCell>Дата</StyledTableHeadCell>
+                                <StyledTableHeadCell>ЛС</StyledTableHeadCell>
+                                <StyledTableHeadCell>Сумма</StyledTableHeadCell>
+                                <StyledTableHeadCell>Статус</StyledTableHeadCell>
+                                <StyledTableHeadCell align="right">Действия</StyledTableHeadCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {filteredPayments.length === 0 ? (
                                 <TableRow>
-                                    <StyledTableHeadCell>Дата</StyledTableHeadCell>
-                                    <StyledTableHeadCell>ЛС</StyledTableHeadCell>
-                                    <StyledTableHeadCell>Сумма</StyledTableHeadCell>
-                                    <StyledTableHeadCell>Статус</StyledTableHeadCell>
-                                    <StyledTableHeadCell align="right">Действия</StyledTableHeadCell>
+                                    <StyledTableCell colSpan={5} align="center">
+                                        Платежей не найдено
+                                    </StyledTableCell>
                                 </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {filteredPayments.length === 0 ? (
-                                    <TableRow>
-                                        <StyledTableCell colSpan={5} align="center">
-                                            Платежей не найдено
+                            ) : (
+                                filteredPayments.map((payment) => (
+                                    <StyledTableRow key={payment.id} hover>
+                                        <StyledTableCell>{formatDate(payment.date)}</StyledTableCell>
+                                        <StyledTableCell>{payment.accountNumber}</StyledTableCell>
+                                        <StyledTableCell>{formatCurrency(payment.amount)}</StyledTableCell>
+                                        <StyledTableCell>
+                                            <StatusPill status={payment.status}>
+                                                {getStatusLabel(payment.status)}
+                                            </StatusPill>
                                         </StyledTableCell>
-                                    </TableRow>
-                                ) : (
-                                    filteredPayments.map((payment) => (
-                                        <StyledTableRow key={payment.id} hover>
-                                            <StyledTableCell>{formatDate(payment.date)}</StyledTableCell>
-                                            <StyledTableCell>{payment.accountNumber}</StyledTableCell>
-                                            <StyledTableCell>{formatCurrency(payment.amount)}</StyledTableCell>
-                                            <StyledTableCell>
-                                                <StatusPill status={payment.status}>
-                                                    {getStatusLabel(payment.status)}
-                                                </StatusPill>
-                                            </StyledTableCell>
-                                            <StyledTableCell align="right">
-                                                {payment.status === 'Pending' && (
-                                                    <>
-                                                        <Tooltip title="Отменить платеж">
-                                                            <GlassIconButton 
-                                                                size="small" 
-                                                                onClick={() => handleCancelClick(payment)}
-                                                                disabled={isProcessing}
-                                                            >
-                                                                <CancelIcon fontSize="small" />
-                                                            </GlassIconButton>
-                                                        </Tooltip>
-                                                    </>
-                                                )}
-                                                <Tooltip title="Детали">
-                                                    <GlassIconButton 
-                                                        size="small" 
-                                                    >
-                                                        <InfoIcon fontSize="small" />
-                                                    </GlassIconButton>
-                                                </Tooltip>
-                                            </StyledTableCell>
-                                        </StyledTableRow>
-                                    ))
-                                )}
-                            </TableBody>
-                        </Table>
-                    </StyledTableContainer>
-                </ContentSection>
-            </PageCard>
+                                        <StyledTableCell align="right">
+                                            {payment.status === 'Pending' && (
+                                                <>
+                                                    <Tooltip title="Отменить платеж">
+                                                        <GlassIconButton 
+                                                            size="small" 
+                                                            onClick={() => handleCancelClick(payment)}
+                                                            disabled={isProcessing}
+                                                        >
+                                                            <CancelIcon fontSize="small" />
+                                                        </GlassIconButton>
+                                                    </Tooltip>
+                                                </>
+                                            )}
+                                            <Tooltip title="Детали">
+                                                <GlassIconButton 
+                                                    size="small" 
+                                                >
+                                                    <InfoIcon fontSize="small" />
+                                                </GlassIconButton>
+                                            </Tooltip>
+                                        </StyledTableCell>
+                                    </StyledTableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </StyledTableContainer>
+            </ContentSection>
 
             {/* Диалог подтверждения отмены */}
             <GlassDialog
@@ -362,8 +378,8 @@ const PaymentHistory = () => {
                     {snackbar.message}
                 </Alert>
             </Snackbar>
-        </PageContainer>
+        </TabCard>
     );
 };
 
-export default PaymentHistory;
+export default HistoryTab;

@@ -3,7 +3,7 @@ import { Box, Typography, CardActionArea, Alert, DialogContentText } from '@mui/
 import { GlassCard, GlassButton } from '../../components/common';
 
 export const HomeContainer = styled('div')(({ theme }) => ({
-    minHeight: '100vh',
+    minHeight: '100%',
     background: theme.custom.gradients.mainBg,
     padding: '20px',
     display: 'flex',

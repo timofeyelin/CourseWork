@@ -6,7 +6,10 @@ export const ROUTES = {
     REGISTER: '/register',
     PROFILE: '/profile',
     BILLS: '/bills',
+    METERS: '/meters',
+    REQUESTS: '/requests',
     PAYMENT_HISTORY: '/payment-history',
+    PAYMENTS: '/payments',
     FORGOT_PASSWORD: '/forgot-password'
 }
 

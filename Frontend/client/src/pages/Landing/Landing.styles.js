@@ -1,5 +1,5 @@
 import { styled } from '@mui/material/styles';
-import { Box, Typography, Container } from '@mui/material';
+import { Box, Typography, Container, Link } from '@mui/material';
 import { GlassCard, GlassButton } from '../../components/common';
 
 export const LandingContainer = styled(Box)(({ theme }) => ({
@@ -8,7 +8,7 @@ export const LandingContainer = styled(Box)(({ theme }) => ({
   flexDirection: 'column',
   background: theme.custom.gradients.mainBg,
   position: 'relative',
-  overflow: 'hidden',
+  overflowX: 'hidden',
 }));
 
 export const BackgroundDecoration = styled(Box)(({ theme }) => ({
@@ -19,11 +19,12 @@ export const BackgroundDecoration = styled(Box)(({ theme }) => ({
   bottom: 0,
   zIndex: 0,
   pointerEvents: 'none',
+  overflow: 'hidden',
   '&::before': {
     content: '""',
     position: 'absolute',
-    top: '-10%',
-    right: '-5%',
+    top: '-200px',
+    right: '-100px',
     width: '600px',
     height: '600px',
     background: 'radial-gradient(circle, rgba(2, 136, 209, 0.15) 0%, rgba(255,255,255,0) 70%)',
@@ -32,8 +33,8 @@ export const BackgroundDecoration = styled(Box)(({ theme }) => ({
   '&::after': {
     content: '""',
     position: 'absolute',
-    bottom: '-10%',
-    left: '-10%',
+    bottom: '-200px',
+    left: '-100px',
     width: '500px',
     height: '500px',
     background: 'radial-gradient(circle, rgba(255, 152, 0, 0.1) 0%, rgba(255,255,255,0) 70%)',
@@ -42,19 +43,53 @@ export const BackgroundDecoration = styled(Box)(({ theme }) => ({
 }));
 
 export const HeroSection = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(12, 2, 8),
-  textAlign: 'center',
+  padding: theme.spacing(12, 6, 8),
   position: 'relative',
   zIndex: 1,
+  minHeight: '80vh',
   display: 'flex',
-  flexDirection: 'column',
   alignItems: 'center',
-  justifyContent: 'center',
-  minHeight: '60vh',
+  [theme.breakpoints.down('md')]: {
+    padding: theme.spacing(12, 3, 8),
+  },
 }));
 
 export const HeroContainer = styled(Container)(({ theme }) => ({
-  maxWidth: '1000px !important',
+  maxWidth: '1200px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(6),
+  [theme.breakpoints.down('md')]: {
+    flexDirection: 'column',
+    textAlign: 'center',
+  },
+}));
+
+export const HeroContent = styled(Box)(({ theme }) => ({
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  [theme.breakpoints.down('md')]: {
+    alignItems: 'center',
+  },
+}));
+
+export const HeroImageContainer = styled(Box)(({ theme }) => ({
+  flex: 1,
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  '& img': {
+    maxWidth: '100%',
+    height: 'auto',
+    borderRadius: '20px',
+    boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+  },
+  [theme.breakpoints.down('md')]: {
+    width: '100%',
+    maxWidth: '500px',
+  },
 }));
 
 export const HeroTitle = styled(Typography)(({ theme }) => ({
@@ -64,6 +99,7 @@ export const HeroTitle = styled(Typography)(({ theme }) => ({
   WebkitTextFillColor: 'transparent',
   marginBottom: theme.spacing(2),
   fontSize: '3.5rem',
+  lineHeight: 1.2,
   [theme.breakpoints.down('md')]: {
     fontSize: '2.5rem',
   },
@@ -71,18 +107,41 @@ export const HeroTitle = styled(Typography)(({ theme }) => ({
 
 export const HeroSubtitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
-  maxWidth: '600px',
-  margin: '0 auto',
   marginBottom: theme.spacing(4),
   fontSize: '1.25rem',
   lineHeight: 1.6,
 }));
 
+export const HeroList = styled('ul')(({ theme }) => ({
+  listStyle: 'none',
+  padding: 0,
+  margin: `0 0 ${theme.spacing(4)} 0`,
+  textAlign: 'left',
+}));
+
+export const HeroListItem = styled('li')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  marginBottom: theme.spacing(1.5),
+  fontSize: '1.1rem',
+  color: theme.palette.text.primary,
+  '&::before': {
+    content: '"•"',
+    color: theme.palette.primary.main,
+    fontWeight: 'bold',
+    fontSize: '1.5rem',
+    marginRight: theme.spacing(1.5),
+    lineHeight: 1,
+  },
+}));
+
 export const HeroButtons = styled(Box)(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing(2),
-  justifyContent: 'center',
   flexWrap: 'wrap',
+  [theme.breakpoints.down('md')]: {
+    justifyContent: 'center',
+  },
 }));
 
 export const StyledAuthButton = styled(GlassButton)(({ theme }) => ({
@@ -91,9 +150,13 @@ export const StyledAuthButton = styled(GlassButton)(({ theme }) => ({
   minWidth: '160px',
 }));
 
+export const LoginButton = styled(StyledAuthButton)({
+  background: 'rgba(255,255,255,0.5)',
+});
+
 export const Section = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(8, 2),
-  maxWidth: '1000px',
+  padding: theme.spacing(10, 2),
+  maxWidth: '1200px',
   margin: '0 auto',
   width: '100%',
   position: 'relative',
@@ -115,6 +178,55 @@ export const SectionTitle = styled(Typography)(({ theme }) => ({
     margin: '16px auto 0',
     borderRadius: '2px',
   }
+}));
+
+export const GridSection = styled(Box)(({ theme }) => ({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+  gap: theme.spacing(4),
+}));
+
+export const StepsGrid = styled(Box)(({ theme }) => ({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+  gap: theme.spacing(4),
+}));
+
+export const FeatureCard = styled(GlassCard)(({ theme }) => ({
+  padding: theme.spacing(4),
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+  '&:hover': {
+    transform: 'translateY(-8px)',
+    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+  },
+}));
+
+export const StepCard = styled(GlassCard)(({ theme }) => ({
+  padding: theme.spacing(4),
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  textAlign: 'center',
+  position: 'relative',
+}));
+
+export const StepNumber = styled(Box)(({ theme }) => ({
+  width: '40px',
+  height: '40px',
+  borderRadius: '50%',
+  backgroundColor: theme.palette.primary.main,
+  color: '#fff',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontWeight: 'bold',
+  fontSize: '1.2rem',
+  marginBottom: theme.spacing(2),
 }));
 
 export const NewsGrid = styled(Box)(({ theme }) => ({
@@ -183,14 +295,46 @@ export const IconWrapper = styled(Box)(({ theme }) => ({
 
 export const Footer = styled(Box)(({ theme }) => ({
   marginTop: 'auto',
-  padding: theme.spacing(4, 2),
-  background: 'rgba(255, 255, 255, 0.5)',
-  backdropFilter: 'blur(10px)',
+  padding: theme.spacing(6, 2),
+  background: 'rgba(255, 255, 255, 0.8)',
+  backdropFilter: 'blur(20px)',
   borderTop: '1px solid rgba(255, 255, 255, 0.3)',
   color: theme.palette.text.secondary,
-  textAlign: 'center',
   position: 'relative',
   zIndex: 1,
+}));
+
+export const FooterContent = styled(Container)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'flex-start',
+  flexWrap: 'wrap',
+  gap: theme.spacing(4),
+  [theme.breakpoints.down('sm')]: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    textAlign: 'center',
+  },
+}));
+
+export const FooterLinks = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing(3),
+  flexWrap: 'wrap',
+  [theme.breakpoints.down('sm')]: {
+    justifyContent: 'center',
+  },
+}));
+
+export const FooterLink = styled(Link)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  textDecoration: 'none',
+  fontWeight: 500,
+  transition: 'color 0.2s',
+  cursor: 'pointer',
+  '&:hover': {
+    color: theme.palette.primary.main,
+  },
 }));
 
 export const AboutText = styled(Typography)(({ theme }) => ({

@@ -1,31 +1,15 @@
 import { styled } from '@mui/material/styles';
 import { 
-    Paper, 
     TableContainer, 
     TableCell, 
     TableRow, 
     FormControl, 
-    TextField,
     Button
 } from '@mui/material';
-import { GlassCard, GlassInput } from '../../components/common';
+import { GlassCard, GlassInput } from '../../../components/common';
 
-export const PageContainer = styled('div')(({ theme }) => ({
-    minHeight: '100vh',
-    background: theme.custom.gradients.mainBg,
-    padding: '40px 20px',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    boxSizing: 'border-box',
-    [theme.breakpoints.down('md')]: {
-        padding: '20px 10px',
-    },
-}));
-
-export const PageCard = styled(GlassCard)(({ theme }) => ({
+export const TabCard = styled(GlassCard)(({ theme }) => ({
     width: '100%',
-    maxWidth: '1000px',
     overflow: 'hidden',
     animation: 'fadeIn 0.5s ease-out',
     '@keyframes fadeIn': {
@@ -149,19 +133,17 @@ export const StyledTableCell = styled(TableCell)(({ theme }) => ({
 }));
 
 export const LoadingContainer = styled('div')(({ theme }) => ({
-    minHeight: '100vh',
+    minHeight: '400px',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: theme.palette.background.default,
 }));
 
 export const ErrorContainer = styled('div')(({ theme }) => ({
-    minHeight: '100vh',
+    minHeight: '400px',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: theme.palette.background.default,
     padding: '2rem',
 }));
 
