@@ -1,59 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-    Typography, 
-    Button, 
-    CircularProgress,
-    DialogContent,
-    Snackbar,
-    Tooltip
-} from '@mui/material';
-import { 
-    Edit as EditIcon, 
-    Home as HomeIcon,
-    AccountBalanceWallet as WalletIcon,
-    Add as AddIcon,
-    Delete as DeleteIcon,
-    SquareFoot as AreaIcon,
-    History as HistoryIcon,
-    Payment as PaymentIcon
-} from '@mui/icons-material';
+import { Typography, Button, CircularProgress, Snackbar } from '@mui/material';
 import { userService } from '../../api';
 import { ROUTES, ERROR_MESSAGES, SUCCESS_MESSAGES, INFO_MESSAGES } from '../../utils/constants';
 import { accountValidationSchema } from '../../utils/validationSchemas';
-import { GlassButton, GlassDialog, GlassDialogTitle, GlassDialogActions, GlassInput } from '../../components/common';
-import {
-    ProfileContainer,
-    ProfileCard,
-    HeaderSection,
-    HeaderContent,
-    UserInfo,
-    StyledAvatar,
-    UserDetails,
-    UserEmail,
-    RegistrationDate,
-    ContentSection,
-    SectionHeader,
-    SectionTitle,
-    EmptyAccounts,
-    AccountsGrid,
-    AccountCard,
-    AccountHeader,
-    AccountNumberLabel,
-    AccountNumber,
-    DeleteButton,
-    AccountDetails,
-    AccountAddress,
-    AccountArea,
-    AccountActions,
-    LoadingContainer,
-    ErrorContainer,
-    ErrorCard,
-    StyledAlert,
-    AddAccountDescription
+import { 
+    ProfileContainer, 
+    ProfileCard, 
+    LoadingContainer, 
+    ErrorContainer, 
+    ErrorCard, 
+    StyledAlert 
 } from './Profile.styles';
-
-const Profile = () => {
+import ProfileHeader from './components/ProfileHeader';
+import AccountsList from './components/AccountsList';
+import AddAccountModal from './components/AddAccountModal';
+import DeleteAccountModal from './components/DeleteAccountModal';const Profile = () => {
     const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
     const [accounts, setAccounts] = useState([]);
@@ -209,16 +171,6 @@ const Profile = () => {
         setSnackbar({ ...snackbar, open: false });
     };
 
-    const getInitials = (name) => {
-        if (!name) return 'U';
-        return name
-            .split(' ')
-            .map(word => word[0])
-            .slice(0, 2)
-            .join('')
-            .toUpperCase();
-    };
-
     if (loading) {
         return (
             <LoadingContainer>
@@ -251,179 +203,36 @@ const Profile = () => {
     return (
         <ProfileContainer>
             <ProfileCard elevation={0}>
-                {/* Заголовок профиля */}
-                <HeaderSection>
-                    <HeaderContent>
-                        <UserInfo>
-                            <StyledAvatar>
-                                {profile ? getInitials(profile.fullName) : 'U'}
-                            </StyledAvatar>
-                            <UserDetails>
-                                <h1>{profile?.fullName || INFO_MESSAGES.DEFAULT_USER_NAME}</h1>
-                                <UserEmail>{profile?.email}</UserEmail>
-                                <RegistrationDate>
-                                    На сайте с {new Date(profile?.createdAt).toLocaleDateString('ru-RU')}
-                                </RegistrationDate>
-                            </UserDetails>
-                        </UserInfo>
-                        <GlassButton 
-                            variant="contained" 
-                            startIcon={<EditIcon />}
-                            color="primary"
-                            onClick={handleEditProfile}
-                        >
-                            Редактировать
-                        </GlassButton>
-                    </HeaderContent>
-                </HeaderSection>
+                <ProfileHeader 
+                    profile={profile} 
+                    onEditProfile={handleEditProfile} 
+                />
 
-                {/* Секция с лицевыми счетами */}
-                <ContentSection>
-                    <SectionHeader>
-                        <SectionTitle variant="h5">
-                            <WalletIcon />
-                            Мои лицевые счета
-                        </SectionTitle>
-                        <GlassButton
-                            variant="contained"
-                            startIcon={<AddIcon />}
-                            color="primary"
-                            onClick={handleOpenAddAccount}
-                        >
-                            Добавить счет
-                        </GlassButton>
-                    </SectionHeader>
-
-                    {accounts.length === 0 ? (
-                        <EmptyAccounts>
-                            <Typography>У вас пока нет привязанных лицевых счетов.</Typography>
-                        </EmptyAccounts>
-                    ) : (
-                        <AccountsGrid>
-                            {accounts.map((account) => (
-                                <AccountCard key={account.id}>
-                                    <AccountHeader>
-                                        <div>
-                                            <AccountNumberLabel>Лицевой счет</AccountNumberLabel>
-                                            <AccountNumber>{account.accountNumber}</AccountNumber>
-                                        </div>
-                                        <Tooltip title="Удалить счет">
-                                            <DeleteButton 
-                                                size="small" 
-                                                onClick={() => handleDeleteClick(account.id)}
-                                            >
-                                                <DeleteIcon fontSize="small" />
-                                            </DeleteButton>
-                                        </Tooltip>
-                                    </AccountHeader>
-                                    <AccountDetails>
-                                        <AccountAddress>
-                                            <HomeIcon fontSize="small" />
-                                            {account.address}
-                                        </AccountAddress>
-                                        <AccountArea>
-                                            <AreaIcon />
-                                            {account.area} м²
-                                        </AccountArea>
-                                    </AccountDetails>
-                                    <AccountActions>
-                                        <GlassButton
-                                            variant="contained"
-                                            color="primary"
-                                            size="small"
-                                            startIcon={<PaymentIcon />}
-                                            onClick={() => navigate(`${ROUTES.PAYMENTS}?tab=pay&account=${account.accountNumber}`)}
-                                            fullWidth
-                                        >
-                                            Оплатить
-                                        </GlassButton>
-                                        <GlassButton
-                                            variant="outlined"
-                                            color="primary"
-                                            size="small"
-                                            startIcon={<HistoryIcon />}
-                                            onClick={() => navigate(`${ROUTES.PAYMENTS}?tab=history&account=${account.accountNumber}`)}
-                                            fullWidth
-                                        >
-                                            История
-                                        </GlassButton>
-                                    </AccountActions>
-                                </AccountCard>
-                            ))}
-                        </AccountsGrid>
-                    )}
-                </ContentSection>
+                <AccountsList 
+                    accounts={accounts} 
+                    onAddAccount={handleOpenAddAccount} 
+                    onDeleteAccount={handleDeleteClick} 
+                    navigate={navigate} 
+                />
             </ProfileCard>
 
-            {/* Модальное окно добавления счета */}
-            <GlassDialog 
+            <AddAccountModal 
                 open={openAddAccount} 
-                onClose={handleCloseAddAccount}
-            >
-                <GlassDialogTitle>
-                    Добавить лицевой счет
-                </GlassDialogTitle>
-                <DialogContent>
-                    <AddAccountDescription variant="body2">
-                        Введите номер вашего лицевого счета для привязки к профилю.
-                    </AddAccountDescription>
-                    <GlassInput
-                        autoFocus
-                        margin="dense"
-                        label="Номер лицевого счета"
-                        type="text"
-                        fullWidth
-                        variant="outlined"
-                        value={newAccountNumber}
-                        onChange={(e) => setNewAccountNumber(e.target.value)}
-                        error={!!addAccountError}
-                        helperText={addAccountError}
-                    />
-                </DialogContent>
-                <GlassDialogActions>
-                    <GlassButton onClick={handleCloseAddAccount} variant="text">
-                        Отмена
-                    </GlassButton>
-                    <GlassButton 
-                        onClick={handleAddAccount} 
-                        variant="contained"
-                        disabled={isSubmitting}
-                        color="primary"
-                    >
-                        {isSubmitting ? <CircularProgress size={24} /> : 'Привязать'}
-                    </GlassButton>
-                </GlassDialogActions>
-            </GlassDialog>
+                onClose={handleCloseAddAccount} 
+                onAdd={handleAddAccount} 
+                accountNumber={newAccountNumber} 
+                setAccountNumber={setNewAccountNumber} 
+                error={addAccountError} 
+                isSubmitting={isSubmitting} 
+            />
 
-            {/* Модальное окно подтверждения удаления */}
-            <GlassDialog
-                open={deleteConfirmation.open}
-                onClose={handleCloseDeleteConfirmation}
-            >
-                <GlassDialogTitle>
-                    Удаление счета
-                </GlassDialogTitle>
-                <DialogContent>
-                    <Typography variant="body1">
-                        Вы действительно хотите удалить этот лицевой счет? Это действие нельзя будет отменить.
-                    </Typography>
-                </DialogContent>
-                <GlassDialogActions>
-                    <GlassButton onClick={handleCloseDeleteConfirmation} variant="text">
-                        Отмена
-                    </GlassButton>
-                    <GlassButton 
-                        onClick={handleConfirmDelete} 
-                        variant="contained" 
-                        color="error"
-                        disabled={isDeleting}
-                    >
-                        {isDeleting ? <CircularProgress size={24} color="inherit" /> : 'Удалить'}
-                    </GlassButton>
-                </GlassDialogActions>
-            </GlassDialog>
+            <DeleteAccountModal 
+                open={deleteConfirmation.open} 
+                onClose={handleCloseDeleteConfirmation} 
+                onConfirm={handleConfirmDelete} 
+                isDeleting={isDeleting} 
+            />
 
-            {/* Снэкбар для уведомлений */}
             <Snackbar 
                 open={snackbar.open} 
                 autoHideDuration={6000} 

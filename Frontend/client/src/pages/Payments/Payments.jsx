@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Box } from '@mui/material';
 import { AccountBalanceWallet, History } from '@mui/icons-material';
 import { PageContainer, PageContent, StyledTabs, StyledTab, TabPanel } from './Payments.styles';
 import PaymentTab from './components/PaymentTab';
@@ -35,11 +34,6 @@ const Payments = () => {
         } else {
             newParams.set('tab', 'history');
         }
-        // Preserve account param if it exists, or maybe clear it? 
-        // The user said "Buttons from profile... pass ?tab=...&account=...".
-        // Header opens without params.
-        // If switching tabs, maybe we want to keep the account filter?
-        // Let's keep it for now.
         if (initialAccount) {
             newParams.set('account', initialAccount);
         }

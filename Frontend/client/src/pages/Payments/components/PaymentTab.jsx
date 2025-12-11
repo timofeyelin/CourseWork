@@ -8,9 +8,6 @@ import {
     TableRow, 
     Tooltip, 
     CircularProgress,
-    Select,
-    MenuItem,
-    InputLabel,
     DialogContent,
     Snackbar,
     Alert,
@@ -27,9 +24,9 @@ import {
     Numbers as NumbersIcon,
     CreditCard as CardIcon
 } from '@mui/icons-material';
-import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill } from '../../../components/common';
+import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill, GlassSelect } from '../../../components/common';
 import { billsService, userService } from '../../../api';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES, INFO_MESSAGES, VALIDATION_MESSAGES } from '../../../utils/constants';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../../utils/constants';
 import { paymentValidationSchema } from '../../../utils/validationSchemas';
 import {
     TabCard,
@@ -37,7 +34,6 @@ import {
     PageTitle,
     ContentSection,
     FilterSection,
-    FilterControl,
     StyledTableContainer,
     StyledTableHeadCell,
     StyledTableRow,
@@ -109,7 +105,7 @@ const PaymentTab = ({ initialAccount }) => {
                     accountNumber: account ? account.accountNumber : 'Н/Д',
                     amount: bill.totalAmount,
                     isPaid: bill.status === 1 || bill.status === 'Paid',
-                    items: [] // Будут загружены при просмотре деталей
+                    items: []
                 };
             });
             
@@ -153,7 +149,7 @@ const PaymentTab = ({ initialAccount }) => {
             console.error('Error fetching bill details:', err);
             setSnackbar({
                 open: true,
-                message: 'Не удалось загрузить детали счета',
+                message: ERROR_MESSAGES.BILL_DETAILS_LOAD_FAILED,
                 severity: 'error'
             });
         }
@@ -271,21 +267,15 @@ const PaymentTab = ({ initialAccount }) => {
             <ContentSection>
                 <FilterSection>
                     <FilterIcon color="action" />
-                    <FilterControl variant="outlined" size="small">
-                        <InputLabel>Лицевой счет</InputLabel>
-                        <Select
-                            value={selectedAccount}
-                            onChange={handleAccountFilterChange}
-                            label="Лицевой счет"
-                        >
-                            <MenuItem value="all">Все счета</MenuItem>
-                            {accounts.map(acc => (
-                                <MenuItem key={acc.id} value={acc.accountNumber}>
-                                    {acc.accountNumber}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FilterControl>
+                    <GlassSelect
+                        label="Лицевой счет"
+                        value={selectedAccount}
+                        onChange={handleAccountFilterChange}
+                        options={[
+                            { value: 'all', label: 'Все счета' },
+                            ...accounts.map(acc => ({ value: acc.accountNumber, label: acc.accountNumber }))
+                        ]}
+                    />
                 </FilterSection>
 
                 <StyledTableContainer>
@@ -500,8 +490,7 @@ const PaymentTab = ({ initialAccount }) => {
                                 htmlInput: {
                                     max: selectedBill?.amount,
                                     min: 0.01,
-                                    step: 0.01,
-                                    style: { fontSize: '1.1rem', fontWeight: 500 }
+                                    step: 0.01
                                 }
                             }}
                         />

@@ -71,17 +71,6 @@ export const FilterSection = styled('div')(({ theme }) => ({
     },
 }));
 
-export const FilterControl = styled(FormControl)(({ theme }) => ({
-    minWidth: '250px',
-    '& .MuiOutlinedInput-root': {
-        backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    },
-    [theme.breakpoints.down('md')]: {
-        width: '100%',
-        minWidth: 'auto',
-    },
-}));
-
 export const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
     borderRadius: '20px',
     overflow: 'hidden',
@@ -222,6 +211,10 @@ export const PaymentInput = styled(GlassInput)(({ theme }) => ({
     '& .MuiOutlinedInput-root': {
         backgroundColor: 'rgba(255, 255, 255, 0.5)',
     },
+    '& .MuiInputBase-input': {
+        fontSize: '1.1rem',
+        fontWeight: 500,
+    }
 }));
 
 export const RetryButton = styled(Button)(({ theme }) => ({

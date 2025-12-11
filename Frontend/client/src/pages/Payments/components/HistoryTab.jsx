@@ -7,9 +7,6 @@ import {
     TableRow, 
     Tooltip, 
     CircularProgress,
-    Select,
-    MenuItem,
-    InputLabel,
     DialogContent,
     Snackbar,
     Alert,
@@ -17,20 +14,26 @@ import {
 import { 
     History as HistoryIcon, 
     FilterList as FilterIcon,
+    CreditCard as CardIcon,
     Cancel as CancelIcon,
     Info as InfoIcon
 } from '@mui/icons-material';
-import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill } from '../../../components/common';
+import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill, GlassSelect, GlassDatePicker } from '../../../components/common';
 import { paymentsService, billsService, userService } from '../../../api';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../../utils/constants';
+import dayjs from 'dayjs';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
+
 import {
     TabCard,
     HeaderSection,
     PageTitle,
     ContentSection,
     FilterSection,
-    StyledFormControl,
-    StyledTextField,
     StyledTableContainer,
     StyledTableHeadCell,
     StyledTableRow,
@@ -38,7 +41,8 @@ import {
     LoadingContainer,
     ErrorContainer,
     ErrorCard,
-    RetryButton
+    RetryButton,
+    StyledGlassDatePicker
 } from './HistoryTab.styles';
 
 const HistoryTab = ({ initialAccount }) => {
@@ -49,8 +53,8 @@ const HistoryTab = ({ initialAccount }) => {
     
     const [statusFilter, setStatusFilter] = useState('all');
     const [accountFilter, setAccountFilter] = useState('all');
-    const [dateFrom, setDateFrom] = useState('');
-    const [dateTo, setDateTo] = useState('');
+    const [dateFrom, setDateFrom] = useState(null);
+    const [dateTo, setDateTo] = useState(null);
     
     const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
     const [selectedPayment, setSelectedPayment] = useState(null);
@@ -77,11 +81,11 @@ const HistoryTab = ({ initialAccount }) => {
                 userService.getAccounts()
             ]);
 
-            const bills = billsRes.data;
-            const accountsData = accountsRes.data;
+            const bills = billsRes.data || [];
+            const accountsData = accountsRes.data || [];
             setAccounts(accountsData);
             
-            const paymentsData = paymentsRes.data.map(payment => {
+            const paymentsData = (paymentsRes.data || []).map(payment => {
                 const bill = bills.find(b => b.billId === payment.billId);
                 const account = bill ? accountsData.find(a => a.id === bill.accountId) : null;
                 
@@ -124,16 +128,13 @@ const HistoryTab = ({ initialAccount }) => {
         const matchesAccount = accountFilter === 'all' || payment.accountNumber === accountFilter;
         
         let matchesDate = true;
-        const paymentDate = new Date(payment.date);
+        const paymentDate = dayjs(payment.date);
         
         if (dateFrom) {
-            matchesDate = matchesDate && paymentDate >= new Date(dateFrom);
+            matchesDate = matchesDate && paymentDate.isSameOrAfter(dateFrom, 'day');
         }
         if (dateTo) {
-            // Добавляем конец дня для корректного сравнения
-            const toDate = new Date(dateTo);
-            toDate.setHours(23, 59, 59, 999);
-            matchesDate = matchesDate && paymentDate <= toDate;
+            matchesDate = matchesDate && paymentDate.isSameOrBefore(dateTo, 'day');
         }
 
         return matchesStatus && matchesDate && matchesAccount;
@@ -233,52 +234,38 @@ const HistoryTab = ({ initialAccount }) => {
                 <FilterSection>
                     <FilterIcon color="action" />
                     
-                    <StyledFormControl variant="outlined" size="small">
-                        <InputLabel>Лицевой счет</InputLabel>
-                        <Select
-                            value={accountFilter}
-                            onChange={handleAccountFilterChange}
-                            label="Лицевой счет"
-                        >
-                            <MenuItem value="all">Все счета</MenuItem>
-                            {accounts.map(acc => (
-                                <MenuItem key={acc.id} value={acc.accountNumber}>
-                                    {acc.accountNumber}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </StyledFormControl>
+                    <GlassSelect
+                        label="Лицевой счет"
+                        value={accountFilter}
+                        onChange={handleAccountFilterChange}
+                        options={[
+                            { value: 'all', label: 'Все счета' },
+                            ...(accounts || []).map(acc => ({ value: acc.accountNumber, label: acc.accountNumber }))
+                        ]}
+                    />
 
-                    <StyledFormControl variant="outlined" size="small">
-                        <InputLabel>Статус</InputLabel>
-                        <Select
-                            value={statusFilter}
-                            onChange={handleStatusFilterChange}
-                            label="Статус"
-                        >
-                            <MenuItem value="all">Все статусы</MenuItem>
-                            <MenuItem value="Pending">Ожидает обработки</MenuItem>
-                            <MenuItem value="Paid">Оплачено</MenuItem>
-                            <MenuItem value="Cancelled">Отменено</MenuItem>
-                        </Select>
-                    </StyledFormControl>
-                    
-                    <StyledTextField
-                        label="С даты"
-                        type="date"
-                        size="small"
-                        value={dateFrom}
-                        onChange={(e) => setDateFrom(e.target.value)}
-                        InputLabelProps={{ shrink: true }}
+                    <GlassSelect
+                        label="Статус"
+                        value={statusFilter}
+                        onChange={handleStatusFilterChange}
+                        options={[
+                            { value: 'all', label: 'Все статусы' },
+                            { value: 'Pending', label: 'Ожидает обработки' },
+                            { value: 'Paid', label: 'Оплачено' },
+                            { value: 'Cancelled', label: 'Отменено' }
+                        ]}
                     />
                     
-                    <StyledTextField
+                    <StyledGlassDatePicker
+                        label="С даты"
+                        value={dateFrom}
+                        onChange={(newValue) => setDateFrom(newValue)}
+                    />
+                    
+                    <StyledGlassDatePicker
                         label="По дату"
-                        type="date"
-                        size="small"
                         value={dateTo}
-                        onChange={(e) => setDateTo(e.target.value)}
-                        InputLabelProps={{ shrink: true }}
+                        onChange={(newValue) => setDateTo(newValue)}
                     />
                 </FilterSection>
 

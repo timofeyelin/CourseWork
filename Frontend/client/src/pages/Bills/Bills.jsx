@@ -1,35 +1,19 @@
 import { useState, useEffect } from 'react';
 import { 
-    Paper, 
     Typography, 
-    Table, 
-    TableBody, 
-    TableHead, 
-    TableRow, 
-    Tooltip, 
     CircularProgress,
     Select,
     MenuItem,
     InputLabel,
-    DialogContent,
     Snackbar,
-    Alert,
-    InputAdornment
+    Alert
 } from '@mui/material';
 import { 
     ReceiptLong as BillIcon, 
-    Visibility as ViewIcon, 
-    Download as DownloadIcon, 
-    Payment as PaymentIcon,
-    FilterList as FilterIcon,
-    AccountBalanceWallet as WalletIcon,
-    CalendarToday as CalendarIcon,
-    Numbers as NumbersIcon,
-    CreditCard as CardIcon
+    FilterList as FilterIcon
 } from '@mui/icons-material';
-import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill } from '../../components/common';
 import { billsService, userService } from '../../api';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES, INFO_MESSAGES, VALIDATION_MESSAGES } from '../../utils/constants';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../utils/constants';
 import { paymentValidationSchema } from '../../utils/validationSchemas';
 import {
     PageContainer,
@@ -39,29 +23,15 @@ import {
     ContentSection,
     FilterSection,
     FilterControl,
-    StyledTableContainer,
-    StyledTableHeadCell,
-    StyledTableRow,
-    StyledTableCell,
     LoadingContainer,
     ErrorContainer,
     ErrorCard,
-    ModalInfoSection,
-    ModalInfoRow,
-    BillDetailsTable,
-    ModalTableCellHead,
-    ModalTableCell,
-    ModalTableRow,
-    TotalAmount,
-    PaymentInput,
-    RetryButton,
-    PaymentModalContent,
-    PaymentAmountContainer,
-    PaymentWalletIconWrapper,
-    PaymentInfoRowContent,
-    PaymentInfoAvatar,
-    PaymentInfoText
+    RetryButton
 } from './Bills.styles';
+
+import BillsTable from './components/BillsTable';
+import BillDetailsModal from './components/BillDetailsModal';
+import PaymentModal from './components/PaymentModal';
 
 const Bills = () => {
     const [bills, setBills] = useState([]);
@@ -284,240 +254,41 @@ const Bills = () => {
                         </FilterControl>
                     </FilterSection>
 
-                    <StyledTableContainer>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <StyledTableHeadCell>Период</StyledTableHeadCell>
-                                    <StyledTableHeadCell>Лицевой счет</StyledTableHeadCell>
-                                    <StyledTableHeadCell>Сумма</StyledTableHeadCell>
-                                    <StyledTableHeadCell>Статус</StyledTableHeadCell>
-                                    <StyledTableHeadCell align="right">Действия</StyledTableHeadCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {filteredBills.length === 0 ? (
-                                    <TableRow>
-                                        <StyledTableCell colSpan={5} align="center">
-                                            Счетов не найдено
-                                        </StyledTableCell>
-                                    </TableRow>
-                                ) : (
-                                    filteredBills.map((bill) => (
-                                        <StyledTableRow key={bill.id} hover>
-                                            <StyledTableCell>{formatDate(bill.period)}</StyledTableCell>
-                                            <StyledTableCell>{bill.accountNumber}</StyledTableCell>
-                                            <StyledTableCell>{formatCurrency(bill.amount)}</StyledTableCell>
-                                            <StyledTableCell>
-                                                <StatusPill status={bill.isPaid ? 'paid' : 'unpaid'}>
-                                                    {bill.isPaid ? 'Оплачено' : 'Не оплачено'}
-                                                </StatusPill>
-                                            </StyledTableCell>
-                                            <StyledTableCell align="right">
-                                                <Tooltip title="Детали">
-                                                    <GlassIconButton 
-                                                        size="small" 
-                                                        onClick={() => handleViewDetails(bill)}
-                                                    >
-                                                        <ViewIcon fontSize="small" />
-                                                    </GlassIconButton>
-                                                </Tooltip>
-                                                <Tooltip title="Скачать квитанцию">
-                                                    <GlassIconButton 
-                                                        size="small" 
-                                                        onClick={() => handleDownloadPdf(bill.id)}
-                                                    >
-                                                        <DownloadIcon fontSize="small" />
-                                                    </GlassIconButton>
-                                                </Tooltip>
-                                                {!bill.isPaid && (
-                                                    <Tooltip title="Оплатить">
-                                                        <GlassIconButton 
-                                                            size="small" 
-                                                            onClick={() => handleOpenPayment(bill)}
-                                                        >
-                                                            <PaymentIcon fontSize="small" />
-                                                        </GlassIconButton>
-                                                    </Tooltip>
-                                                )}
-                                            </StyledTableCell>
-                                        </StyledTableRow>
-                                    ))
-                                )}
-                            </TableBody>
-                        </Table>
-                    </StyledTableContainer>
+                    <BillsTable 
+                        bills={filteredBills}
+                        onViewDetails={handleViewDetails}
+                        onDownloadPdf={handleDownloadPdf}
+                        onOpenPayment={handleOpenPayment}
+                        formatDate={formatDate}
+                        formatCurrency={formatCurrency}
+                    />
                 </ContentSection>
             </PageCard>
 
             {/* Модальное окно деталей счета */}
-            <GlassDialog 
-                open={detailsModalOpen} 
+            <BillDetailsModal 
+                open={detailsModalOpen}
                 onClose={handleCloseDetails}
-                maxWidth="md"
-                fullWidth
-            >
-                <GlassDialogTitle>
-                    Детали счета за {selectedBill && formatDate(selectedBill.period)}
-                </GlassDialogTitle>
-                <DialogContent>
-                    {selectedBill && (
-                        <>
-                            <ModalInfoSection>
-                                <ModalInfoRow>
-                                    <Typography variant="body2" color="textSecondary">Лицевой счет</Typography>
-                                    <Typography variant="body1" fontWeight="600">{selectedBill.accountNumber}</Typography>
-                                </ModalInfoRow>
-                            </ModalInfoSection>
-                            
-                            <BillDetailsTable component={Paper} variant="outlined">
-                                <Table size="small">
-                                    <TableHead>
-                                        <TableRow>
-                                            <ModalTableCellHead>Услуга</ModalTableCellHead>
-                                            <ModalTableCellHead align="right">Тариф</ModalTableCellHead>
-                                            <ModalTableCellHead align="right">Объем</ModalTableCellHead>
-                                            <ModalTableCellHead align="right">Сумма</ModalTableCellHead>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {selectedBill.items && selectedBill.items.map((item, index) => (
-                                            <ModalTableRow key={index}>
-                                                <ModalTableCell>{item.service}</ModalTableCell>
-                                                <ModalTableCell align="right">{item.tariff}</ModalTableCell>
-                                                <ModalTableCell align="right">{item.volume}</ModalTableCell>
-                                                <ModalTableCell align="right">{formatCurrency(item.amount)}</ModalTableCell>
-                                            </ModalTableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </BillDetailsTable>
-                            
-                            <TotalAmount>
-                                <Typography variant="body1" color="textSecondary">Итого к оплате</Typography>
-                                <Typography variant="h5" color="primary" fontWeight="700">
-                                    {formatCurrency(selectedBill.amount)}
-                                </Typography>
-                            </TotalAmount>
-                        </>
-                    )}
-                </DialogContent>
-                <GlassDialogActions>
-                    <GlassButton 
-                        onClick={() => handleDownloadPdf(selectedBill.id)}
-                        startIcon={<DownloadIcon />}
-                        variant="text"
-                    >
-                        Скачать квитанцию
-                    </GlassButton>
-                    <GlassButton onClick={handleCloseDetails} variant="text">
-                        Закрыть
-                    </GlassButton>
-                    {selectedBill && !selectedBill.isPaid && (
-                        <GlassButton 
-                            variant="contained" 
-                            color="primary"
-                            onClick={() => {
-                                handleCloseDetails();
-                                handleOpenPayment(selectedBill);
-                            }}
-                        >
-                            Оплатить
-                        </GlassButton>
-                    )}
-                </GlassDialogActions>
-            </GlassDialog>
+                bill={selectedBill}
+                onDownloadPdf={handleDownloadPdf}
+                onOpenPayment={handleOpenPayment}
+                formatDate={formatDate}
+                formatCurrency={formatCurrency}
+            />
 
             {/* Модальное окно оплаты */}
-            <GlassDialog 
-                open={paymentModalOpen} 
+            <PaymentModal 
+                open={paymentModalOpen}
                 onClose={handleClosePayment}
-                maxWidth="sm"
-                fullWidth
-            >
-                <GlassDialogTitle>Оплата счета</GlassDialogTitle>
-                <DialogContent>
-                    <PaymentModalContent>
-                        <PaymentAmountContainer>
-                            <PaymentWalletIconWrapper>
-                                <WalletIcon />
-                            </PaymentWalletIconWrapper>
-                            <Typography variant="body2" color="textSecondary" gutterBottom>
-                                Сумма к оплате
-                            </Typography>
-                            <Typography variant="h3" color="primary" fontWeight="700">
-                                {selectedBill && formatCurrency(selectedBill.amount)}
-                            </Typography>
-                        </PaymentAmountContainer>
-
-                        <ModalInfoSection>
-                            <ModalInfoRow>
-                                <PaymentInfoRowContent>
-                                    <PaymentInfoAvatar>
-                                        <NumbersIcon fontSize="small" />
-                                    </PaymentInfoAvatar>
-                                    <PaymentInfoText>
-                                        <Typography variant="caption" color="textSecondary" display="block">Лицевой счет</Typography>
-                                        <Typography variant="body1" fontWeight="600">{selectedBill?.accountNumber}</Typography>
-                                    </PaymentInfoText>
-                                </PaymentInfoRowContent>
-                            </ModalInfoRow>
-                            <ModalInfoRow>
-                                <PaymentInfoRowContent>
-                                    <PaymentInfoAvatar>
-                                        <CalendarIcon fontSize="small" />
-                                    </PaymentInfoAvatar>
-                                    <PaymentInfoText>
-                                        <Typography variant="caption" color="textSecondary" display="block">Период оплаты</Typography>
-                                        <Typography variant="body1" fontWeight="600">{selectedBill && formatDate(selectedBill.period)}</Typography>
-                                    </PaymentInfoText>
-                                </PaymentInfoRowContent>
-                            </ModalInfoRow>
-                        </ModalInfoSection>
-                        
-                        <PaymentInput
-                            autoFocus
-                            margin="dense"
-                            label="Сумма платежа"
-                            type="number"
-                            fullWidth
-                            variant="outlined"
-                            value={paymentAmount}
-                            onChange={(e) => setPaymentAmount(e.target.value)}
-                            error={!!paymentError}
-                            helperText={paymentError}
-                            slotProps={{
-                                input: {
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <CardIcon color="action" />
-                                        </InputAdornment>
-                                    ),
-                                },
-                                htmlInput: {
-                                    max: selectedBill?.amount,
-                                    min: 0.01,
-                                    step: 0.01,
-                                    style: { fontSize: '1.1rem', fontWeight: 500 }
-                                }
-                            }}
-                        />
-                    </PaymentModalContent>
-                </DialogContent>
-                <GlassDialogActions>
-                    <GlassButton onClick={handleClosePayment} variant="text">
-                        Отмена
-                    </GlassButton>
-                    <GlassButton 
-                        onClick={handlePaymentSubmit} 
-                        variant="contained"
-                        color="primary"
-                        disabled={isPaying}
-                    >
-                        {isPaying ? <CircularProgress size={24} /> : 'Оплатить'}
-                    </GlassButton>
-                </GlassDialogActions>
-            </GlassDialog>
+                bill={selectedBill}
+                amount={paymentAmount}
+                onAmountChange={(e) => setPaymentAmount(e.target.value)}
+                error={paymentError}
+                onSubmit={handlePaymentSubmit}
+                isPaying={isPaying}
+                formatDate={formatDate}
+                formatCurrency={formatCurrency}
+            />
 
             {/* Снэкбар для уведомлений */}
             <Snackbar 

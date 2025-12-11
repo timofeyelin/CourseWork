@@ -9,16 +9,21 @@ export const theme = createTheme({
         },
         secondary: {
             main: '#FF9800',
+            light: '#FFF3E0',
             dark: '#F57C00',
         },
         success: {
             main: '#4CAF50',
+            light: '#E8F5E9',
+            dark: '#2E7D32',
         },
         error: {
             main: '#F44336',
         },
         warning: {
             main: '#FFC107',
+            light: '#FFF8E1',
+            dark: '#FF6F00',
         },
         text: {
             primary: '#263238',

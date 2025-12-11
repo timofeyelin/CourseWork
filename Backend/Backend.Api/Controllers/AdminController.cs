@@ -1,6 +1,7 @@
 using Backend.Api.Dtos;
 using Backend.Application.Interfaces;
 using Backend.Domain.Entities;
+using Backend.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -85,6 +86,27 @@ namespace Backend.Api.Controllers
             {
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
+        }
+
+        [HttpPost("add-meter")]
+        public async Task<IActionResult> AddMeter(int accountId, MeterType type, string serialNumber)
+        {
+            var account = await _context.Accounts.FindAsync(accountId);
+            if (account == null)
+                return NotFound("Account not found");
+
+            var meter = new Meter
+            {
+                AccountId = accountId,
+                Type = type,
+                SerialNumber = serialNumber,
+                InstallationDate = DateTime.UtcNow
+            };
+
+            _context.Meters.Add(meter);
+            await _context.SaveChangesAsync(CancellationToken.None);
+
+            return Ok(meter);
         }
     }
 }

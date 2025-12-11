@@ -27,7 +27,10 @@ export const VALIDATION_MESSAGES = {
     PASSWORDS_DO_NOT_MATCH: 'Пароли не совпадают',
     AGREE_TO_TERMS: 'Необходимо согласиться с условиями обработки персональных данных',
     INVALID_PAYMENT_AMOUNT: 'Введите корректную сумму',
-    PAYMENT_AMOUNT_EXCEEDS: 'Сумма платежа не может превышать сумму счета'
+    PAYMENT_AMOUNT_EXCEEDS: 'Сумма платежа не может превышать сумму счета',
+    SELECT_METER: 'Выберите счетчик',
+    ENTER_VALUE: 'Введите значение',
+    READING_LESS_THAN_PREVIOUS: 'Значение не может быть меньше предыдущего'
 }
 
 export const ERROR_MESSAGES = {
@@ -38,6 +41,7 @@ export const ERROR_MESSAGES = {
     ADD_ACCOUNT_FAILED: 'Не удалось добавить лицевой счет',
     DELETE_ACCOUNT_FAILED: 'Не удалось удалить лицевой счет',
     BILLS_LOAD_FAILED: 'Не удалось загрузить список счетов',
+    BILL_DETAILS_LOAD_FAILED: 'Не удалось загрузить детали счета',
     PAYMENT_HISTORY_LOAD_FAILED: 'Не удалось загрузить историю платежей',
     DOWNLOAD_RECEIPT_FAILED: 'Не удалось скачать квитанцию',
     PAYMENT_FAILED: 'Ошибка при проведении платежа',
@@ -45,7 +49,11 @@ export const ERROR_MESSAGES = {
     BALANCE_LOAD_FAILED: 'Не удалось загрузить баланс',
     REQUESTS_LOAD_FAILED: 'Не удалось загрузить заявки',
     NEWS_LOAD_FAILED: 'Не удалось загрузить новости',
-    MARK_READ_FAILED: 'Не удалось отметить новость как прочитанную'
+    MARK_READ_FAILED: 'Не удалось отметить новость как прочитанную',
+    METERS_LOAD_FAILED: 'Не удалось загрузить список счетчиков',
+    READINGS_LOAD_FAILED: 'Не удалось загрузить показания',
+    SUBMIT_READING_FAILED: 'Ошибка при отправке показаний',
+    METER_HISTORY_LOAD_FAILED: 'Не удалось загрузить историю показаний'
 }
 
 export const SUCCESS_MESSAGES = {
@@ -53,7 +61,8 @@ export const SUCCESS_MESSAGES = {
     ACCOUNT_DELETED: 'Лицевой счет успешно удален',
     PAYMENT_SUCCESS: 'Платеж успешно проведен',
     PAYMENT_PROCESSED: 'Платеж успешно обработан',
-    PAYMENT_CANCELLED: 'Платеж успешно отменен'
+    PAYMENT_CANCELLED: 'Платеж успешно отменен',
+    READING_SUBMITTED: 'Показания успешно переданы'
 }
 
 export const INFO_MESSAGES = {

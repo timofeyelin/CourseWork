@@ -30,7 +30,8 @@ namespace Backend.Api.Controllers
                 MeterId = m.MeterId,
                 AccountId = m.AccountId,
                 Type = m.Type,
-                SerialNumber = m.SerialNumber
+                SerialNumber = m.SerialNumber,
+                InstallationDate = m.InstallationDate
             }).ToList();
             return Ok(dtos);
         }
@@ -50,7 +51,8 @@ namespace Backend.Api.Controllers
                 MeterId = m.MeterId,
                 AccountId = m.AccountId,
                 Type = m.Type,
-                SerialNumber = m.SerialNumber
+                SerialNumber = m.SerialNumber,
+                InstallationDate = m.InstallationDate
             }).ToList();
             
             return Ok(dtos);

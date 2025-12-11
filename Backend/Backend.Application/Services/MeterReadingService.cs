@@ -47,44 +47,29 @@ namespace Backend.Application.Services
             if (meter.Account?.UserId != userId)
                 throw new UnauthorizedAccessException("У вас нет доступа к этому счетчику.");
             
-            var lastReading = await _context.MeterReadings
-                .Where(r => r.MeterId == meterId)
+            var now = DateTime.UtcNow;
+            var currentPeriod = now;
+
+            var previousReading = await _context.MeterReadings
+                .Where(r => r.MeterId == meterId && r.Period < currentPeriod)
                 .OrderByDescending(r => r.Period)
                 .FirstOrDefaultAsync(ct);
 
-            if (lastReading != null && value < lastReading.Value)
-                throw new InvalidOperationException("Новое показание не может быть меньше предыдущего.");
+            if (previousReading != null && value < previousReading.Value)
+                throw new InvalidOperationException($"Новое показание ({value}) не может быть меньше предыдущего ({previousReading.Value} от {previousReading.Period:d}).");
 
-            var now = DateTime.UtcNow;
-            var currentPeriod = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-            
-            var existingReadingForMonth = await _context.MeterReadings
-                .FirstOrDefaultAsync(r => r.MeterId == meterId && r.Period.Year == currentPeriod.Year && r.Period.Month == currentPeriod.Month, ct);
-
-            if (existingReadingForMonth != null)
+            var newReading = new MeterReading
             {
-                existingReadingForMonth.Value = value;
-                existingReadingForMonth.SubmittedAt = now;
-                existingReadingForMonth.Validated = false; 
-                
-                await _context.SaveChangesAsync(ct);
-                return existingReadingForMonth;
-            }
-            else
-            {
-                var newReading = new MeterReading
-                {
-                    MeterId = meterId,
-                    Value = value,
-                    Period = currentPeriod,
-                    SubmittedAt = now,
-                    Validated = false 
-                };
+                MeterId = meterId,
+                Value = value,
+                Period = currentPeriod,
+                SubmittedAt = now,
+                Validated = false 
+            };
 
-                _context.MeterReadings.Add(newReading);
-                await _context.SaveChangesAsync(ct);
-                return newReading;
-            }
+            _context.MeterReadings.Add(newReading);
+            await _context.SaveChangesAsync(ct);
+            return newReading;
         }
         
         public async Task<MeterReading?> GetReadingByIdAsync(int userId, int readingId, CancellationToken ct)
