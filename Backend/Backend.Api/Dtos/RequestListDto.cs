@@ -7,7 +7,9 @@ namespace Backend.Api.Dtos
     {
         public int RequestId { get; set; }
         public string Category { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public RequestStatus Status { get; set; }
         public DateTime CreatedAt { get; set; }
+        public int? Rating { get; set; }
     }
 }

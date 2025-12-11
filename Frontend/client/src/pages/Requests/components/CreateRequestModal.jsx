@@ -1,0 +1,136 @@
+import { 
+    DialogContent, 
+    MenuItem, 
+    Typography, 
+    IconButton, 
+    CircularProgress,
+    Box
+} from '@mui/material';
+import { 
+    Close as CloseIcon, 
+    CloudUpload as UploadIcon 
+} from '@mui/icons-material';
+import { 
+    GlassButton, 
+    GlassDialog, 
+    GlassDialogTitle, 
+    GlassDialogActions, 
+    GlassInput,
+    GlassSelect
+} from '../../../components/common';
+import { REQUEST_CATEGORY_LABELS } from '../../../utils/constants';
+import {
+    ModalContent,
+    FileUploadArea,
+    FileList,
+    FileItem
+} from '../Requests.styles';
+
+const CreateRequestModal = ({ 
+    open, 
+    onClose, 
+    accounts, 
+    newRequest, 
+    setNewRequest, 
+    onSubmit, 
+    isSubmitting,
+    onFileChange,
+    onRemoveFile
+}) => {
+    return (
+        <GlassDialog 
+            open={open} 
+            onClose={onClose}
+            maxWidth="sm"
+            fullWidth
+        >
+            <GlassDialogTitle>Создание заявки</GlassDialogTitle>
+            <DialogContent>
+                <ModalContent>
+                    <GlassSelect
+                        label="Лицевой счет"
+                        value={newRequest.accountId}
+                        onChange={(e) => setNewRequest({...newRequest, accountId: e.target.value})}
+                        fullWidth
+                    >
+                        {accounts.map(acc => (
+                            <MenuItem key={acc.id} value={acc.id}>
+                                {acc.accountNumber} ({acc.address})
+                            </MenuItem>
+                        ))}
+                    </GlassSelect>
+
+                    <GlassSelect
+                        label="Категория"
+                        value={newRequest.category}
+                        onChange={(e) => setNewRequest({...newRequest, category: e.target.value})}
+                        fullWidth
+                    >
+                        {Object.entries(REQUEST_CATEGORY_LABELS).map(([key, label]) => (
+                            <MenuItem key={key} value={key}>{label}</MenuItem>
+                        ))}
+                    </GlassSelect>
+
+                    <GlassInput
+                        label="Описание проблемы"
+                        multiline
+                        rows={4}
+                        value={newRequest.description}
+                        onChange={(e) => setNewRequest({...newRequest, description: e.target.value})}
+                        fullWidth
+                    />
+
+                    <Box>
+                        <input
+                            accept="image/*,.pdf,.doc,.docx"
+                            style={{ display: 'none' }}
+                            id="raised-button-file"
+                            multiple
+                            type="file"
+                            onChange={onFileChange}
+                            disabled={newRequest.files.length >= 3}
+                        />
+                        <label htmlFor="raised-button-file">
+                            <FileUploadArea>
+                                <UploadIcon color="primary" fontSize="large" />
+                                <Typography variant="body2" color="textSecondary">
+                                    Нажмите для загрузки файлов (макс. 3)
+                                </Typography>
+                            </FileUploadArea>
+                        </label>
+                        
+                        {newRequest.files.length > 0 && (
+                            <FileList>
+                                {newRequest.files.map((file, index) => (
+                                    <FileItem key={index}>
+                                        <Typography variant="caption" noWrap style={{ maxWidth: '80%' }}>
+                                            {file.name}
+                                        </Typography>
+                                        <IconButton size="small" onClick={() => onRemoveFile(index)}>
+                                            <CloseIcon fontSize="small" />
+                                        </IconButton>
+                                    </FileItem>
+                                ))}
+                            </FileList>
+                        )}
+                    </Box>
+                </ModalContent>
+            </DialogContent>
+            <GlassDialogActions>
+                <GlassButton onClick={onClose} variant="text">
+                    Отмена
+                </GlassButton>
+                <GlassButton 
+                    onClick={onSubmit} 
+                    variant="contained" 
+                    color="primary"
+                    disabled={isSubmitting}
+                >
+                    {isSubmitting ? <CircularProgress size={24} /> : 'Отправить'}
+                </GlassButton>
+            </GlassDialogActions>
+        </GlassDialog>
+    );
+};
+
+export default CreateRequestModal;
