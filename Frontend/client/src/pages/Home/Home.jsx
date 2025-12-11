@@ -1,62 +1,18 @@
 import { useState, useEffect } from 'react';
-import { 
-    Typography, 
-    Box, 
-    CircularProgress, 
-    DialogContent, 
-    Chip,
-    Snackbar,
-    Alert
-} from '@mui/material';
-import { 
-    AccountBalanceWallet, 
-    Assignment, 
-    Warning, 
-    Notifications,
-    ArrowForward,
-    Close,
-    CalendarMonth
-} from '@mui/icons-material';
+import { CircularProgress, Snackbar, Alert } from '@mui/material';
 import { billsService, requestsService, announcementsService } from '../../api';
 import { ERROR_MESSAGES } from '../../utils/constants';
 import { 
+    HomeContainer, 
+    HomeContent, 
     DashboardContainer, 
-    WidgetsGrid, 
-    WidgetCard, 
-    WidgetHeader, 
-    WidgetTitle, 
-    WidgetValue, 
-    WidgetIcon,
-    OutageBanner,
-    NewsSection,
-    NewsCard,
-    NewsActionArea,
-    NewsHeader,
-    NewsTitle,
-    NewsDate,
-    NewsContent,
-    NewBadge,
-    WelcomeSection,
-    WelcomeTitle,
-    NewsSectionHeader,
-    NewsSectionTitle,
-    StyledAlert,
-    NewsTitleWrapper,
-    ReadMoreLink,
-    CloseButtonWrapper,
-    NewsMetaInfo,
-    NewsFullContent,
-    LoadingContainer,
-    OutageTitle,
-    ReadMoreIcon,
-    CloseButton,
-    HomeContainer,
-    HomeContent,
-    ModalHeader,
-    ModalIconWrapper,
-    ModalDateWrapper
+    LoadingContainer 
 } from './Home.styles';
-import { GlassDialog, GlassDialogTitle, GlassDialogActions, GlassButton } from '../../components/common';
+import WelcomeBlock from './components/WelcomeBlock';
+import StatsWidgets from './components/StatsWidgets';
+import OutageBanners from './components/OutageBanners';
+import NewsFeed from './components/NewsFeed';
+import NewsModal from './components/NewsModal';
 
 const Home = () => {
     const [balance, setBalance] = useState(0);
@@ -165,165 +121,26 @@ const Home = () => {
         <HomeContainer>
             <HomeContent>
                 <DashboardContainer>
-                    {/* Секция приветствия */}
-                    <WelcomeSection>
-                        <WelcomeTitle variant='h4' component='h1'>
-                            Добро пожаловать!
-                        </WelcomeTitle>
-                        <Typography variant='body1' color="text.secondary">
-                            Обзор вашего лицевого счета и новости УК
-                        </Typography>
-                    </WelcomeSection>
+                    <WelcomeBlock />
 
-                    {/* Виджеты баланса и заявок */}
-                    <WidgetsGrid>
-                        <WidgetCard color="#0288D1">
-                            <WidgetHeader>
-                                <WidgetTitle>Баланс</WidgetTitle>
-                                <WidgetIcon color="#0288D1">
-                                    <AccountBalanceWallet />
-                                </WidgetIcon>
-                            </WidgetHeader>
-                            <Box>
-                                <WidgetValue color={balance > 0 ? "#d32f2f" : "#2e7d32"}>
-                                    {balance.toLocaleString('ru-RU')} ₽
-                                </WidgetValue>
-                                <Typography variant="caption" color="text.secondary">
-                                    {balance > 0 ? 'Задолженность' : 'Все оплачено'}
-                                </Typography>
-                            </Box>
-                        </WidgetCard>
+                    <StatsWidgets 
+                        balance={balance} 
+                        openRequestsCount={openRequestsCount} 
+                    />
 
-                        <WidgetCard color="#FF9800">
-                            <WidgetHeader>
-                                <WidgetTitle>Заявки</WidgetTitle>
-                                <WidgetIcon color="#FF9800">
-                                    <Assignment />
-                                </WidgetIcon>
-                            </WidgetHeader>
-                            <Box>
-                                <WidgetValue>
-                                    {openRequestsCount}
-                                </WidgetValue>
-                                <Typography variant="caption" color="text.secondary">
-                                    Открытых заявок
-                                </Typography>
-                            </Box>
-                        </WidgetCard>
-                    </WidgetsGrid>
+                    <OutageBanners outages={outages} />
 
-                    {/* Баннеры отключений */}
-                    {outages.map(outage => (
-                        <OutageBanner key={outage.announcementId}>
-                            <Warning color="error" />
-                            <Box>
-                                <OutageTitle variant="subtitle1">
-                                    {outage.title}
-                                </OutageTitle>
-                                <Typography variant="body2">
-                                    {outage.content}
-                                </Typography>
-                            </Box>
-                        </OutageBanner>
-                    ))}
+                    <NewsFeed 
+                        announcements={announcements} 
+                        newsError={newsError} 
+                        onOpenNews={handleOpenNews} 
+                    />
 
-                    {/* Секция новостей */}
-                    <NewsSectionHeader>
-                        <Notifications color="primary" />
-                        <NewsSectionTitle variant="h5">
-                            Новости и объявления
-                        </NewsSectionTitle>
-                    </NewsSectionHeader>
-
-                    {newsError && (
-                        <StyledAlert severity="error">
-                            {ERROR_MESSAGES.NEWS_LOAD_FAILED}
-                        </StyledAlert>
-                    )}
-
-                    {!newsError && announcements.length === 0 && (
-                        <StyledAlert severity="info">
-                            Новостей пока нет.
-                        </StyledAlert>
-                    )}
-
-                    <NewsSection>
-                        {announcements.map(news => (
-                            <NewsCard key={news.announcementId}>
-                                <NewsActionArea onClick={() => handleOpenNews(news)}>
-                                    <NewsHeader>
-                                        <NewsTitleWrapper>
-                                            <NewsTitle>{news.title}</NewsTitle>
-                                            {!news.isRead && <NewBadge>Новое</NewBadge>}
-                                        </NewsTitleWrapper>
-                                        <NewsDate>
-                                            {new Date(news.createdAt).toLocaleDateString('ru-RU')}
-                                        </NewsDate>
-                                    </NewsHeader>
-                                    <NewsContent>
-                                        {news.content}
-                                    </NewsContent>
-                                    <ReadMoreLink>
-                                        Читать полностью 
-                                        <ReadMoreIcon>
-                                            <ArrowForward fontSize="inherit" />
-                                        </ReadMoreIcon>
-                                    </ReadMoreLink>
-                                </NewsActionArea>
-                            </NewsCard>
-                        ))}
-                    </NewsSection>
-
-                    {/* Модальное окно новости */}
-                    <GlassDialog 
+                    <NewsModal 
                         open={isModalOpen} 
-                        onClose={handleCloseModal}
-                        maxWidth="md"
-                        fullWidth
-                    >
-                        {selectedNews && (
-                            <>
-                                <GlassDialogTitle>
-                                    <ModalHeader>
-                                        <ModalIconWrapper isEmergency={selectedNews.isEmergency}>
-                                            {selectedNews.isEmergency ? <Warning /> : <Notifications />}
-                                        </ModalIconWrapper>
-                                        {selectedNews.title}
-                                    </ModalHeader>
-                                    <CloseButtonWrapper>
-                                        <CloseButton onClick={handleCloseModal}>
-                                            <Close />
-                                        </CloseButton>
-                                    </CloseButtonWrapper>
-                                </GlassDialogTitle>
-                                <DialogContent>
-                                    <NewsMetaInfo>
-                                        <ModalDateWrapper>
-                                            <CalendarMonth fontSize="small" />
-                                            {new Date(selectedNews.createdAt).toLocaleDateString('ru-RU', { 
-                                                year: 'numeric', 
-                                                month: 'long', 
-                                                day: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}
-                                        </ModalDateWrapper>
-                                        {selectedNews.isEmergency && (
-                                            <Chip label="Важно" color="error" size="small" />
-                                        )}
-                                    </NewsMetaInfo>
-                                    <NewsFullContent>
-                                        {selectedNews.content}
-                                    </NewsFullContent>
-                                </DialogContent>
-                                <GlassDialogActions>
-                                    <GlassButton onClick={handleCloseModal}>
-                                        Закрыть
-                                    </GlassButton>
-                                </GlassDialogActions>
-                            </>
-                        )}
-                    </GlassDialog>
+                        news={selectedNews} 
+                        onClose={handleCloseModal} 
+                    />
 
                 </DashboardContainer>
             </HomeContent>

@@ -4,9 +4,11 @@ import {
     TableCell, 
     TableRow, 
     FormControl, 
-    Button
+    Button,
+    Box,
+    Typography
 } from '@mui/material';
-import { GlassCard, GlassInput } from '../../../components/common';
+import { GlassCard, GlassDatePicker } from '../../../components/common';
 
 export const TabCard = styled(GlassCard)(({ theme }) => ({
     width: '100%',
@@ -69,20 +71,6 @@ export const FilterSection = styled('div')(({ theme }) => ({
         alignItems: 'stretch',
     },
 }));
-
-const filterControlStyles = (theme) => ({
-    minWidth: '200px',
-    '& .MuiOutlinedInput-root': {
-        backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    },
-    [theme.breakpoints.down('md')]: {
-        width: '100%',
-        minWidth: 'auto',
-    },
-});
-
-export const StyledFormControl = styled(FormControl)(({ theme }) => filterControlStyles(theme));
-export const StyledTextField = styled(GlassInput)(({ theme }) => filterControlStyles(theme));
 
 export const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
     borderRadius: '20px',
@@ -158,4 +146,8 @@ export const ErrorCard = styled('div')(({ theme }) => ({
 
 export const RetryButton = styled(Button)(({ theme }) => ({
     marginTop: theme.spacing(2),
+}));
+
+export const StyledGlassDatePicker = styled(GlassDatePicker)(({ theme }) => ({
+    minWidth: 200,
 }));
