@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { InputAdornment, CircularProgress, Snackbar, Alert } from '@mui/material';
+import { InputAdornment, CircularProgress } from '@mui/material';
 import { Search, Add, Speed } from '@mui/icons-material';
 import { 
     PageContainer, 
@@ -18,6 +18,7 @@ import SubmitReadingModal from './components/SubmitReadingModal';
 import { metersService } from '../../api/meters';
 import { GlassButton } from '../../components/common';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../utils/constants';
+import { AppSnackbar } from '../../components/common';
 
 const MetersPage = () => {
     const [meters, setMeters] = useState([]);
@@ -162,16 +163,12 @@ const MetersPage = () => {
                     readings={readings}
                 />
 
-                <Snackbar 
-                    open={snackbar.open} 
-                    autoHideDuration={6000} 
+                <AppSnackbar
+                    open={snackbar.open}
+                    message={snackbar.message}
+                    severity={snackbar.severity}
                     onClose={() => setSnackbar({ ...snackbar, open: false })}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                >
-                    <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
-                        {snackbar.message}
-                    </Alert>
-                </Snackbar>
+                />
             </PageContent>
         </PageContainer>
     );

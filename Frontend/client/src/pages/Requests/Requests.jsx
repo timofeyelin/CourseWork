@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { 
     CircularProgress,
-    Snackbar,
-    Alert,
     Typography,
     Box
 } from '@mui/material';
@@ -12,7 +10,8 @@ import {
     FilterList as FilterIcon
 } from '@mui/icons-material';
 import { 
-    GlassButton
+    GlassButton,
+    AppSnackbar
 } from '../../components/common';
 import { requestsService, userService } from '../../api';
 import { 
@@ -360,16 +359,12 @@ const Requests = () => {
                 isSubmittingRating={isSubmittingRating}
             />
 
-            <Snackbar 
-                open={snackbar.open} 
-                autoHideDuration={6000} 
+            <AppSnackbar
+                open={snackbar.open}
+                message={snackbar.message}
+                severity={snackbar.severity}
                 onClose={() => setSnackbar({ ...snackbar, open: false })}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            >
-                <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
+            />
         </PageContainer>
     );
 };

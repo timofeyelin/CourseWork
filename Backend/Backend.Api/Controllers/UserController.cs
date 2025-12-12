@@ -44,6 +44,7 @@ public class UserController : ControllerBase
                 Email = user.Email,
                 FullName = user.FullName,
                 Phone = user.Phone,
+                Role = user.Role.ToString(),
                 CreatedAt = user.CreatedAt
             };
 

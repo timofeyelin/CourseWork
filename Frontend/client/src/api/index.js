@@ -177,6 +177,14 @@ export const announcementsService = {
 
     async markAsRead(announcementId) {
         return await api.post(`/announcements/${announcementId}/mark-read`);
+    },
+
+    async create(data) {
+        return await api.post('/announcements', data);
+    },
+
+    async delete(id) {
+        return await api.delete(`/announcements/${id}`);
     }
 };
 
