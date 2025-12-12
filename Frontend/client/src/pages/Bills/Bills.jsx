@@ -4,9 +4,7 @@ import {
     CircularProgress,
     Select,
     MenuItem,
-    InputLabel,
-    Snackbar,
-    Alert
+    InputLabel
 } from '@mui/material';
 import { 
     ReceiptLong as BillIcon, 
@@ -30,6 +28,7 @@ import {
 } from './Bills.styles';
 
 import BillsTable from './components/BillsTable';
+import { AppSnackbar } from '../../components/common';
 import BillDetailsModal from './components/BillDetailsModal';
 import PaymentModal from './components/PaymentModal';
 
@@ -291,16 +290,12 @@ const Bills = () => {
             />
 
             {/* Снэкбар для уведомлений */}
-            <Snackbar 
-                open={snackbar.open} 
-                autoHideDuration={6000}  
+            <AppSnackbar
+                open={snackbar.open}
+                message={snackbar.message}
+                severity={snackbar.severity}
                 onClose={() => setSnackbar({ ...snackbar, open: false })}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            >
-                <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
+            />
         </PageContainer>
     );
 };

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Typography, Button, CircularProgress, Snackbar } from '@mui/material';
+import { Typography, Button, CircularProgress } from '@mui/material';
 import { userService } from '../../api';
 import { ROUTES, ERROR_MESSAGES, SUCCESS_MESSAGES, INFO_MESSAGES } from '../../utils/constants';
 import { accountValidationSchema } from '../../utils/validationSchemas';
@@ -12,6 +12,7 @@ import {
     ErrorCard, 
     StyledAlert 
 } from './Profile.styles';
+import { AppSnackbar } from '../../components/common';
 import ProfileHeader from './components/ProfileHeader';
 import AccountsList from './components/AccountsList';
 import AddAccountModal from './components/AddAccountModal';
@@ -233,20 +234,12 @@ import DeleteAccountModal from './components/DeleteAccountModal';const Profile =
                 isDeleting={isDeleting} 
             />
 
-            <Snackbar 
-                open={snackbar.open} 
-                autoHideDuration={6000} 
+            <AppSnackbar
+                open={snackbar.open}
+                message={snackbar.message}
+                severity={snackbar.severity}
                 onClose={handleCloseSnackbar}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            >
-                <StyledAlert 
-                    onClose={handleCloseSnackbar} 
-                    severity={snackbar.severity} 
-                    variant="filled"
-                >
-                    {snackbar.message}
-                </StyledAlert>
-            </Snackbar>
+            />
         </ProfileContainer>
     );
 };

@@ -8,6 +8,7 @@ export const ROUTES = {
     BILLS: '/bills',
     METERS: '/meters',
     REQUESTS: '/requests',
+    ADMIN_ANNOUNCEMENTS: '/admin/announcements',
     PAYMENT_HISTORY: '/payment-history',
     PAYMENTS: '/payments',
     FORGOT_PASSWORD: '/forgot-password'
@@ -73,6 +74,14 @@ export const INFO_MESSAGES = {
     PAYMENT_SUCCESS_MOCK: 'Платеж успешно проведен (Mock)'
 }
 
+export const ANNOUNCEMENTS_MESSAGES = {
+    LOAD_FAILED: 'Не удалось загрузить объявления',
+    VALIDATION_REQUIRED: 'Заполните все обязательные поля',
+    CREATE_SUCCESS: 'Объявление успешно создано',
+    CREATE_FAILED: 'Ошибка при создании объявления',
+    DELETE_SUCCESS: 'Объявление удалено',
+    DELETE_FAILED: 'Ошибка при удалении объявления'
+}
 export const PASSWORD_STRENGTH = {
     WEAK: 'Слабый',
     MEDIUM: 'Средний',

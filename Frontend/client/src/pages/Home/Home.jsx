@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CircularProgress, Snackbar, Alert } from '@mui/material';
+import { CircularProgress } from '@mui/material';
 import { billsService, requestsService, announcementsService } from '../../api';
 import { ERROR_MESSAGES } from '../../utils/constants';
 import { 
@@ -13,6 +13,7 @@ import StatsWidgets from './components/StatsWidgets';
 import OutageBanners from './components/OutageBanners';
 import NewsFeed from './components/NewsFeed';
 import NewsModal from './components/NewsModal';
+import { AppSnackbar } from '../../components/common';
 
 const Home = () => {
     const [balance, setBalance] = useState(0);
@@ -145,16 +146,12 @@ const Home = () => {
                 </DashboardContainer>
             </HomeContent>
 
-            <Snackbar 
-                open={snackbar.open} 
-                autoHideDuration={6000} 
+            <AppSnackbar
+                open={snackbar.open}
+                message={snackbar.message}
+                severity={snackbar.severity}
                 onClose={() => setSnackbar({ ...snackbar, open: false })}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            >
-                <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
+            />
         </HomeContainer>
     );
 }

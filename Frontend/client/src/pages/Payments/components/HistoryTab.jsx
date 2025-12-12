@@ -7,9 +7,7 @@ import {
     TableRow, 
     Tooltip, 
     CircularProgress,
-    DialogContent,
-    Snackbar,
-    Alert,
+    DialogContent
 } from '@mui/material';
 import { 
     History as HistoryIcon, 
@@ -18,7 +16,7 @@ import {
     Cancel as CancelIcon,
     Info as InfoIcon
 } from '@mui/icons-material';
-import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill, GlassSelect, GlassDatePicker } from '../../../components/common';
+import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill, GlassSelect, GlassDatePicker, AppSnackbar } from '../../../components/common';
 import { paymentsService, billsService, userService } from '../../../api';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../../utils/constants';
 import dayjs from 'dayjs';
@@ -355,16 +353,12 @@ const HistoryTab = ({ initialAccount }) => {
             </GlassDialog>
 
             {/* Снэкбар для уведомлений */}
-            <Snackbar 
-                open={snackbar.open} 
-                autoHideDuration={6000} 
+            <AppSnackbar
+                open={snackbar.open}
+                message={snackbar.message}
+                severity={snackbar.severity}
                 onClose={() => setSnackbar({ ...snackbar, open: false })}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            >
-                <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
+            />
         </TabCard>
     );
 };

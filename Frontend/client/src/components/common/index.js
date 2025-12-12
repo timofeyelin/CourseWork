@@ -5,3 +5,4 @@ export * from './GlassDialog';
 export * from './StatusPill';
 export * from './GlassSelect';
 export * from './GlassDatePicker';
+export { default as AppSnackbar } from './AppSnackbar';

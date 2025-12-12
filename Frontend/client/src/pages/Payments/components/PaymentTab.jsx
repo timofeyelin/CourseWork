@@ -9,8 +9,6 @@ import {
     Tooltip, 
     CircularProgress,
     DialogContent,
-    Snackbar,
-    Alert,
     InputAdornment
 } from '@mui/material';
 import { 
@@ -24,7 +22,7 @@ import {
     Numbers as NumbersIcon,
     CreditCard as CardIcon
 } from '@mui/icons-material';
-import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill, GlassSelect } from '../../../components/common';
+import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill, GlassSelect, AppSnackbar } from '../../../components/common';
 import { billsService, userService } from '../../../api';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../../utils/constants';
 import { paymentValidationSchema } from '../../../utils/validationSchemas';
@@ -512,16 +510,12 @@ const PaymentTab = ({ initialAccount }) => {
             </GlassDialog>
 
             {/* Снэкбар для уведомлений */}
-            <Snackbar 
-                open={snackbar.open} 
-                autoHideDuration={6000}  
+            <AppSnackbar
+                open={snackbar.open}
+                message={snackbar.message}
+                severity={snackbar.severity}
                 onClose={() => setSnackbar({ ...snackbar, open: false })}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            >
-                <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
+            />
         </TabCard>
     );
 };

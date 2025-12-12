@@ -81,6 +81,10 @@ const Header = () => {
         { title: 'Заявки', path: ROUTES.REQUESTS },
     ];
 
+    if (user?.role === 'Admin') {
+        userLinks.push({ title: 'Админ-панель', path: ROUTES.ADMIN_ANNOUNCEMENTS });
+    }
+
     return (
         <>
             <StyledAppBar position="sticky">
