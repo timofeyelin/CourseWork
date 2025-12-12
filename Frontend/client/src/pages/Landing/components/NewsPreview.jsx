@@ -5,7 +5,8 @@ import {
     NewsGrid, 
     NewsCard, 
     NewsDate, 
-    NewsContent 
+    NewsContent,
+    NoNewsText
 } from '../Landing.styles';
 
 const NewsPreview = ({ news }) => {
@@ -34,9 +35,9 @@ const NewsPreview = ({ news }) => {
                         </NewsCard>
                     ))
                 ) : (
-                    <Typography variant="body1" color="textSecondary" align="center" sx={{ gridColumn: '1 / -1' }}>
+                    <NoNewsText variant="body1" color="textSecondary" align="center">
                         Пока нет новостей
-                    </Typography>
+                    </NoNewsText>
                 )}
             </NewsGrid>
         </Section>

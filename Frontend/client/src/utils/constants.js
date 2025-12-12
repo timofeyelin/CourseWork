@@ -78,3 +78,40 @@ export const PASSWORD_STRENGTH = {
     MEDIUM: 'Средний',
     STRONG: 'Сильный'
 }
+
+export const REQUEST_STATUSES = {
+    NEW: 0,
+    IN_PROGRESS: 1,
+    CLOSED: 2,
+    REJECTED: 3
+}
+
+export const REQUEST_STATUS_LABELS = {
+    [REQUEST_STATUSES.NEW]: 'Новая',
+    [REQUEST_STATUSES.IN_PROGRESS]: 'В работе',
+    [REQUEST_STATUSES.CLOSED]: 'Закрыта',
+    [REQUEST_STATUSES.REJECTED]: 'Отклонена'
+}
+
+export const REQUEST_STATUS_COLORS = {
+    [REQUEST_STATUSES.NEW]: 'info',
+    [REQUEST_STATUSES.IN_PROGRESS]: 'warning',
+    [REQUEST_STATUSES.CLOSED]: 'success',
+    [REQUEST_STATUSES.REJECTED]: 'error'
+}
+
+export const REQUEST_CATEGORIES = {
+    PLUMBING: 0,
+    ELECTRICITY: 1,
+    HEATING: 2,
+    CLEANING: 3,
+    OTHER: 4
+}
+
+export const REQUEST_CATEGORY_LABELS = {
+    [REQUEST_CATEGORIES.PLUMBING]: 'Сантехника',
+    [REQUEST_CATEGORIES.ELECTRICITY]: 'Электрика',
+    [REQUEST_CATEGORIES.HEATING]: 'Отопление',
+    [REQUEST_CATEGORIES.CLEANING]: 'Уборка',
+    [REQUEST_CATEGORIES.OTHER]: 'Другое'
+}

@@ -41,8 +41,10 @@ namespace Backend.Api.Controllers
             {
                 RequestId = r.RequestId,
                 Category = r.Category,
+                Description = r.Description,
                 Status = r.Status,
-                CreatedAt = r.CreatedAt
+                CreatedAt = r.CreatedAt,
+                Rating = r.Rating
             }).ToList();
             return Ok(dtos);
         }

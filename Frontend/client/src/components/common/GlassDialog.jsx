@@ -10,10 +10,35 @@ export const GlassDialog = styled(Dialog)(({ theme }) => ({
         border: '1px solid rgba(255, 255, 255, 0.8)',
         boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
         overflowX: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        // limit dialog height to viewport, allow internal scrolling when needed
+        maxHeight: 'calc(100vh - 48px)',
     },
     '& .MuiDialogContent-root': {
         overflowX: 'hidden',
-        padding: '20px 0',
+        // allow children to manage their own scrolling
+        overflowY: 'auto',
+        flex: 1,
+        paddingTop: 0,
+        paddingBottom: 0,
+        paddingLeft: 0,
+        paddingRight: 0,
+        // Custom scrollbar
+        '&::-webkit-scrollbar': {
+            width: '8px',
+        },
+        '&::-webkit-scrollbar-track': {
+            background: 'rgba(0, 0, 0, 0.02)',
+            borderRadius: '4px',
+        },
+        '&::-webkit-scrollbar-thumb': {
+            background: 'rgba(0, 0, 0, 0.1)',
+            borderRadius: '4px',
+            '&:hover': {
+                background: 'rgba(0, 0, 0, 0.2)',
+            },
+        },
     },
 }));
 
