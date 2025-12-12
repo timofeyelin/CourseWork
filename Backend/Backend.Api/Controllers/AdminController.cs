@@ -108,5 +108,45 @@ namespace Backend.Api.Controllers
 
             return Ok(meter);
         }
+        [HttpGet("analytics")]
+        public async Task<IActionResult> GetAnalytics(CancellationToken ct)
+        {
+            // 1. KPI: Общие суммы
+            // Считаем сколько всего начислено по всем счетам
+            var totalCharged = await _context.Bills.SumAsync(b => b.TotalAmount, ct);
+
+            // Считаем сколько реально оплачено (статус Paid)
+            var totalPaid = await _context.Payment
+                .Where(p => p.Status == Backend.Domain.Enums.PaymentStatus.Paid)
+                .SumAsync(p => p.Amount, ct);
+
+            // Долг = Начислено - Оплачено
+            var totalDebt = totalCharged - totalPaid;
+
+            // 2. График: Начисления за последние 6 месяцев
+            var sixMonthsAgo = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(-6));
+
+            var chartData = await _context.Bills
+                .Where(b => b.Period >= sixMonthsAgo)
+                .GroupBy(b => b.Period)
+                .Select(g => new
+                {
+                    Date = g.Key,
+                    Amount = g.Sum(b => b.TotalAmount)
+                })
+                .OrderBy(x => x.Date)
+                .ToListAsync(ct);
+
+            return Ok(new
+            {
+                kpi = new
+                {
+                    totalCharged,
+                    totalPaid,
+                    totalDebt
+                },
+                chart = chartData
+            });
+        }
     }
 }
