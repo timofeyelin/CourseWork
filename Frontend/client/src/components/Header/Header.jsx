@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { MenuItem, IconButton, Badge, Divider } from '@mui/material';
+import { MenuItem, IconButton, Badge, Divider, Popover } from '@mui/material';
 import { Notifications, AccountBalanceWallet, Person, Logout, Login } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { ROUTES } from '../../utils/constants';
+import { useNotifications } from '../../hooks/useNotifications';
+import NotificationsPopover from './NotificationsPopover';
 import { GlassButton } from '../common';
 import LoginModal from '../Modals/LoginModal';
 import RegisterModal from '../Modals/RegisterModal';
@@ -27,6 +29,30 @@ const Header = () => {
     const { user, isAuthenticated, logout, isLoginOpen, isRegisterOpen, openLogin, openRegister, closeModals } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+
+    const { 
+        items: notifications, 
+        unreadCount, 
+        loading: notificationsLoading, 
+        markAllAsRead,
+        reload: reloadNotifications
+    } = useNotifications(isAuthenticated);
+
+    const [notifAnchorEl, setNotifAnchorEl] = useState(null);
+
+     const handleNotifClick = (event) => {
+        setNotifAnchorEl(event.currentTarget);
+        // При открытии можно обновить список, чтобы убедиться в актуальности
+        reloadNotifications();
+    };
+
+    const handleNotifClose = () => {
+        setNotifAnchorEl(null);
+    };
+
+    const isNotifOpen = Boolean(notifAnchorEl);
+    const notifId = isNotifOpen ? 'notifications-popover' : undefined;
+
     const [anchorEl, setAnchorEl] = useState(null);
     
     const handleMenuOpen = (event) => {
@@ -123,11 +149,44 @@ const Header = () => {
                                     0.00 ₽
                                 </BalanceWidget>
                                 
-                                <IconButton color="inherit">
-                                    <Badge badgeContent={0} color="error">
+                                <IconButton 
+                                    color="inherit" 
+                                    onClick={handleNotifClick}
+                                    aria-describedby={notifId}
+                                >
+                                    <Badge badgeContent={unreadCount} color="error" max={99}>
                                         <Notifications />
                                     </Badge>
                                 </IconButton>
+
+                                <Popover
+                                    id={notifId}
+                                    open={isNotifOpen}
+                                    anchorEl={notifAnchorEl}
+                                    onClose={handleNotifClose}
+                                    anchorOrigin={{
+                                        vertical: 'bottom',
+                                        horizontal: 'right',
+                                    }}
+                                    transformOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'right',
+                                    }}
+                                    PaperProps={{
+                                        sx: { 
+                                            backgroundColor: 'transparent', 
+                                            boxShadow: 'none', 
+                                            mt: 1.5 // Небольшой отступ от шапки
+                                        }
+                                    }}
+                                >
+                                    <NotificationsPopover 
+                                        notifications={notifications}
+                                        loading={notificationsLoading}
+                                        onMarkAllRead={markAllAsRead}
+                                        onClose={handleNotifClose}
+                                    />
+                                </Popover>
 
                                 <UserInfo onClick={handleMenuOpen}>
                                     <UserName variant="body2">

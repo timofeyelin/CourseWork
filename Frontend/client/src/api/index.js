@@ -188,4 +188,14 @@ export const announcementsService = {
     }
 };
 
+export const notificationsService = {
+    async getAll() {
+        return await api.get('/notifications');
+    },
+
+    async markAllAsRead() {
+        return await api.post('/notifications/mark-read');
+    }
+};
+
 export default api;
