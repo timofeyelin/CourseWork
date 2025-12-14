@@ -1,8 +1,9 @@
 using Backend.Application.Interfaces;
 using Backend.Domain.Entities;
+using Backend.Domain.Enums;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-
+using System.Linq;
 
 namespace Backend.Application.Services
 {
@@ -11,12 +12,14 @@ namespace Backend.Application.Services
         private readonly IAppDbContext _context;
         private readonly IPdfGeneratorService _pdfGeneratorService;
         private readonly IWebHostEnvironment _hostingEnvironment;
+        private readonly INotificationService _notificationService;
 
-        public BillService(IAppDbContext context, IPdfGeneratorService pdfGeneratorService, IWebHostEnvironment hostingEnvironment)
+        public BillService(IAppDbContext context, IPdfGeneratorService pdfGeneratorService, IWebHostEnvironment hostingEnvironment, INotificationService notificationService)
         {
             _context = context;
             _pdfGeneratorService = pdfGeneratorService;
             _hostingEnvironment = hostingEnvironment;
+            _notificationService = notificationService;
         }
 
         // Предполагается, что объект newBill приходит с уже заполненными BillItems.
@@ -47,6 +50,18 @@ namespace Backend.Application.Services
             billWithDetails.PdfLink = $"/bills/{fileName}";
             _context.Bills.Update(billWithDetails);
             await _context.SaveChangesAsync(ct);
+
+            if (billWithDetails.Account != null && billWithDetails.Account.UserId.HasValue)
+            {
+                await _notificationService.CreateNotificationAsync(
+                    billWithDetails.Account.UserId.Value,
+                    NotificationType.Bill,
+                    "Новая квитанция",
+                    $"Сформирована квитанция за {newBill.Period:MM.yyyy} на сумму {newBill.TotalAmount} ₽", 
+                    newBill.BillId,
+                    ct
+                );
+            }
 
             return billWithDetails;
         }

@@ -16,7 +16,7 @@ import {
 import { 
     REQUEST_STATUSES, 
     REQUEST_STATUS_LABELS,
-    REQUEST_CATEGORY_LABELS 
+    REQUEST_CATEGORY_LABELS
 } from '../../../utils/constants';
 import {
     StyledTableContainer,

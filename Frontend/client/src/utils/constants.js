@@ -89,10 +89,10 @@ export const PASSWORD_STRENGTH = {
 }
 
 export const REQUEST_STATUSES = {
-    NEW: 0,
-    IN_PROGRESS: 1,
-    CLOSED: 2,
-    REJECTED: 3
+    NEW: 1,
+    IN_PROGRESS: 2,
+    CLOSED: 3,
+    REJECTED: 4
 }
 
 export const REQUEST_STATUS_LABELS = {

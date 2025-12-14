@@ -247,7 +247,7 @@ const Requests = () => {
         setIsSubmittingRating(true);
         try {
             await requestsService.rateRequest(selectedRequest.requestId, { 
-                score: rating, 
+                rating: rating, 
                 comment: ratingComment 
             });
             

@@ -18,6 +18,7 @@ public interface IAppDbContext
     DbSet<MeterReading> MeterReadings { get; set; }
     DbSet<Announcement> Announcements { get; set; }
     DbSet<AnnouncementRead> AnnouncementReads { get; set; }
+    DbSet<Notification> Notifications { get; set; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

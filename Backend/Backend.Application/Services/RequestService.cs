@@ -8,10 +8,12 @@ namespace Backend.Application.Services
     public class RequestService : IRequestService
     {
         private readonly IAppDbContext _context;
+        private readonly INotificationService _notificationService;
 
-        public RequestService(IAppDbContext context)
+        public RequestService(IAppDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         public async Task<List<Request>> GetUserRequestsAsync(int userId, CancellationToken ct)
@@ -110,7 +112,7 @@ namespace Backend.Application.Services
         
         public async Task<Request> UpdateRequestStatusAsync(int requestId, RequestStatus newStatus, CancellationToken ct)
         {
-            var request = await _context.Requests.FindAsync(new object[] { requestId }, ct);
+            var request = await _context.Requests.Include(r => r.Account).FirstOrDefaultAsync(r => r.RequestId == requestId, ct);
             if (request == null)
                 throw new KeyNotFoundException("Заявка не найдена.");
 
@@ -133,6 +135,19 @@ namespace Backend.Application.Services
             }
 
             await _context.SaveChangesAsync(ct);
+
+            if (request.Account != null)
+            {
+                await _notificationService.CreateNotificationAsync(
+                    request.Account.UserId.Value,
+                    NotificationType.Request,
+                    "Статус заявки изменен",
+                    $"Заявка №{requestId} переведена в статус {newStatus}",
+                    requestId,
+                    ct
+                );
+            }
+
             return request;
         }
 

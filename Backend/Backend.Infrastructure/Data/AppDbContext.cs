@@ -21,6 +21,7 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<MeterReading> MeterReadings { get; set; }
     public DbSet<Announcement> Announcements { get; set; }
     public DbSet<AnnouncementRead> AnnouncementReads { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -160,6 +161,7 @@ public class AppDbContext : DbContext, IAppDbContext
                   .HasForeignKey(ar => ar.AnnouncementId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
+
         modelBuilder.Entity<AnnouncementRead>(entity =>
         {
             entity.HasKey(ar => ar.Id);
@@ -170,6 +172,20 @@ public class AppDbContext : DbContext, IAppDbContext
                   .HasForeignKey(ar => ar.UserId)
                   .OnDelete(DeleteBehavior.Cascade);
 
+        });
+
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(n => n.NotificationId);
+
+            entity.Property(n => n.Title).IsRequired().HasMaxLength(200);
+            entity.Property(n => n.Text).IsRequired();
+            
+            // При удалении пользователя удаляем и его уведомления
+            entity.HasOne(n => n.User)
+                  .WithMany()
+                  .HasForeignKey(n => n.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
