@@ -198,4 +198,26 @@ export const notificationsService = {
     }
 };
 
+export const adminService = {
+    async getUsers(query) {
+        return await api.get('/admin/users', { params: { q: query } });
+    },
+
+    async blockUser(userId, isActive) {
+        return await api.post('/admin/users/block', { userId, isActive });
+    },
+
+    async changeRole(userId, newRole) {
+        return await api.post('/admin/users/change-role', { userId, newRole });
+    },
+
+    async linkAccount(userId, accountNumber) {
+        return await api.post('/admin/users/link-account', { userId, accountNumber });
+    },
+
+    async unlinkAccount(userId, accountId) {
+        return await api.post('/admin/users/unlink-account', { userId, accountId });
+    }
+};
+
 export default api;

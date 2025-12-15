@@ -109,6 +109,7 @@ const Header = () => {
 
     if (user?.role === 'Admin') {
         userLinks.push({ title: 'Админ-панель', path: ROUTES.ADMIN_ANNOUNCEMENTS });
+        userLinks.push({ title: 'Жители', path: ROUTES.ADMIN_RESIDENTS });
     }
 
     return (
