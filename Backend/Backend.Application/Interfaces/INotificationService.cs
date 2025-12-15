@@ -13,6 +13,8 @@ namespace Backend.Application.Interfaces
 
         // Отметить все уведомления пользователя как прочитанные
         Task MarkAllAsReadAsync(int userId, CancellationToken ct);
+
+        Task MarkAsReadAsync(int userId, int notificationId, CancellationToken ct);
         
         // Создать уведомление (для вызова из других сервисов)
         Task CreateNotificationAsync(int userId, NotificationType type, string title, string text, int? relatedEntityId, CancellationToken ct);

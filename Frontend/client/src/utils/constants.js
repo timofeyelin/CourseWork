@@ -12,7 +12,8 @@ export const ROUTES = {
     ADMIN_RESIDENTS: '/admin/residents',
     PAYMENT_HISTORY: '/payment-history',
     PAYMENTS: '/payments',
-    FORGOT_PASSWORD: '/forgot-password'
+    FORGOT_PASSWORD: '/forgot-password',
+    OPERATOR_REQUESTS: '/operator/requests'
 }
 
 export const VALIDATION_MESSAGES = {
@@ -137,4 +138,18 @@ export const RESIDENTS_MESSAGES = {
     ACCOUNT_LINK_FAILED: 'Ошибка при привязке счета',
     ACCOUNT_UNLINKED: 'Лицевой счет отвязан',
     ACCOUNT_UNLINK_FAILED: 'Ошибка при отвязке счета'
+}
+
+export const REQUEST_PRIORITIES = {
+    LOW: 1,
+    NORMAL: 2,
+    HIGH: 3,
+    CRITICAL: 4,
+}
+
+export const REQUEST_PRIORITY_LABELS = {
+    1: 'Низкий',
+    2: 'Обычный',
+    3: 'Высокий',
+    4: 'Критический',
 }

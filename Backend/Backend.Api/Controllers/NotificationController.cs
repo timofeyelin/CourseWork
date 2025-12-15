@@ -52,5 +52,12 @@ namespace Backend.Api.Controllers
             await _notificationService.MarkAllAsReadAsync(GetUserId(), ct);
             return NoContent();
         }
+
+        [HttpPost("{notificationId:int}/mark-read")]
+        public async Task<IActionResult> MarkAsRead(int notificationId, CancellationToken ct)
+        {
+            await _notificationService.MarkAsReadAsync(GetUserId(), notificationId, ct);
+            return NoContent();
+        }
     }
 }

@@ -25,19 +25,22 @@ namespace Backend.Application.Services
                 .ToListAsync(ct);
         }
 
-        public async Task<Request> GetRequestDetailsAsync(int userId, int requestId, CancellationToken ct)
+        public async Task<Request> GetRequestDetailsAsync(int userId, UserRole userRole, int requestId, CancellationToken ct)
         {
             var request = await _context.Requests
-                .Include(r => r.Account) 
+                .Include(r => r.Account)
                 .Include(r => r.Comments)
-                    .ThenInclude(c => c.Author) 
-                .Include(r => r.Attachments) 
+                    .ThenInclude(c => c.Author)
+                .Include(r => r.Attachments)
                 .FirstOrDefaultAsync(r => r.RequestId == requestId, ct);
 
             if (request == null)
                 throw new KeyNotFoundException("Заявка не найдена.");
 
-            if (request.Account?.UserId != userId)
+            var isOwner = request.Account?.UserId == userId;
+            var isStaff = userRole == UserRole.Admin || userRole == UserRole.Operator;
+
+            if (!isOwner && !isStaff)
                 throw new UnauthorizedAccessException("У вас нет доступа к этой заявке.");
 
             return request;
@@ -95,17 +98,26 @@ namespace Backend.Application.Services
 
         public async Task<Request> RateRequestAsync(int userId, int requestId, int rating, string? comment, CancellationToken ct)
         {
-            var request = await GetRequestAndValidateUserAccessAsync(userId, requestId, ct);
+            var request = await _context.Requests
+                .Include(r => r.Account)
+                .FirstOrDefaultAsync(r => r.RequestId == requestId, ct);
+
+            if (request == null)
+                throw new KeyNotFoundException("Заявка не найдена.");
+
+            // КЛЮЧЕВОЕ: оценивать может ТОЛЬКО владелец заявки
+            if (request.Account?.UserId != userId)
+                throw new UnauthorizedAccessException("Оценить заявку может только её владелец.");
 
             if (request.Status != RequestStatus.Closed)
                 throw new InvalidOperationException("Оставить оценку можно только для закрытой заявки.");
-            
+
             if (rating < 1 || rating > 5)
                 throw new ArgumentOutOfRangeException(nameof(rating), "Оценка должна быть в диапазоне от 1 до 5.");
 
             request.Rating = rating;
             request.Comment = comment;
-            
+
             await _context.SaveChangesAsync(ct);
             return request;
         }
@@ -188,6 +200,86 @@ namespace Backend.Application.Services
             _context.RequestAttachments.Add(attachment);
             await _context.SaveChangesAsync(ct);
             return attachment;
+        }
+
+        // Backend.Application.Services.RequestService
+
+        public async Task<List<Request>> GetAllRequestsForOperatorAsync(RequestStatus? status, string? category, string? search, CancellationToken ct)
+        {
+            var query = _context.Requests
+                .Include(r => r.Account)
+                .ThenInclude(a => a.User)
+                .AsQueryable();
+
+            if (status.HasValue) 
+                query = query.Where(r => r.Status == status.Value);
+
+            if (!string.IsNullOrEmpty(category)) 
+                query = query.Where(r => r.Category == category);
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                var ls = search.ToLower();
+                query = query.Where(r => 
+                    r.Description.ToLower().Contains(ls) || 
+                    (r.Account != null && r.Account.Address.ToLower().Contains(ls)));
+            }
+
+            return await query
+                .OrderByDescending(r => r.Priority)
+                .ThenByDescending(r => r.CreatedAt)
+                .ToListAsync(ct);
+        }
+
+        public async Task<Request> UpdateRequestByOperatorAsync(int requestId, RequestStatus? status, RequestPriority? priority, DateTime? deadline, bool updateDeadline, CancellationToken ct)
+        {
+            var request = await _context.Requests
+                .Include(r => r.Account)
+                .FirstOrDefaultAsync(r => r.RequestId == requestId, ct);
+
+            if (request == null)
+                throw new KeyNotFoundException("Заявка не найдена.");
+
+            bool statusChanged = false;
+
+            if (status.HasValue && request.Status != status.Value)
+            {
+                request.Status = status.Value;
+                statusChanged = true;
+
+                if (status.Value == RequestStatus.Closed)
+                {
+                    request.ClosedAt = DateTime.UtcNow;
+                }
+                else if (status.Value == RequestStatus.New)
+                {
+                    request.Rating = null;
+                    request.Comment = null;
+                    request.ClosedAt = null;
+                }
+            }
+
+            if (priority.HasValue)
+                request.Priority = priority.Value;
+
+            if (updateDeadline)
+                request.Deadline = deadline;
+
+            await _context.SaveChangesAsync(ct);
+
+            if (statusChanged && request.Account?.UserId != null)
+            {
+                await _notificationService.CreateNotificationAsync(
+                    request.Account.UserId.Value,
+                    NotificationType.Request,
+                    "Статус заявки изменен",
+                    $"Статус вашей заявки №{request.RequestId} изменён на \"{request.Status}\".",
+                    requestId,
+                    ct
+                );
+            }
+
+            return request;
         }
     }
 }

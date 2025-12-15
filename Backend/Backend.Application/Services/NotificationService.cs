@@ -61,5 +61,20 @@ namespace Backend.Application.Services
                 await _context.SaveChangesAsync(ct);
             }
         }
+
+        public async Task MarkAsReadAsync(int userId, int notificationId, CancellationToken ct)
+        {
+            var notification = await _context.Notifications
+                .FirstOrDefaultAsync(n => n.NotificationId == notificationId && n.UserId == userId, ct);
+
+            if (notification == null)
+                throw new KeyNotFoundException("Уведомление не найдено.");
+
+            if (!notification.IsRead)
+            {
+                notification.IsRead = true;
+                await _context.SaveChangesAsync(ct);
+            }
+        }
     }
 }
