@@ -148,5 +148,107 @@ namespace Backend.Api.Controllers
                 chart = chartData
             });
         }
+        [HttpGet("users")]
+        public async Task<IActionResult> GetUsers([FromQuery] string? q, CancellationToken ct)
+        {
+            var query = _context.Users
+                .Include(u => u.Accounts)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                q = q.ToLower();
+                query = query.Where(u => 
+                    u.FullName.ToLower().Contains(q) || 
+                    u.Phone.Contains(q) ||
+                    u.Accounts.Any(a => a.AccountNumber.Contains(q) || a.Address.ToLower().Contains(q))
+                );
+            }
+
+            var users = await query.Select(u => new AdminUserDto
+            {
+                Id = u.UserId,
+                FullName = u.FullName,
+                Phone = u.Phone,
+                Role = u.Role.ToString(),
+                IsActive = u.IsActive,
+                Accounts = u.Accounts.Select(a => new AdminUserAccountDto 
+                { 
+                    Id = a.AccountId, 
+                    AccountNumber = a.AccountNumber, 
+                    Address = a.Address 
+                }).ToList()
+            }).ToListAsync(ct);
+
+            return Ok(users);
+        }
+
+        [HttpPost("users/block")]
+        public async Task<IActionResult> BlockUser([FromBody] BlockUserRequest request, CancellationToken ct)
+        {
+            var user = await _context.Users.FindAsync(new object[] { request.UserId }, ct);
+            if (user == null) return NotFound("User not found");
+
+            if (user.Role == UserRole.Admin && !request.IsActive)
+            {
+                 return BadRequest("Cannot block an administrator. Change role first.");
+            }
+
+            user.IsActive = request.IsActive;
+            await _context.SaveChangesAsync(ct);
+            return Ok(new { message = "User status updated" });
+        }
+
+        [HttpPost("users/change-role")]
+        public async Task<IActionResult> ChangeRole([FromBody] ChangeRoleRequest request, CancellationToken ct)
+        {
+            var user = await _context.Users.FindAsync(new object[] { request.UserId }, ct);
+            if (user == null) return NotFound("User not found");
+
+            var currentUserIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (currentUserIdClaim != null && int.Parse(currentUserIdClaim.Value) == request.UserId)
+            {
+                return BadRequest("Cannot change your own role.");
+            }
+
+            if (Enum.TryParse<UserRole>(request.NewRole, out var role))
+            {
+                user.Role = role;
+                await _context.SaveChangesAsync(ct);
+                return Ok(new { message = "User role updated" });
+            }
+            return BadRequest("Invalid role");
+        }
+
+        [HttpPost("users/link-account")]
+        public async Task<IActionResult> LinkAccount([FromBody] AdminLinkAccountRequest request, CancellationToken ct)
+        {
+             var user = await _context.Users.Include(u => u.Accounts).FirstOrDefaultAsync(u => u.UserId == request.UserId, ct);
+             if (user == null) return NotFound("User not found");
+
+             var account = await _context.Accounts.FirstOrDefaultAsync(a => a.AccountNumber == request.AccountNumber, ct);
+             if (account == null) return NotFound("Account not found");
+
+             if (user.Accounts.Any(a => a.AccountId == account.AccountId))
+                 return BadRequest("Account already linked");
+
+             user.Accounts.Add(account);
+             await _context.SaveChangesAsync(ct);
+             return Ok(new { message = "Account linked" });
+        }
+
+        [HttpPost("users/unlink-account")]
+        public async Task<IActionResult> UnlinkAccount([FromBody] AdminUnlinkAccountRequest request, CancellationToken ct)
+        {
+             var user = await _context.Users.Include(u => u.Accounts).FirstOrDefaultAsync(u => u.UserId == request.UserId, ct);
+             if (user == null) return NotFound("User not found");
+
+             var account = user.Accounts.FirstOrDefault(a => a.AccountId == request.AccountId);
+             if (account == null) return BadRequest("Account not linked to this user");
+
+             user.Accounts.Remove(account);
+             await _context.SaveChangesAsync(ct);
+             return Ok(new { message = "Account unlinked" });
+        }
     }
 }

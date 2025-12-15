@@ -9,6 +9,7 @@ export const ROUTES = {
     METERS: '/meters',
     REQUESTS: '/requests',
     ADMIN_ANNOUNCEMENTS: '/admin/announcements',
+    ADMIN_RESIDENTS: '/admin/residents',
     PAYMENT_HISTORY: '/payment-history',
     PAYMENTS: '/payments',
     FORGOT_PASSWORD: '/forgot-password'
@@ -123,4 +124,17 @@ export const REQUEST_CATEGORY_LABELS = {
     [REQUEST_CATEGORIES.HEATING]: 'Отопление',
     [REQUEST_CATEGORIES.CLEANING]: 'Уборка',
     [REQUEST_CATEGORIES.OTHER]: 'Другое'
+}
+
+export const RESIDENTS_MESSAGES = {
+    LOAD_FAILED: 'Не удалось загрузить список жителей',
+    USER_BLOCKED: 'заблокирован',
+    USER_UNBLOCKED: 'разблокирован',
+    STATUS_CHANGE_FAILED: 'Ошибка при изменении статуса',
+    ROLE_CHANGE_SUCCESS: 'Роль успешно изменена',
+    ROLE_CHANGE_FAILED: 'Ошибка при смене роли',
+    ACCOUNT_LINKED: 'Лицевой счет привязан',
+    ACCOUNT_LINK_FAILED: 'Ошибка при привязке счета',
+    ACCOUNT_UNLINKED: 'Лицевой счет отвязан',
+    ACCOUNT_UNLINK_FAILED: 'Ошибка при отвязке счета'
 }
