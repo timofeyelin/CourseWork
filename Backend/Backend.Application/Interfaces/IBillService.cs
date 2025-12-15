@@ -10,5 +10,6 @@ namespace Backend.Application.Interfaces
         Task<Bill> GetBillDetailsAsync(CancellationToken ct, int userId, int billId);
         Task<bool> ValidateUserAccessAsync(CancellationToken ct, int userId, int billId);
         Task<Bill?> GetBillByIdAsync(int billId);
+        Task<string> ImportBillsAsync(IEnumerable<(string AccountNumber, Bill BillData)> data, CancellationToken ct);
     }
 }

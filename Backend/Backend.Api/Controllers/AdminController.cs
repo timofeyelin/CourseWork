@@ -250,5 +250,32 @@ namespace Backend.Api.Controllers
              await _context.SaveChangesAsync(ct);
              return Ok(new { message = "Account unlinked" });
         }
+        [HttpPost("import/bills")]
+        public async Task<IActionResult> ImportBills([FromBody] List<ImportBillDto> request, CancellationToken ct)
+        {
+            if (request == null || !request.Any()) return BadRequest("Нет данных");
+
+            var importData = request.Select(dto =>
+            {
+                var bill = new Bill
+                {
+                    Period = dto.Period,
+                    BillItems = dto.Items.Select(i => new BillItem
+                    {
+                        ServiceName = i.ServiceName,
+                        Tariff = i.Tariff,
+                        Consumption = i.Consumption,
+                        Amount = i.Tariff * i.Consumption
+                    }).ToList()
+                };
+                bill.TotalAmount = bill.BillItems.Sum(x => x.Amount);
+
+                return (dto.AccountNumber, bill);
+            }).ToList();
+
+            var result = await _billService.ImportBillsAsync(importData, ct);
+
+            return Ok(new { message = result });
+        }
     }
 }

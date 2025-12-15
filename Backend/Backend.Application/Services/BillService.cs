@@ -127,5 +127,71 @@ namespace Backend.Application.Services
                 .Include(b => b.Account)
                 .FirstOrDefaultAsync(b => b.BillId == billId);
         }
+        public async Task<string> ImportBillsAsync(IEnumerable<(string AccountNumber, Bill BillData)> data, CancellationToken ct)
+        {
+            int successCount = 0;
+            int errorCount = 0;
+
+            var incomingAccountNumbers = data.Select(x => x.AccountNumber).Distinct().ToList();
+            var accountsDict = await _context.Accounts
+                .Where(a => incomingAccountNumbers.Contains(a.AccountNumber))
+                .ToDictionaryAsync(a => a.AccountNumber, a => a.AccountId, ct);
+
+            var existingAccountIds = accountsDict.Values.ToList();
+
+            var existingBills = await _context.Bills
+                .Where(b => existingAccountIds.Contains(b.AccountId))
+                .Select(b => new { b.AccountId, b.Period })
+                .ToListAsync(ct);
+
+            var existingBillsSet = existingBills
+                .Select(b => (b.AccountId, b.Period))
+                .ToHashSet();
+
+            var processedInCurrentBatch = new HashSet<(int, DateOnly)>();
+
+            foreach (var item in data)
+            {
+                try
+                {
+                    if (!accountsDict.TryGetValue(item.AccountNumber, out var accountId))
+                    {
+                        errorCount++;
+                        continue;
+                    }
+
+                    if (existingBillsSet.Contains((accountId, item.BillData.Period)))
+                    {
+                        errorCount++;
+                        continue;
+                    }
+
+                    if (processedInCurrentBatch.Contains((accountId, item.BillData.Period)))
+                    {
+                        // Такой счет уже был выше в этом же файле
+                        errorCount++;
+                        continue;
+                    }
+
+                    var bill = item.BillData;
+                    bill.AccountId = accountId;
+                    bill.CreatedAt = DateTime.UtcNow;
+
+                    _context.Bills.Add(bill);
+
+                    processedInCurrentBatch.Add((accountId, bill.Period));
+
+                    successCount++;
+                }
+                catch (Exception ex)
+                {
+                    errorCount++;
+                }
+            }
+
+            await _context.SaveChangesAsync(ct);
+
+            return $"Загружено: {successCount}, Ошибок: {errorCount}";
+        }
     }
 }
