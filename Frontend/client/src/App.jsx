@@ -9,6 +9,7 @@ import Requests from './pages/Requests/Requests';
 import AdminAnnouncements from './pages/Admin/Announcements/AdminAnnouncements';
 import Residents from './pages/Admin/Residents';
 import Header from './components/Header';
+import OperatorRequests from './pages/Operator/Requests';
 import { useAuth } from './context/AuthContext';
 import { ROUTES } from './utils/constants';
 import { LoadingContainer, AppContainer, MainContent } from './App.styles';
@@ -41,6 +42,7 @@ function App() {
             <Route path={ROUTES.ADMIN_RESIDENTS} element={isAuthenticated ? <Residents/> : <Navigate to={ROUTES.HOME} />}/>
             <Route path={ROUTES.BILLS} element={<Navigate to={`${ROUTES.PAYMENTS}?tab=pay`} replace />}/>
             <Route path={ROUTES.PAYMENT_HISTORY} element={<Navigate to={`${ROUTES.PAYMENTS}?tab=history`} replace />}/>
+            <Route path={ROUTES.OPERATOR_REQUESTS} element={isAuthenticated ? <OperatorRequests/> : <Navigate to={ROUTES.HOME} />}/>
           </Routes>
         </MainContent>
       </AppContainer>

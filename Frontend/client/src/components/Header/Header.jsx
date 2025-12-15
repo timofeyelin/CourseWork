@@ -35,6 +35,7 @@ const Header = () => {
         unreadCount, 
         loading: notificationsLoading, 
         markAllAsRead,
+        markAsRead,
         reload: reloadNotifications
     } = useNotifications(isAuthenticated);
 
@@ -108,8 +109,12 @@ const Header = () => {
     ];
 
     if (user?.role === 'Admin') {
-        userLinks.push({ title: 'Админ-панель', path: ROUTES.ADMIN_ANNOUNCEMENTS });
+        userLinks.push({ title: 'Объявления', path: ROUTES.ADMIN_ANNOUNCEMENTS });
         userLinks.push({ title: 'Жители', path: ROUTES.ADMIN_RESIDENTS });
+    }
+
+    if (user?.role === 'Operator') {
+        userLinks.push({ title: 'Диспетчерская', path: ROUTES.OPERATOR_REQUESTS });
     }
 
     return (
@@ -175,9 +180,13 @@ const Header = () => {
                                     }}
                                     PaperProps={{
                                         sx: { 
-                                            backgroundColor: 'transparent', 
-                                            boxShadow: 'none', 
-                                            mt: 1.5 // Небольшой отступ от шапки
+                                            p: 0,
+                                            backgroundColor: 'transparent',
+                                            backgroundImage: 'none', 
+                                            boxShadow: 'none',
+                                            borderRadius: 20,        
+                                            overflow: 'visible',
+                                            mt: 1.5
                                         }
                                     }}
                                 >
@@ -185,6 +194,7 @@ const Header = () => {
                                         notifications={notifications}
                                         loading={notificationsLoading}
                                         onMarkAllRead={markAllAsRead}
+                                        onMarkRead={markAsRead}
                                         onClose={handleNotifClose}
                                     />
                                 </Popover>

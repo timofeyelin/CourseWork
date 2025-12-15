@@ -1,9 +1,4 @@
 ﻿using Backend.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Backend.Domain.Entities
 {
@@ -18,6 +13,9 @@ namespace Backend.Domain.Entities
         public string Description { get; set; } = string.Empty;
 
         public RequestStatus Status { get; set; } = RequestStatus.New;
+
+        public RequestPriority Priority { get; set; } = RequestPriority.Medium; 
+        public DateTime? Deadline { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? ClosedAt { get; set; }

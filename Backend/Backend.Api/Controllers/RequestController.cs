@@ -44,7 +44,10 @@ namespace Backend.Api.Controllers
                 Description = r.Description,
                 Status = r.Status,
                 CreatedAt = r.CreatedAt,
-                Rating = r.Rating
+                Rating = r.Rating,
+
+                Priority = (int)r.Priority,
+                Deadline = r.Deadline
             }).ToList();
             return Ok(dtos);
         }
@@ -54,7 +57,7 @@ namespace Backend.Api.Controllers
         {
             try
             {
-                var request = await _requestService.GetRequestDetailsAsync(GetUserId(), requestId, ct);
+                var request = await _requestService.GetRequestDetailsAsync(GetUserId(), GetUserRole(),requestId, ct);
                 var dto = new RequestDetailsDto
                 {
                     RequestId = request.RequestId,
@@ -66,6 +69,8 @@ namespace Backend.Api.Controllers
                     ClosedAt = request.ClosedAt,
                     Rating = request.Rating,
                     UserCommentOnRating = request.Comment,
+                    Priority = (int)request.Priority,
+                    Deadline = request.Deadline,
                     Comments = request.Comments.Select(c => new RequestCommentDto
                     {
                         CommentId = c.CommentId,
@@ -106,6 +111,8 @@ namespace Backend.Api.Controllers
                     ClosedAt = newRequest.ClosedAt,
                     Rating = newRequest.Rating,
                     UserCommentOnRating = newRequest.Comment,
+                    Priority = (int)newRequest.Priority,
+                    Deadline = newRequest.Deadline,
                     Comments = new (),
                     Attachments = new ()
                 };
@@ -198,14 +205,16 @@ namespace Backend.Api.Controllers
 
             try
             {
-                var request = await _requestService.GetRequestDetailsAsync(userId, requestId, ct);
-                if (request.Attachments.All(a => a.AttachmentId != attachmentId))
-                {
+                // удаление вложений оставляем только владельцу
+                if (!await _requestService.ValidateUserAccessAsync(userId, requestId, ct))
                     return Forbid();
-                }
+
+                var request = await _requestService.GetRequestDetailsAsync(userId, UserRole.Resident, requestId, ct);
+
+                if (request.Attachments.All(a => a.AttachmentId != attachmentId))
+                    return Forbid();
 
                 await _fileUploadService.DeleteFileAsync(attachmentId, ct);
-
                 return NoContent();
             }
             catch (KeyNotFoundException) { return NotFound(new { message = "Заявка не найдена." }); }

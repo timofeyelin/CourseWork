@@ -29,10 +29,14 @@ const PopoverContainer = styled(Paper)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)', // Стекло
-    backdropFilter: 'blur(10px)',
-    border: '1px solid rgba(255, 255, 255, 0.3)',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+
+    borderRadius: 16,
+
+    backgroundColor: 'rgba(255, 255, 255, 0.96)',
+    backdropFilter: 'blur(12px)',
+
+    border: '1px solid rgba(0, 0, 0, 0.08)',
+    boxShadow: '0 14px 40px rgba(0, 0, 0, 0.22)',
 }));
 
 const NotificationItem = styled(ListItem)(({ theme, isread }) => ({
@@ -58,13 +62,25 @@ const getIconByType = (type) => {
     }
 };
 
-const NotificationsPopover = ({ notifications, loading, onMarkAllRead, onClose }) => {
+const REQUEST_STATUS_RU = {
+    New: 'Новая',
+    InProgress: 'В работе',
+    Closed: 'Выполнена',
+    Rejected: 'Отклонена',
+};
+
+const localizeRequestStatusInText = (text) => {
+    if (!text) return text;
+
+    return text.replace(/\b(New|InProgress|Closed|Rejected)\b/g, (m) => REQUEST_STATUS_RU[m] ?? m);
+};
+
+const NotificationsPopover = ({ notifications, loading, onMarkAllRead, onMarkRead, onClose }) => {
     const navigate = useNavigate();
 
-    const handleItemClick = (notification) => {
-        onClose(); // Закрываем попап
-        
-        // Логика перехода
+    const handleItemClick = async (notification) => {
+        onClose();
+
         switch (notification.type) {
             case 'Bill':
             case 'Debt':
@@ -81,10 +97,16 @@ const NotificationsPopover = ({ notifications, loading, onMarkAllRead, onClose }
             default:
                 break;
         }
+
+        if (!notification.isRead && typeof onMarkRead === 'function') {
+            onMarkRead(notification.notificationId).catch((e) => {
+                console.error('Failed to mark notification as read', e);
+            });
+        }
     };
 
     return (
-        <PopoverContainer elevation={3}>
+        <PopoverContainer elevation={0}>
             {/* Шапка */}
             <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(0,0,0,0.1)' }}>
                 <Typography variant="subtitle1" fontWeight="bold">
@@ -128,7 +150,7 @@ const NotificationsPopover = ({ notifications, loading, onMarkAllRead, onClose }
                                         secondary={
                                             <>
                                                 <Typography variant="body2" component="span" color="text.primary" display="block" sx={{ my: 0.5 }}>
-                                                    {n.text}
+                                                    {localizeRequestStatusInText(n.text)}
                                                 </Typography>
                                                 <Typography variant="caption" color="text.secondary">
                                                     {new Date(n.createdAt).toLocaleString('ru-RU', { 

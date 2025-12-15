@@ -57,14 +57,35 @@ export const useNotifications = (enabled = true) => {
         }
     }, [items, unreadCount]);
 
+    const markAsRead = useCallback(async (notificationId) => {
+        const prevItems = [...items];
+        const prevCount = unreadCount;
+
+        const target = items.find(n => n.notificationId === notificationId);
+        if (!target || target.isRead) return;
+
+        // оптимистично
+        setItems(prev => prev.map(n => n.notificationId === notificationId ? { ...n, isRead: true } : n));
+        setUnreadCount(prev => Math.max(0, prev - 1));
+
+        try {
+            await notificationsService.markAsRead(notificationId);
+        } catch (e) {
+            console.error("Failed to mark notification as read", e);
+            setItems(prevItems);
+            setUnreadCount(prevCount);
+        }
+    }, [items, unreadCount]);
+
     const value = useMemo(() => ({
         items,
         unreadCount,
         loading,
         error,
         reload: load,
-        markAllAsRead
-    }), [items, unreadCount, loading, error, load, markAllAsRead]);
+        markAllAsRead,
+        markAsRead,
+    }), [items, unreadCount, loading, error, load, markAllAsRead, markAsRead]);
 
     return value;
 };

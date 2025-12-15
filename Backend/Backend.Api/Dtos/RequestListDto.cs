@@ -11,5 +11,7 @@ namespace Backend.Api.Dtos
         public RequestStatus Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public int? Rating { get; set; }
+        public int Priority { get; set; }
+        public DateTime? Deadline { get; set; }
     }
 }

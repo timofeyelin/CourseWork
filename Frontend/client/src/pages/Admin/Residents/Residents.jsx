@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { InputAdornment, Snackbar, Alert } from '@mui/material';
 import { Search, People } from '@mui/icons-material';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import { adminService } from '../../../api';
 import { RESIDENTS_MESSAGES } from '../../../utils/constants';
 import ResidentsTable from './components/ResidentsTable';

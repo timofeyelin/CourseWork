@@ -163,6 +163,14 @@ export const requestsService = {
                 'Content-Type': 'multipart/form-data'
             }
         });
+    },
+
+    async getOperatorRequests(params) {
+        return await api.get('/operator/requests', { params });
+    },
+
+    async updateOperatorRequest(requestId, data) {
+        return await api.patch(`/operator/requests/${requestId}`, data);
     }
 };
 
@@ -195,6 +203,10 @@ export const notificationsService = {
 
     async markAllAsRead() {
         return await api.post('/notifications/mark-read');
+    },
+
+    async markAsRead(notificationId) {
+        return await api.post(`/notifications/${notificationId}/mark-read`);
     }
 };
 
@@ -219,5 +231,6 @@ export const adminService = {
         return await api.post('/admin/users/unlink-account', { userId, accountId });
     }
 };
+
 
 export default api;

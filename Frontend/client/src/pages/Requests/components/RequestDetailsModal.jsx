@@ -8,14 +8,20 @@ import {
     Chip,
     Divider,
     Rating,
-    Avatar
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    TextField
 } from '@mui/material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';  
 import { 
     Close as CloseIcon, 
     Send as SendIcon,
     AttachFile as AttachFileIcon,
-    Download as DownloadIcon
+    Download as DownloadIcon,
+    Flag as FlagIcon,
+    Event as DeadlineIcon
 } from '@mui/icons-material';
 import { 
     GlassButton, 
@@ -29,6 +35,7 @@ import {
     REQUEST_STATUS_COLORS,
     REQUEST_CATEGORY_LABELS,
     REQUEST_STATUSES,
+    REQUEST_PRIORITY_LABELS,
     API_BASE_URL
 } from '../../../utils/constants';
 import {
@@ -38,7 +45,6 @@ import {
     CommentItem,
     CommentHeader,
     CommentText,
-    CommentInputArea,
     RatingSection,
     AttachmentList,
     AttachmentItem
@@ -71,17 +77,29 @@ const RequestDetailsModal = ({
     ratingComment,
     setRatingComment,
     onRateRequest,
-    isSubmittingRating
+    isSubmittingRating,
+    isOperatorView = false,
+    onUpdateRequest,
+    isUpdatingRequest = false
 }) => {
-    if (!request) return null;
-
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewUrl, setPreviewUrl] = useState('');
+    
+    const [editPriority, setEditPriority] = useState(2);
+    const [editDeadline, setEditDeadline] = useState('');
+
+    useEffect(() => {
+        if (request) {
+            setEditPriority(request.priority ?? 2);
+            setEditDeadline(request.deadline ? request.deadline.split('T')[0] : '');
+        }
+    }, [request]);
+
+    if (!request) return null;
 
     const getFullUrl = (uri) => {
         if (!uri) return uri;
         if (uri.startsWith('http://') || uri.startsWith('https://')) return uri;
-        // API_BASE_URL contains /api suffix — strip it
         const base = API_BASE_URL.replace(/\/api\/?$/, '');
         return `${base}${uri}`;
     };
@@ -96,6 +114,25 @@ const RequestDetailsModal = ({
         setPreviewUrl('');
     };
 
+    const handleSaveChanges = () => {
+        if (onUpdateRequest) {
+            const updates = {};
+            
+            if (editPriority !== (request.priority ?? 2)) {
+                updates.priority = editPriority;
+            }
+            
+            const currentDeadline = request.deadline ? request.deadline.split('T')[0] : '';
+            if (editDeadline !== currentDeadline) {
+                updates.deadline = editDeadline ? new Date(editDeadline).toISOString() : null;
+            }
+            
+            if (Object.keys(updates).length > 0) {
+                onUpdateRequest(request.requestId, updates);
+            }
+        }
+    };
+
     const previewDialogPaperProps = {
         sx: {
             background: 'transparent',
@@ -107,6 +144,11 @@ const RequestDetailsModal = ({
     const previewDialogBackdropProps = { 
         sx: { backgroundColor: 'rgba(0,0,0,0.7)' } 
     };
+
+    const currentDeadline = request.deadline ? request.deadline.split('T')[0] : '';
+    const hasChanges = 
+        editPriority !== (request.priority ?? 2) ||
+        editDeadline !== currentDeadline;
 
     return (
         <GlassDialog 
@@ -137,6 +179,84 @@ const RequestDetailsModal = ({
                             <Typography variant="subtitle2" color="textSecondary">Описание</Typography>
                             <Typography variant="body1">{request.description}</Typography>
                         </Box>
+
+                        {/* СЕКЦИЯ ОПЕРАТОРА: Приоритет и Дедлайн */}
+                        {isOperatorView && (
+                            <>
+                                <Divider />
+                                <Box>
+                                    <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <FlagIcon color="primary" fontSize="small" />
+                                        Управление заявкой
+                                    </Typography>
+                                    
+                                    <Box display="flex" gap={2} flexWrap="wrap" mt={1}>
+                                        {/* Приоритет */}
+                                        <FormControl size="small" sx={{ minWidth: 180 }}>
+                                            <InputLabel>Приоритет</InputLabel>
+                                            <Select
+                                                value={editPriority}
+                                                label="Приоритет"
+                                                onChange={(e) => setEditPriority(Number(e.target.value))}
+                                                MenuProps={{
+                                                    PaperProps: {
+                                                        sx: {
+                                                            backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                                                            backdropFilter: 'blur(20px)',
+                                                            borderRadius: '12px',
+                                                            boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                                                            border: '1px solid rgba(0,0,0,0.08)',
+                                                        }
+                                                    }
+                                                }}
+                                                sx={{
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                                    '& .MuiOutlinedInput-notchedOutline': {
+                                                        borderColor: 'rgba(0, 0, 0, 0.15)',
+                                                    },
+                                                }}
+                                            >
+                                                {Object.entries(REQUEST_PRIORITY_LABELS).map(([value, label]) => (
+                                                    <MenuItem key={value} value={Number(value)}>
+                                                        {label}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+
+                                        {/* Дедлайн */}
+                                        <TextField
+                                            label="Дедлайн"
+                                            type="date"
+                                            size="small"
+                                            value={editDeadline}
+                                            onChange={(e) => setEditDeadline(e.target.value)}
+                                            InputLabelProps={{ shrink: true }}
+                                            sx={{ 
+                                                minWidth: 180,
+                                                '& .MuiOutlinedInput-root': {
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                                }
+                                            }}
+                                        />
+
+                                        {/* Кнопка сохранения */}
+                                        <GlassButton
+                                            variant="contained"
+                                            onClick={handleSaveChanges}
+                                            disabled={!hasChanges || isUpdatingRequest}
+                                            sx={{ alignSelf: 'center' }}
+                                        >
+                                            {isUpdatingRequest ? (
+                                                <CircularProgress size={20} color="inherit" />
+                                            ) : (
+                                                'Сохранить'
+                                            )}
+                                        </GlassButton>
+                                    </Box>
+                                </Box>
+                            </>
+                        )}
 
                         {request.attachments && request.attachments.length > 0 && (
                             <Box>
@@ -175,7 +295,8 @@ const RequestDetailsModal = ({
 
                         <Divider />
 
-                        {request.status === REQUEST_STATUSES.CLOSED && !request.rating && (
+                        {/* Секция оценки — ТОЛЬКО для владельца (не оператора) */}
+                        {request.status === REQUEST_STATUSES.CLOSED && !request.rating && !isOperatorView && (
                             <RatingSection>
                                 <Typography variant="h6" gutterBottom>Оцените выполнение</Typography>
                                 <Rating
@@ -200,9 +321,12 @@ const RequestDetailsModal = ({
                             </RatingSection>
                         )}
 
+                        {/* Показ существующей оценки */}
                         {request.rating && (
                             <RatingContainer>
-                                <Typography variant="subtitle2" gutterBottom>Ваша оценка</Typography>
+                                <Typography variant="subtitle2" gutterBottom>
+                                    {isOperatorView ? 'Оценка жителя' : 'Ваша оценка'}
+                                </Typography>
                                 <Rating value={request.rating} readOnly />
                                 {request.userCommentOnRating && (
                                     <Typography variant="body2" color="textSecondary">
@@ -244,6 +368,8 @@ const RequestDetailsModal = ({
                     </Box>
                 </ModalContent>
             </DialogContent>
+
+            {/* Превью изображений */}
             <Dialog
                 open={previewOpen}
                 onClose={handlePreviewClose}
@@ -260,7 +386,6 @@ const RequestDetailsModal = ({
                             >
                                 <CloseIcon fontSize="small" />
                             </ClosePreviewButton>
-
                             <PreviewImage
                                 src={previewUrl}
                                 alt="preview"
@@ -270,6 +395,7 @@ const RequestDetailsModal = ({
                 </PreviewDialogContent>
             </Dialog>
             
+            {/* Ввод комментария (для незакрытых заявок) */}
             {request.status !== REQUEST_STATUSES.CLOSED && request.status !== REQUEST_STATUSES.REJECTED && (
                 <CommentInputContainer>
                     <CommentInputWrapper>
