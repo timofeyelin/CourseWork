@@ -36,12 +36,16 @@ namespace Backend.Api.Controllers
                 Text = n.Text,
                 CreatedAt = n.CreatedAt,
                 IsRead = n.IsRead,
-                RelatedEntityId = n.RelatedEntityId
+                RelatedEntityId = n.RelatedEntityId,
+                IsUrgent = n.Type.ToString() == "Announcement" || n.Type.ToString() == "Outage"
             }).ToList();
+ 
+            var urgentUnreadCount = items.Count(i => i.IsUrgent && !i.IsRead);
 
             return Ok(new NotificationsResponseDto
             {
                 UnreadCount = unreadCount,
+                UrgentUnreadCount = urgentUnreadCount,
                 Items = items
             });
         }

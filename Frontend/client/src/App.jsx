@@ -7,6 +7,7 @@ import Payments from './pages/Payments';
 import MetersPage from './pages/Meters';
 import Requests from './pages/Requests/Requests';
 import AdminAnnouncements from './pages/Admin/Announcements/AdminAnnouncements';
+import Dashboard from './pages/Admin/Dashboard/Dashboard';
 import Residents from './pages/Admin/Residents';
 import Header from './components/Header';
 import OperatorRequests from './pages/Operator/Requests';
@@ -43,6 +44,7 @@ function App() {
             <Route path={ROUTES.BILLS} element={<Navigate to={`${ROUTES.PAYMENTS}?tab=pay`} replace />}/>
             <Route path={ROUTES.PAYMENT_HISTORY} element={<Navigate to={`${ROUTES.PAYMENTS}?tab=history`} replace />}/>
             <Route path={ROUTES.OPERATOR_REQUESTS} element={isAuthenticated ? <OperatorRequests/> : <Navigate to={ROUTES.HOME} />}/>
+            <Route path={ROUTES.ADMIN_DASHBOARD} element={isAuthenticated ? <Dashboard/> : <Navigate to={ROUTES.HOME} />}/>
           </Routes>
         </MainContent>
       </AppContainer>
