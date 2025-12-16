@@ -22,6 +22,7 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<Announcement> Announcements { get; set; }
     public DbSet<AnnouncementRead> AnnouncementReads { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<AuditLog> AuditLogs { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

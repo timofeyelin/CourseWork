@@ -1,5 +1,7 @@
 using Backend.Api.Dtos;
 using Backend.Application.Interfaces;
+using Backend.Application.Services;
+using Backend.Domain.Entities;
 using Backend.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,13 +16,16 @@ namespace Backend.Api.Controllers
     {
         private readonly IRequestService _requestService;
         private readonly IFileUploadService _fileUploadService;
+        private readonly ILogger<RequestController> _logger;
         private readonly IUserService _userService;
-
-        public RequestController(IRequestService requestService, IFileUploadService fileUploadService, IUserService userService)
+        private readonly IAuditService _auditService;
+        public RequestController(IRequestService requestService, IFileUploadService fileUploadService, IUserService userService, IAuditService auditService, ILogger<RequestController> logger)
         {
             _requestService = requestService;
             _fileUploadService = fileUploadService;
             _userService = userService;
+            _auditService = auditService;
+            _logger = logger;
         }
 
         private int GetUserId() => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -116,7 +121,21 @@ namespace Backend.Api.Controllers
                     Comments = new (),
                     Attachments = new ()
                 };
-
+                try
+                {
+                    await _auditService.LogAsync(
+                    GetUserId(),
+                    "CreateRequest",
+                    "Request",
+                    newRequest.RequestId.ToString(),
+                    $"Категория: {dto.Category}",
+                    ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Не удалось записать аудит");
+                }
+                
                 return CreatedAtAction(nameof(GetRequestDetails), new { requestId = newRequest.RequestId}, response);
             }
             catch (UnauthorizedAccessException) { return Forbid();}
