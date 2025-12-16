@@ -15,6 +15,7 @@ import {
     TextField
 } from '@mui/material';
 import { useState, useEffect } from 'react';  
+import dayjs from 'dayjs';
 import { 
     Close as CloseIcon, 
     Send as SendIcon,
@@ -28,7 +29,8 @@ import {
     GlassDialog, 
     GlassDialogTitle, 
     GlassDialogActions, 
-    GlassInput
+    GlassInput,
+    GlassDatePicker
 } from '../../../components/common';
 import { 
     REQUEST_STATUS_LABELS, 
@@ -86,12 +88,12 @@ const RequestDetailsModal = ({
     const [previewUrl, setPreviewUrl] = useState('');
     
     const [editPriority, setEditPriority] = useState(2);
-    const [editDeadline, setEditDeadline] = useState('');
+    const [editDeadline, setEditDeadline] = useState(null);
 
     useEffect(() => {
         if (request) {
             setEditPriority(request.priority ?? 2);
-            setEditDeadline(request.deadline ? request.deadline.split('T')[0] : '');
+            setEditDeadline(request.deadline ? dayjs(request.deadline) : null);
         }
     }, [request]);
 
@@ -114,24 +116,28 @@ const RequestDetailsModal = ({
         setPreviewUrl('');
     };
 
-    const handleSaveChanges = () => {
-        if (onUpdateRequest) {
-            const updates = {};
-            
-            if (editPriority !== (request.priority ?? 2)) {
-                updates.priority = editPriority;
-            }
-            
-            const currentDeadline = request.deadline ? request.deadline.split('T')[0] : '';
-            if (editDeadline !== currentDeadline) {
-                updates.deadline = editDeadline ? new Date(editDeadline).toISOString() : null;
-            }
-            
-            if (Object.keys(updates).length > 0) {
-                onUpdateRequest(request.requestId, updates);
-            }
+const handleSaveChanges = () => {
+    if (onUpdateRequest) {
+        const updates = {};
+
+        if (editPriority !== (request.priority ?? 2)) {
+            updates.priority = editPriority;
         }
-    };
+
+        const currentDeadline = request.deadline ? dayjs(request.deadline) : null;
+        const isDeadlineChanged =
+            (!!editDeadline || !!currentDeadline) &&
+            (!(editDeadline && currentDeadline) || !editDeadline.isSame(currentDeadline, 'day'));
+
+        if (isDeadlineChanged) {
+            updates.deadline = editDeadline ? editDeadline.toDate().toISOString() : null;
+        }
+
+        if (Object.keys(updates).length > 0) {
+            onUpdateRequest(request.requestId, updates);
+        }
+    }
+};
 
     const previewDialogPaperProps = {
         sx: {
@@ -145,10 +151,11 @@ const RequestDetailsModal = ({
         sx: { backgroundColor: 'rgba(0,0,0,0.7)' } 
     };
 
-    const currentDeadline = request.deadline ? request.deadline.split('T')[0] : '';
+    const currentDeadline = request.deadline ? dayjs(request.deadline) : null;
     const hasChanges = 
         editPriority !== (request.priority ?? 2) ||
-        editDeadline !== currentDeadline;
+        (!!editDeadline || !!currentDeadline) &&
++       (!(editDeadline && currentDeadline) || !editDeadline.isSame(currentDeadline, 'day'));
 
     return (
         <GlassDialog 
@@ -225,19 +232,14 @@ const RequestDetailsModal = ({
                                         </FormControl>
 
                                         {/* Дедлайн */}
-                                        <TextField
+                                        <GlassDatePicker
                                             label="Дедлайн"
-                                            type="date"
-                                            size="small"
                                             value={editDeadline}
-                                            onChange={(e) => setEditDeadline(e.target.value)}
-                                            InputLabelProps={{ shrink: true }}
-                                            sx={{ 
-                                                minWidth: 180,
-                                                '& .MuiOutlinedInput-root': {
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                                                }
-                                            }}
+                                            onChange={(newValue) => setEditDeadline(newValue)}
+                                            placeholder="DD.MM.YYYY"
+                                            format="DD.MM.YYYY"
+                                            sx={{ minWidth: 180 }}
+                                            disablePast={false}
                                         />
 
                                         {/* Кнопка сохранения */}

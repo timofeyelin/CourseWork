@@ -1,5 +1,7 @@
 using Backend.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Backend.Domain.Entities;
+using Backend.Domain.Enums;
 
 namespace Backend.Application.Services
 {
@@ -24,6 +26,28 @@ namespace Backend.Application.Services
 
             _context.Announcements.Add(announcement);
             await _context.SaveChangesAsync(ct);
+
+            if (announcement.IsEmergency)
+            {
+                var userIds = await _context.Users
+                    .Select(u => u.UserId)
+                    .ToListAsync(ct);
+
+                var notifications = userIds.Select(userId => new Notification
+                {
+                    UserId = userId,
+                    Type = NotificationType.Announcement,
+                    Title = "Срочное объявление",
+                    Text = announcement.Title, 
+                    CreatedAt = DateTime.UtcNow,
+                    IsRead = false,
+                    RelatedEntityId = announcement.AnnouncementId
+                });
+
+                _context.Notifications.AddRange(notifications);
+                await _context.SaveChangesAsync(ct);
+            }
+
             return announcement;
         }
 

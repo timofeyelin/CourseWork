@@ -229,6 +229,10 @@ export const adminService = {
 
     async unlinkAccount(userId, accountId) {
         return await api.post('/admin/users/unlink-account', { userId, accountId });
+    },
+
+    async getAnalytics(params) {
+         return await api.get('/admin/analytics', { params });
     }
 };
 

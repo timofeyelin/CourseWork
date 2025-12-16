@@ -19,7 +19,7 @@ import {
 
 const NewsFeed = ({ announcements, newsError, onOpenNews }) => {
     return (
-        <>
+        <div id="news">
             <NewsSectionHeader>
                 <Notifications color="primary" />
                 <NewsSectionTitle variant="h5">
@@ -65,7 +65,7 @@ const NewsFeed = ({ announcements, newsError, onOpenNews }) => {
                     </NewsCard>
                 ))}
             </NewsSection>
-        </>
+        </div>
     );
 };
 

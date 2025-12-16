@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { MenuItem, IconButton, Badge, Divider, Popover } from '@mui/material';
 import { Notifications, AccountBalanceWallet, Person, Logout, Login } from '@mui/icons-material';
@@ -39,6 +39,11 @@ const Header = () => {
         reload: reloadNotifications
     } = useNotifications(isAuthenticated);
 
+    const urgentNotifications = useMemo(
+        () => (notifications || []).filter((n) => n?.isUrgent === true),
+        [notifications]
+    );
+    
     const [notifAnchorEl, setNotifAnchorEl] = useState(null);
 
      const handleNotifClick = (event) => {
@@ -111,6 +116,7 @@ const Header = () => {
     if (user?.role === 'Admin') {
         userLinks.push({ title: 'Объявления', path: ROUTES.ADMIN_ANNOUNCEMENTS });
         userLinks.push({ title: 'Жители', path: ROUTES.ADMIN_RESIDENTS });
+        userLinks.push({ title: 'Аналитика', path: ROUTES.ADMIN_DASHBOARD });
     }
 
     if (user?.role === 'Operator') {
@@ -160,7 +166,7 @@ const Header = () => {
                                     onClick={handleNotifClick}
                                     aria-describedby={notifId}
                                 >
-                                    <Badge badgeContent={unreadCount} color="error" max={99}>
+                                    <Badge badgeContent={unreadCount} color="error" max={99} invisible={unreadCount === 0}>
                                         <Notifications />
                                     </Badge>
                                 </IconButton>

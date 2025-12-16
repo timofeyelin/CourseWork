@@ -16,7 +16,11 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
         '&.Mui-focused': {
             backgroundColor: 'rgba(255, 255, 255, 0.9)',
             boxShadow: '0 4px 15px rgba(2, 136, 209, 0.15)',
-        }
+        },
+        '& input::placeholder': {
+            color: theme.palette.text.secondary,
+            opacity: 0.7,
+        },
     },
     '& .MuiOutlinedInput-notchedOutline': {
         borderColor: 'rgba(0, 0, 0, 0.08)',
@@ -60,26 +64,36 @@ const popperSx = {
     }
 };
 
-export const GlassDatePicker = ({ label, value, onChange, sx, className, ...props }) => {
+export const GlassDatePicker = ({
+    label,
+    value,
+    onChange,
+    sx,
+    className,
+    format: formatString = 'DD.MM.YYYY', 
+    placeholder = 'DD.MM.YYYY',
+    disableFuture,
+    ...props
+}) => {
     return (
         <DatePicker
             label={label}
             value={value}
             onChange={onChange}
+            format={formatString}            
+            disableFuture={disableFuture}
             enableAccessibleFieldDOMStructure={false}
-            slots={{
-                textField: StyledTextField
-            }}
+            slots={{ textField: StyledTextField }}
             slotProps={{
-                popper: {
-                    sx: popperSx
-                },
+                popper: { sx: popperSx },
                 textField: {
                     size: 'small',
-                    sx: sx,
-                    className: className,
-                    ...props
-                }
+                    sx,
+                    className,
+                    placeholder,
+                    InputLabelProps: { shrink: true },
+                    ...props,
+                },
             }}
         />
     );

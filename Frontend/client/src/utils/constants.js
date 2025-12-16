@@ -13,7 +13,8 @@ export const ROUTES = {
     PAYMENT_HISTORY: '/payment-history',
     PAYMENTS: '/payments',
     FORGOT_PASSWORD: '/forgot-password',
-    OPERATOR_REQUESTS: '/operator/requests'
+    OPERATOR_REQUESTS: '/operator/requests',
+    ADMIN_DASHBOARD: '/admin/dashboard'
 }
 
 export const VALIDATION_MESSAGES = {
@@ -153,3 +154,8 @@ export const REQUEST_PRIORITY_LABELS = {
     3: 'Высокий',
     4: 'Критический',
 }
+
+export const ADMIN_MESSAGES = {
+    ANALYTICS_LOAD_FAILED: 'Не удалось загрузить данные аналитики',
+    NO_DATA: 'Нет данных за выбранный период'
+};

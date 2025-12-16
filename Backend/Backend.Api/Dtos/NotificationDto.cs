@@ -11,5 +11,6 @@ namespace Backend.Api.Dtos
         public DateTime CreatedAt { get; set; }
         public bool IsRead { get; set; }
         public int? RelatedEntityId { get; set; }
+        public bool IsUrgent { get; set; }
     }
 }

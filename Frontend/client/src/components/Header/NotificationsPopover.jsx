@@ -21,6 +21,7 @@ import CampaignIcon from '@mui/icons-material/Campaign';
 import PowerOffIcon from '@mui/icons-material/PowerOff';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../utils/constants';
 
 // Стили для контейнера
 const PopoverContainer = styled(Paper)(({ theme }) => ({
@@ -90,9 +91,10 @@ const NotificationsPopover = ({ notifications, loading, onMarkAllRead, onMarkRea
                 navigate('/requests');
                 break;
             case 'Outage':
+                navigate(ROUTES.HOME, { state: { scrollTo: 'news' } });
+                break;
             case 'Announcement':
-                // Можно открыть модалку новостей или просто остаться на месте
-                // navigate('/'); 
+                navigate(ROUTES.HOME, { state: { scrollTo: 'news' } });
                 break;
             default:
                 break;
