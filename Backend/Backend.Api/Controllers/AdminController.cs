@@ -1,10 +1,13 @@
 using Backend.Api.Dtos;
 using Backend.Application.Interfaces;
+using Backend.Application.Services;
 using Backend.Domain.Entities;
 using Backend.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+
 
 namespace Backend.Api.Controllers
 {
@@ -16,12 +19,15 @@ namespace Backend.Api.Controllers
         private readonly IAdminAnalyticsService _analyticsService;
         private readonly IBillService _billService;
         private readonly IAppDbContext _context;
-
-        public AdminController(IAdminAnalyticsService analyticsService, IBillService billService, IAppDbContext context)
+        private readonly IAuditService _auditService;
+        private readonly ILogger<AdminController> _logger;
+        public AdminController(IAdminAnalyticsService analyticsService, IBillService billService, IAppDbContext context, IAuditService auditService, ILogger<AdminController> logger)
         {
             _analyticsService = analyticsService;
             _billService = billService;
             _context = context;
+            _auditService = auditService;
+            _logger = logger;
         }
 
         [HttpPost("create-account")]
@@ -37,7 +43,22 @@ namespace Backend.Api.Controllers
                 UkName = dto.UkName ?? "ООО 'УК Горизонт'",
                 IsActive = true
             };
-
+            var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            try
+            {
+                await _auditService.LogAsync(
+                adminId,
+                "CreateAccount",
+                "Account",
+                account.AccountId.ToString(),
+                $"Создан ЛС {dto.AccountNumber}",
+                ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Не удалось записать аудит");
+            }
+            
             _context.Accounts.Add(account);
             await _context.SaveChangesAsync(ct);
 
@@ -251,6 +272,27 @@ namespace Backend.Api.Controllers
              user.Accounts.Remove(account);
              await _context.SaveChangesAsync(ct);
              return Ok(new { message = "Account unlinked" });
+        }
+        [HttpGet("audit")]
+        public async Task<IActionResult> GetAuditLogs(
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 20,
+    CancellationToken ct = default)
+        {
+            if (page < 1) page = 1;
+            if (pageSize > 100) pageSize = 100;
+            if (pageSize < 1) pageSize = 10;
+
+            var logs = await _auditService.GetLogsAsync(page, pageSize, ct);
+            var total = await _auditService.GetTotalCountAsync(ct);
+
+            return Ok(new
+            {
+                Data = logs,
+                TotalCount = total,
+                Page = page,
+                PageSize = pageSize
+            });
         }
         [HttpPost("import/bills")]
         public async Task<IActionResult> ImportBills([FromBody] List<ImportBillDto> request, CancellationToken ct)

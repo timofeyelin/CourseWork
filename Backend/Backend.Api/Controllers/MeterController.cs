@@ -1,5 +1,6 @@
 using Backend.Api.Dtos;
 using Backend.Application.Interfaces;
+using Backend.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -13,11 +14,14 @@ namespace Backend.Api.Controllers
     {
         private readonly IMeterReadingService _meterService;
         private readonly IUserService _userService;
-
-        public MeterController(IMeterReadingService meterService, IUserService userService)
+        private readonly IAuditService _auditService;
+        private readonly ILogger<MeterController> _logger;
+        public MeterController(IMeterReadingService meterService, IUserService userService, IAuditService auditService, ILogger<MeterController> logger)
         {
             _meterService = meterService;
             _userService = userService;
+            _auditService = auditService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -126,6 +130,21 @@ namespace Backend.Api.Controllers
                     SubmittedAt = reading.SubmittedAt,
                     Validated = reading.Validated
                 };
+                try
+                {
+                    await _auditService.LogAsync(
+    userId,
+    "SubmitReading",
+    "MeterReading",
+    reading.ReadingId.ToString(),
+    $"Счетчик: {meterId}, Значение: {request.Value}",
+    ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Не удалось записать аудит");
+                }
+                
                 return Ok(dto);
             }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
