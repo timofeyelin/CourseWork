@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { InputAdornment, Snackbar, Alert } from '@mui/material';
-import { Search, People } from '@mui/icons-material';
+import { InputAdornment, Snackbar, Alert, Button, Stack } from '@mui/material';
+import { Search, People, Add, Speed } from '@mui/icons-material';
 import debounce from 'lodash/debounce';
 import { adminService } from '../../../api';
 import { RESIDENTS_MESSAGES } from '../../../utils/constants';
 import ResidentsTable from './components/ResidentsTable';
 import UserDetailsModal from './components/UserDetailsModal';
+import CreateAccountModal from '../../../components/Modals/CreateAccountModal';
+import AddMeterModal from '../../../components/Modals/AddMeterModal';
+
 import { 
     PageContainer, 
     PageCard,
@@ -26,6 +29,8 @@ const Residents = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+    const [isAccountModalOpen, setAccountModalOpen] = useState(false);
+    const [isMeterModalOpen, setMeterModalOpen] = useState(false);
 
     const fetchUsers = async (query = '') => {
         setLoading(true);
@@ -70,6 +75,16 @@ const Residents = () => {
     
     const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
+
+    const handleAccountSuccess = () => {
+        setSnackbar({ open: true, message: 'Лицевой счет успешно создан', severity: 'success' });
+
+    };
+
+    const handleMeterSuccess = () => {
+        setSnackbar({ open: true, message: 'Счетчик успешно добавлен', severity: 'success' });
+    };
+
     return (
         <PageContainer>
             <PageCard>
@@ -86,18 +101,47 @@ const Residents = () => {
                 </HeaderSection>
 
                 <SearchSection>
-                    <StyledSearchField
-                        placeholder="Поиск по ФИО, телефону, квартире или ЛС"
-                        value={searchQuery}
-                        onChange={handleSearchChange}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <Search color="action" />
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
+                    
+                    <Stack 
+                        direction={{ xs: 'column', md: 'row' }} 
+                        spacing={2} 
+                        justifyContent="space-between" 
+                        alignItems="center"
+                        width="100%"
+                    >
+                        <StyledSearchField
+                            placeholder="Поиск по ФИО, телефону, квартире или ЛС"
+                            value={searchQuery}
+                            onChange={handleSearchChange}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <Search color="action" />
+                                    </InputAdornment>
+                                ),
+                            }}
+                            sx={{ flexGrow: 1, width: { xs: '100%', md: 'auto' } }}
+                        />
+
+                        <Stack direction="row" spacing={2} sx={{ width: { xs: '100%', md: 'auto' } }}>
+                            <Button 
+                                variant="contained" 
+                                startIcon={<Add />}
+                                onClick={() => setAccountModalOpen(true)}
+                                sx={{ whiteSpace: 'nowrap' }}
+                            >
+                                Новый ЛС
+                            </Button>
+                            <Button 
+                                variant="outlined" 
+                                startIcon={<Speed />}
+                                onClick={() => setMeterModalOpen(true)}
+                                sx={{ whiteSpace: 'nowrap' }}
+                            >
+                                Счетчик
+                            </Button>
+                        </Stack>
+                    </Stack>
                 </SearchSection>
 
                 <ContentSection>
@@ -112,6 +156,7 @@ const Residents = () => {
                 </ContentSection>
             </PageCard>
 
+            
             {selectedUser && (
                 <UserDetailsModal
                     open={isDetailsOpen}
@@ -121,6 +166,19 @@ const Residents = () => {
                     setSnackbar={setSnackbar}
                 />
             )}
+
+            
+            <CreateAccountModal 
+                open={isAccountModalOpen} 
+                onClose={() => setAccountModalOpen(false)} 
+                onSuccess={handleAccountSuccess}
+            />
+            
+            <AddMeterModal 
+                open={isMeterModalOpen} 
+                onClose={() => setMeterModalOpen(false)} 
+                onSuccess={handleMeterSuccess}
+            />
             
             <Snackbar 
                 open={snackbar.open} 

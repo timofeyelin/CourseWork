@@ -1,6 +1,5 @@
 using Backend.Api.Dtos;
 using Backend.Application.Interfaces;
-using Backend.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -33,6 +32,7 @@ namespace Backend.Api.Controllers
             {
                 MeterId = m.MeterId,
                 AccountId = m.AccountId,
+                AccountNumber = m.Account?.AccountNumber ?? "Н/Д",
                 Type = m.Type,
                 SerialNumber = m.SerialNumber,
                 InstallationDate = m.InstallationDate
@@ -50,7 +50,7 @@ namespace Backend.Api.Controllers
             }
 
             var meters = await _meterService.GetAccountMetersAsync(accountId, ct);
-            var dtos = meters.Select(m => new MeterDto 
+            var dtos = meters.Select(m => new MeterDto
             {
                 MeterId = m.MeterId,
                 AccountId = m.AccountId,
@@ -58,10 +58,10 @@ namespace Backend.Api.Controllers
                 SerialNumber = m.SerialNumber,
                 InstallationDate = m.InstallationDate
             }).ToList();
-            
+
             return Ok(dtos);
         }
-        
+
         [HttpGet("{meterId}/readings")]
         public async Task<ActionResult<List<MeterReadingDto>>> GetMeterReadings(int meterId, CancellationToken ct)
         {
@@ -106,7 +106,7 @@ namespace Backend.Api.Controllers
                     SubmittedAt = reading.SubmittedAt,
                     Validated = reading.Validated
                 };
-                
+
                 return Ok(dto);
             }
             catch (UnauthorizedAccessException ex)
@@ -144,7 +144,7 @@ namespace Backend.Api.Controllers
                 {
                     _logger.LogError(ex, "Не удалось записать аудит");
                 }
-                
+
                 return Ok(dto);
             }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
@@ -152,7 +152,7 @@ namespace Backend.Api.Controllers
             catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
         }
 
-         [HttpPut("{meterId}/readings/{readingId}")]
+        [HttpPut("{meterId}/readings/{readingId}")]
         public async Task<IActionResult> UpdateReading(int meterId, int readingId, [FromBody] SubmitReadingRequest request, CancellationToken ct)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -160,7 +160,7 @@ namespace Backend.Api.Controllers
             try
             {
                 await _meterService.UpdateMeterReadingAsync(userId, meterId, readingId, request.Value, ct);
-                
+
                 return NoContent();
             }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }

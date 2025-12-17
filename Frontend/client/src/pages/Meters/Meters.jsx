@@ -92,8 +92,8 @@ const MetersPage = () => {
     };
 
     const filteredMeters = meters.filter(meter => 
-        meter.accountId.toString().includes(filterAccount)
-    );
+    meter.accountNumber?.toLowerCase().includes(filterAccount.toLowerCase())
+);
 
     return (
         <PageContainer>

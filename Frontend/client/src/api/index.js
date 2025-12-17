@@ -233,6 +233,18 @@ export const adminService = {
 
     async getAnalytics(params) {
          return await api.get('/admin/analytics', { params });
+    },
+    async createAccount(data) {
+        return await api.post('/admin/create-account', data);
+    },
+    async addMeter(accountNumber, type, serialNumber) {
+        return await api.post('/admin/add-meter', null, {
+            params: {
+                accountNumber,
+                type,
+                serialNumber
+            }
+        });
     }
 };
 
