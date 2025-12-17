@@ -1,4 +1,4 @@
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5151/api'
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7032/api'
 
 export const ROUTES = {
     HOME: '/',

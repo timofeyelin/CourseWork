@@ -67,7 +67,7 @@ const MetersTable = ({ meters, readings, onOpenHistory, onOpenSubmit }) => {
                                         {meter.serialNumber}
                                     </Typography>
                                 </StyledTableCell>
-                                <StyledTableCell>{meter.accountId}</StyledTableCell>
+                                <StyledTableCell>{meter.accountNumber}</StyledTableCell>
                                 <StyledTableCell>
                                     {new Date(meter.installationDate).toLocaleDateString()}
                                 </StyledTableCell>

@@ -112,22 +112,26 @@ namespace Backend.Api.Controllers
         }
 
         [HttpPost("add-meter")]
-        public async Task<IActionResult> AddMeter(int accountId, MeterType type, string serialNumber)
+        public async Task<IActionResult> AddMeter(string accountNumber, MeterType type, string serialNumber, CancellationToken ct)
         {
-            var account = await _context.Accounts.FindAsync(accountId);
+            var account = await _context.Accounts
+                .FirstOrDefaultAsync(a => a.AccountNumber == accountNumber, ct);
+
             if (account == null)
-                return NotFound("Account not found");
+            {
+                return NotFound($"Лицевой счет с номером '{accountNumber}' не найден.");
+            }
 
             var meter = new Meter
             {
-                AccountId = accountId,
+                AccountId = account.AccountId,
                 Type = type,
                 SerialNumber = serialNumber,
                 InstallationDate = DateTime.UtcNow
             };
 
             _context.Meters.Add(meter);
-            await _context.SaveChangesAsync(CancellationToken.None);
+            await _context.SaveChangesAsync(ct);
 
             return Ok(meter);
         }

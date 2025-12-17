@@ -16,6 +16,7 @@ namespace Backend.Application.Services
         public async Task<List<Meter>> GetUserMetersAsync(int userId, CancellationToken ct)
         {
             return await _context.Meters
+                .Include(m => m.Account)
                 .Where(m => m.Account != null && m.Account.UserId == userId)
                 .ToListAsync(ct);
         }
@@ -23,6 +24,7 @@ namespace Backend.Application.Services
         public async Task<List<Meter>> GetAccountMetersAsync(int accountId, CancellationToken ct)
         {
             return await _context.Meters
+                .Include(m => m.Account)
                 .Where(m => m.AccountId == accountId)
                 .ToListAsync(ct);
         }
