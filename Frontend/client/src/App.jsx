@@ -11,6 +11,7 @@ import Dashboard from './pages/Admin/Dashboard/Dashboard';
 import Residents from './pages/Admin/Residents';
 import Header from './components/Header';
 import OperatorRequests from './pages/Operator/Requests';
+import Documents from './pages/Documents';
 import { useAuth } from './context/AuthContext';
 import { ROUTES } from './utils/constants';
 import { LoadingContainer, AppContainer, MainContent } from './App.styles';
@@ -37,6 +38,7 @@ function App() {
             <Route path={ROUTES.REGISTER} element={<Navigate to={ROUTES.HOME} />}/>
             <Route path={ROUTES.PROFILE} element={isAuthenticated ? <Profile/> : <Navigate to={ROUTES.HOME} />}/>
             <Route path={ROUTES.PAYMENTS} element={isAuthenticated ? <Payments/> : <Navigate to={ROUTES.HOME} />}/>
+            <Route path={ROUTES.DOCUMENTS} element={isAuthenticated ? <Documents/> : <Navigate to={ROUTES.HOME} />}/>
             <Route path={ROUTES.METERS} element={isAuthenticated ? <MetersPage/> : <Navigate to={ROUTES.HOME} />}/>
             <Route path={ROUTES.REQUESTS} element={isAuthenticated ? <Requests/> : <Navigate to={ROUTES.HOME} />}/>
             <Route path={ROUTES.ADMIN_ANNOUNCEMENTS} element={isAuthenticated ? <AdminAnnouncements/> : <Navigate to={ROUTES.HOME} />}/>

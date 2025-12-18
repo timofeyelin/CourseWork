@@ -11,10 +11,10 @@ const RequestsFilter = ({ filterStatus, onFilterChange }) => {
     return (
         <FilterContainer>
             <GlassSelect
+                label="Статус"
                 value={filterStatus}
                 onChange={(e) => onFilterChange(e.target.value)}
                 fullWidth
-                size="small"
             >
                 <MenuItem value="All">Все заявки</MenuItem>
                 {Object.entries(REQUEST_STATUS_LABELS).map(([key, label]) => (

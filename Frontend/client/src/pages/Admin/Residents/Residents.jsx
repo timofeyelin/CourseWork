@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { InputAdornment, Snackbar, Alert, Button, Stack } from '@mui/material';
+import { InputAdornment, Stack } from '@mui/material';
 import { Search, People, Add, Speed } from '@mui/icons-material';
 import debounce from 'lodash/debounce';
 import { adminService } from '../../../api';
-import { RESIDENTS_MESSAGES } from '../../../utils/constants';
+import { AppSnackbar } from '../../../components/common';
+import { RESIDENTS_MESSAGES, SUCCESS_MESSAGES } from '../../../utils/constants';
 import ResidentsTable from './components/ResidentsTable';
 import UserDetailsModal from './components/UserDetailsModal';
 import CreateAccountModal from '../../../components/Modals/CreateAccountModal';
 import AddMeterModal from '../../../components/Modals/AddMeterModal';
+import { GlassButton } from '../../../components/common';
 
 import { 
     PageContainer, 
@@ -77,12 +79,11 @@ const Residents = () => {
 
 
     const handleAccountSuccess = () => {
-        setSnackbar({ open: true, message: 'Лицевой счет успешно создан', severity: 'success' });
-
+        setSnackbar({ open: true, message: SUCCESS_MESSAGES.ACCOUNT_ADDED, severity: 'success' });
     };
 
     const handleMeterSuccess = () => {
-        setSnackbar({ open: true, message: 'Счетчик успешно добавлен', severity: 'success' });
+        setSnackbar({ open: true, message: SUCCESS_MESSAGES.METER_ADDED, severity: 'success' });
     };
 
     return (
@@ -123,23 +124,23 @@ const Residents = () => {
                             sx={{ flexGrow: 1, width: { xs: '100%', md: 'auto' } }}
                         />
 
-                        <Stack direction="row" spacing={2} sx={{ width: { xs: '100%', md: 'auto' } }}>
-                            <Button 
+                            <Stack direction="row" spacing={2} sx={{ width: { xs: '100%', md: 'auto' } }}>
+                            <GlassButton 
                                 variant="contained" 
                                 startIcon={<Add />}
                                 onClick={() => setAccountModalOpen(true)}
                                 sx={{ whiteSpace: 'nowrap' }}
                             >
                                 Новый ЛС
-                            </Button>
-                            <Button 
+                            </GlassButton>
+                            <GlassButton 
                                 variant="outlined" 
                                 startIcon={<Speed />}
                                 onClick={() => setMeterModalOpen(true)}
                                 sx={{ whiteSpace: 'nowrap' }}
                             >
                                 Счетчик
-                            </Button>
+                            </GlassButton>
                         </Stack>
                     </Stack>
                 </SearchSection>
@@ -180,16 +181,12 @@ const Residents = () => {
                 onSuccess={handleMeterSuccess}
             />
             
-            <Snackbar 
-                open={snackbar.open} 
-                autoHideDuration={6000} 
+            <AppSnackbar
+                open={snackbar.open}
+                message={snackbar.message}
+                severity={snackbar.severity}
                 onClose={handleCloseSnackbar}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            >
-                <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
+            />
         </PageContainer>
     );
 };

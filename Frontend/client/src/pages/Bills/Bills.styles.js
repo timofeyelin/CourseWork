@@ -154,23 +154,7 @@ export const LoadingContainer = styled('div')(({ theme }) => ({
     backgroundColor: theme.palette.background.default,
 }));
 
-export const ErrorContainer = styled('div')(({ theme }) => ({
-    minHeight: '100vh',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: theme.palette.background.default,
-    padding: '2rem',
-}));
 
-export const ErrorCard = styled('div')(({ theme }) => ({
-    background: theme.palette.background.paper,
-    padding: '2rem',
-    borderRadius: '12px',
-    textAlign: 'center',
-    maxWidth: '400px',
-    boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-}));
 
 export const ModalInfoSection = styled('div')(({ theme }) => ({
     background: 'rgba(255, 255, 255, 0.5)',
@@ -242,9 +226,7 @@ export const PaymentInput = styled(GlassInput)(({ theme }) => ({
     },
 }));
 
-export const RetryButton = styled(Button)(({ theme }) => ({
-    marginTop: theme.spacing(2),
-}));
+
 
 export const PaymentModalContent = styled(Box)(({ theme }) => ({
     textAlign: 'center',

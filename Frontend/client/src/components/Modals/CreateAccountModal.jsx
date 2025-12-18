@@ -1,11 +1,8 @@
 import { useState } from 'react';
-import { Stack } from '@mui/material';
+import { Stack, IconButton } from '@mui/material';
 import { adminService } from '../../api';
-import { GlassInput } from '../common';
+import { GlassInput, GlassDialogTitle } from '../common';
 import {
-    Header,
-    Title,
-    Subtitle,
     StyledAlert,
     Form,
     FormField,
@@ -13,6 +10,14 @@ import {
     SubmitButton,
 } from './Auth.styles';
 import { StyledDialog, ModalLoginCard } from './Modal.styles';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import CloseIcon from '@mui/icons-material/Close';
+import {
+    ModalHeader,
+    ModalIconWrapper,
+    ModalSubtitle,
+    ModalCloseButton
+} from '../../pages/Admin/Announcements/AdminAnnouncements.styles';
 
 const CreateAccountModal = ({ open, onClose, onSuccess }) => {
     const [formData, setFormData] = useState({
@@ -72,14 +77,18 @@ const CreateAccountModal = ({ open, onClose, onSuccess }) => {
             scroll="body"
         >
             <ModalLoginCard elevation={3}>
-                <Header>
-                    <Title variant='h5' component='h2' sx={{ mb: 1 }}>
-                        Новый лицевой счет
-                    </Title>
-                    <Subtitle variant='body2'>
-                        Заполните данные квартиры или дома
-                    </Subtitle>
-                </Header>
+                <ModalHeader>
+                    <ModalCloseButton>
+                        <IconButton aria-label="close" onClick={onClose} size="large">
+                            <CloseIcon />
+                        </IconButton>
+                    </ModalCloseButton>
+                    <ModalIconWrapper>
+                        <AccountBalanceIcon color="primary" />
+                    </ModalIconWrapper>
+                    <GlassDialogTitle>Новый лицевой счет</GlassDialogTitle>
+                    <ModalSubtitle>Заполните данные квартиры или дома</ModalSubtitle>
+                </ModalHeader>
 
                 {error && (
                     <StyledAlert severity='error'>
@@ -89,8 +98,8 @@ const CreateAccountModal = ({ open, onClose, onSuccess }) => {
                 
                 <Form onSubmit={handleSubmit}>
                     <FormField>
-                        <FieldLabel variant='body2'>Номер счета (ЛС)</FieldLabel>
                         <GlassInput
+                            label="Номер счета (ЛС)"
                             fullWidth
                             name='accountNumber'
                             placeholder='Например: 100200300'
@@ -101,8 +110,8 @@ const CreateAccountModal = ({ open, onClose, onSuccess }) => {
                     </FormField>
 
                     <FormField>
-                        <FieldLabel variant='body2'>Адрес</FieldLabel>
                         <GlassInput
+                            label="Адрес"
                             fullWidth
                             name='address'
                             placeholder='Улица, дом, квартира'
@@ -114,8 +123,8 @@ const CreateAccountModal = ({ open, onClose, onSuccess }) => {
 
                     <Stack direction="row" spacing={2}>
                         <FormField>
-                            <FieldLabel variant='body2'>Площадь (м²)</FieldLabel>
                             <GlassInput
+                                label="Площадь (м²)"
                                 fullWidth
                                 name='area'
                                 type="number"
@@ -123,11 +132,12 @@ const CreateAccountModal = ({ open, onClose, onSuccess }) => {
                                 value={formData.area}
                                 onChange={handleChange}
                                 required
+                                slotProps={{ htmlInput: { step: '0.01' } }}
                             />
                         </FormField>
                         <FormField>
-                            <FieldLabel variant='body2'>Жильцов</FieldLabel>
                             <GlassInput
+                                label="Жильцов"
                                 fullWidth
                                 name='occupantsCount'
                                 type="number"
@@ -140,8 +150,8 @@ const CreateAccountModal = ({ open, onClose, onSuccess }) => {
                     </Stack>
 
                     <FormField>
-                        <FieldLabel variant='body2'>Управляющая компания</FieldLabel>
                         <GlassInput
+                            label="Управляющая компания"
                             fullWidth
                             name='ukName'
                             value={formData.ukName}

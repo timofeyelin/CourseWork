@@ -12,10 +12,10 @@ import {
     menuPaperStyles,
     StyledFilterControl // Используем наш стилизованный контрол
 } from './OperatorRequests.styles';
-import { GlassInput, AppSnackbar } from '../../../components/common';
+import { GlassInput, AppSnackbar, GlassSelect } from '../../../components/common';
 import KanbanColumn from './components/KanbanColumn';
 import RequestDetailsModal from '../../Requests/components/RequestDetailsModal';
-import { REQUEST_STATUSES, REQUEST_CATEGORY_LABELS } from '../../../utils/constants';
+import { REQUEST_STATUSES, REQUEST_CATEGORY_LABELS, REQUESTS_MESSAGES, ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../../utils/constants';
 
 
 const OperatorRequests = () => {
@@ -66,7 +66,7 @@ const OperatorRequests = () => {
             setRequests(response.data);
         } catch (error) {
             console.error('Error fetching requests:', error);
-            setSnackbar({ open: true, message: 'Не удалось загрузить заявки', severity: 'error' });
+            setSnackbar({ open: true, message: ERROR_MESSAGES.REQUESTS_LOAD_FAILED || REQUESTS_MESSAGES.DETAILS_LOAD_FAILED, severity: 'error' });
         } finally {
             setLoading(false);
         }
@@ -104,10 +104,10 @@ const OperatorRequests = () => {
             if (newStatus === REQUEST_STATUSES.NEW) {
                  fetchRequests();
             }
-            setSnackbar({ open: true, message: 'Статус обновлен', severity: 'success' });
+            setSnackbar({ open: true, message: REQUESTS_MESSAGES.STATUS_UPDATED, severity: 'success' });
         } catch (error) {
             console.error('Error updating status:', error);
-            setSnackbar({ open: true, message: 'Ошибка обновления статуса', severity: 'error' });
+            setSnackbar({ open: true, message: REQUESTS_MESSAGES.STATUS_UPDATE_FAILED, severity: 'error' });
             fetchRequests(); // Откат
         }
     };
@@ -119,7 +119,7 @@ const OperatorRequests = () => {
             setSelectedRequest(response.data);
             setDetailsOpen(true);
         } catch (error) {
-            setSnackbar({ open: true, message: 'Не удалось загрузить детали', severity: 'error' });
+            setSnackbar({ open: true, message: REQUESTS_MESSAGES.DETAILS_LOAD_FAILED, severity: 'error' });
         }
     };
 
@@ -132,7 +132,7 @@ const OperatorRequests = () => {
             setSelectedRequest(response.data);
             setNewComment('');
         } catch (error) {
-            setSnackbar({ open: true, message: 'Ошибка отправки комментария', severity: 'error' });
+            setSnackbar({ open: true, message: REQUESTS_MESSAGES.COMMENT_SEND_FAILED, severity: 'error' });
         } finally {
             setSendingComment(false);
         }
@@ -155,10 +155,10 @@ const OperatorRequests = () => {
                 setSelectedRequest(prev => ({ ...prev, ...updates }));
             }
             
-            setSnackbar({ open: true, message: 'Заявка обновлена', severity: 'success' });
+            setSnackbar({ open: true, message: REQUESTS_MESSAGES.REQUEST_UPDATED, severity: 'success' });
         } catch (error) {
             console.error('Error updating request:', error);
-            setSnackbar({ open: true, message: 'Ошибка обновления заявки', severity: 'error' });
+            setSnackbar({ open: true, message: REQUESTS_MESSAGES.REQUEST_UPDATE_FAILED, severity: 'error' });
         } finally {
             setUpdatingRequest(false);
         }
@@ -198,30 +198,15 @@ const OperatorRequests = () => {
                     />
                     
                     <StyledFilterControl size="small">
-                        <Select
+                        <GlassSelect
+                            label="Категория"
                             name="category"
                             value={filters.category}
                             onChange={handleFilterChange}
-                            displayEmpty
-                            inputProps={{ 'aria-label': 'Without label' }}
-                            // 5. Подключаем стили для меню (непрозрачность)
-                            MenuProps={{
-                                PaperProps: {
-                                    sx: menuPaperStyles
-                                }
-                            }}
-                        >
-                            {/* 4. Убрали opacity, теперь цвет как у всех */}
-                            <MenuItem value="">
-                                Все категории
-                            </MenuItem>
-                            
-                            {Object.entries(REQUEST_CATEGORY_LABELS).map(([key, label]) => (
-                                <MenuItem key={key} value={label}>
-                                    {label}
-                                </MenuItem>
-                            ))}
-                        </Select>
+                            options={[{ value: '', label: 'Все категории' }, ...Object.entries(REQUEST_CATEGORY_LABELS).map(([key, label]) => ({ value: label, label }))]}
+                            size="small"
+                            sx={{ minWidth: '220px' }}
+                        />
                     </StyledFilterControl>
                 </FilterSection>
 

@@ -12,19 +12,16 @@ export const GlassDialog = styled(Dialog)(({ theme }) => ({
         overflowX: 'hidden',
         display: 'flex',
         flexDirection: 'column',
-        // limit dialog height to viewport, allow internal scrolling when needed
         maxHeight: 'calc(100vh - 48px)',
     },
     '& .MuiDialogContent-root': {
         overflowX: 'hidden',
-        // allow children to manage their own scrolling
         overflowY: 'auto',
         flex: 1,
         paddingTop: 0,
         paddingBottom: 0,
         paddingLeft: 0,
         paddingRight: 0,
-        // Custom scrollbar
         '&::-webkit-scrollbar': {
             width: '8px',
         },

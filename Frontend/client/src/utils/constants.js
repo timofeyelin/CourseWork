@@ -1,4 +1,4 @@
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7032/api'
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5151/api'
 
 export const ROUTES = {
     HOME: '/',
@@ -12,6 +12,7 @@ export const ROUTES = {
     ADMIN_RESIDENTS: '/admin/residents',
     PAYMENT_HISTORY: '/payment-history',
     PAYMENTS: '/payments',
+    DOCUMENTS: '/documents',
     FORGOT_PASSWORD: '/forgot-password',
     OPERATOR_REQUESTS: '/operator/requests',
     ADMIN_DASHBOARD: '/admin/dashboard'
@@ -47,6 +48,7 @@ export const ERROR_MESSAGES = {
     BILLS_LOAD_FAILED: 'Не удалось загрузить список счетов',
     BILL_DETAILS_LOAD_FAILED: 'Не удалось загрузить детали счета',
     PAYMENT_HISTORY_LOAD_FAILED: 'Не удалось загрузить историю платежей',
+    DOCUMENTS_LOAD_FAILED: 'Не удалось загрузить документы',
     DOWNLOAD_RECEIPT_FAILED: 'Не удалось скачать квитанцию',
     PAYMENT_FAILED: 'Ошибка при проведении платежа',
     PAYMENT_CANCEL_FAILED: 'Не удалось отменить платеж',
@@ -60,6 +62,22 @@ export const ERROR_MESSAGES = {
     METER_HISTORY_LOAD_FAILED: 'Не удалось загрузить историю показаний'
 }
 
+export const REQUESTS_MESSAGES = {
+    FILES_TOO_MANY: 'Максимум 3 файла',
+    SELECT_ACCOUNT: 'Выберите лицевой счет',
+    CREATE_SUCCESS: 'Заявка успешно создана',
+    CREATE_FAILED: 'Ошибка при создании заявки',
+    DETAILS_LOAD_FAILED: 'Не удалось загрузить детали заявки',
+    COMMENT_SEND_FAILED: 'Не удалось отправить комментарий',
+    RATE_REQUIRED: 'Поставьте оценку',
+    RATE_THANK_YOU: 'Спасибо за оценку!',
+    RATE_SEND_FAILED: 'Не удалось отправить оценку',
+    STATUS_UPDATED: 'Статус обновлен',
+    STATUS_UPDATE_FAILED: 'Ошибка обновления статуса',
+    REQUEST_UPDATED: 'Заявка обновлена',
+    REQUEST_UPDATE_FAILED: 'Ошибка обновления заявки'
+}
+
 export const SUCCESS_MESSAGES = {
     ACCOUNT_ADDED: 'Лицевой счет успешно добавлен',
     ACCOUNT_DELETED: 'Лицевой счет успешно удален',
@@ -68,6 +86,11 @@ export const SUCCESS_MESSAGES = {
     PAYMENT_CANCELLED: 'Платеж успешно отменен',
     READING_SUBMITTED: 'Показания успешно переданы'
 }
+
+// Добавляем отдельные успешные сообщения, используемые в админке
+SUCCESS_MESSAGES.METER_ADDED = 'Счетчик успешно добавлен';
+SUCCESS_MESSAGES.REQUEST_CREATED = REQUESTS_MESSAGES.CREATE_SUCCESS;
+SUCCESS_MESSAGES.REQUEST_UPDATED = REQUESTS_MESSAGES.REQUEST_UPDATED;
 
 export const INFO_MESSAGES = {
     EDIT_PROFILE_UNAVAILABLE: 'Функционал редактирования профиля будет доступен позже',
@@ -83,7 +106,9 @@ export const ANNOUNCEMENTS_MESSAGES = {
     CREATE_SUCCESS: 'Объявление успешно создано',
     CREATE_FAILED: 'Ошибка при создании объявления',
     DELETE_SUCCESS: 'Объявление удалено',
-    DELETE_FAILED: 'Ошибка при удалении объявления'
+    DELETE_FAILED: 'Ошибка при удалении объявления',
+    UPDATE_SUCCESS: 'Объявление обновлено',
+    UPDATE_FAILED: 'Ошибка при обновлении объявления'
 }
 export const PASSWORD_STRENGTH = {
     WEAK: 'Слабый',

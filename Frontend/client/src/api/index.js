@@ -190,7 +190,9 @@ export const announcementsService = {
     async create(data) {
         return await api.post('/announcements', data);
     },
-
+    async update(id, data) {
+        return await api.put(`/announcements/${id}`, data);
+    },
     async delete(id) {
         return await api.delete(`/announcements/${id}`);
     }

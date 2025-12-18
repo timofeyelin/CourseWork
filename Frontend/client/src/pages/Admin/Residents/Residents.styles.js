@@ -2,8 +2,6 @@ import { styled } from '@mui/material/styles';
 import { Box, Typography, TableContainer, IconButton, TableCell, TableRow, ListItem } from '@mui/material';
 import { GlassCard, GlassInput } from '../../../components/common';
 
-// --- Page Layout Styles ---
-
 export const PageContainer = styled('div')(({ theme }) => ({
     minHeight: '100%',
     background: theme.custom.gradients.mainBg,
@@ -90,7 +88,11 @@ export const ContentSection = styled('div')(({ theme }) => ({
     },
 }));
 
-// --- Table Styles ---
+export const ModalContentBox = styled(Box)(({ theme }) => ({
+    padding: theme.spacing(3),
+    borderRadius: '12px',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+}));
 
 export const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
     borderRadius: '20px',
@@ -167,22 +169,7 @@ export const UserStatusPill = styled('span')(({ theme, isActive }) => ({
     border: `1px solid ${isActive ? 'rgba(76, 175, 80, 0.2)' : 'rgba(244, 67, 54, 0.2)'}`,
 }));
 
-export const ActionButton = styled(IconButton)(({ theme, color }) => ({
-    transition: 'all 0.2s',
-    '&:hover': {
-        backgroundColor: color === 'error' 
-            ? 'rgba(211, 47, 47, 0.08)' 
-            : 'rgba(25, 118, 210, 0.08)',
-        transform: 'scale(1.1)',
-    }
-}));
 
-// --- Modal Styles ---
-
-export const ModalContentBox = styled(Box)(({ theme }) => ({
-    marginBottom: theme.spacing(3),
-    padding: '1rem 0',
-}));
 
 export const AddAccountBox = styled(Box)(({ theme }) => ({
     display: 'flex',
@@ -206,9 +193,10 @@ export const StyledListItem = styled(ListItem)(({ theme }) => ({
     borderRadius: '12px',
     marginBottom: theme.spacing(1),
     border: '1px solid rgba(0, 0, 0, 0.05)',
-    transition: 'all 0.2s',
+    transition: 'background-color 0.2s',
     '&:hover': {
-        background: 'rgba(255, 255, 255, 0.8)',
-        transform: 'translateX(4px)',
+        background: 'rgba(255, 255, 255, 0.8)'
     }
 }));
+
+

@@ -1,19 +1,18 @@
 import { useEffect, useState } from 'react';
-import { 
-    Typography, IconButton, 
-    Table, TableBody, TableCell, TableHead, TableRow, CircularProgress 
-} from '@mui/material';
+import { Typography, IconButton, Table, TableBody, TableHead, CircularProgress, DialogContent } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import { 
     HistoryTableContainer, 
     HistoryValueCell, 
-    StatusBox,
     ModalTitleBox,
     ModalContentBox,
-    LoadingBox
+    LoadingBox,
+    StyledTableHeadCell,
+    StyledTableRow,
+    StyledTableCell
 } from '../Meters.styles';
 import { metersService } from '../../../api/meters';
-import { GlassDialog, GlassDialogTitle, GlassDialogActions, GlassButton } from '../../../components/common';
+import { GlassDialog, GlassDialogTitle, GlassDialogActions, GlassButton, StatusPill } from '../../../components/common';
 
 const MeterHistoryModal = ({ open, onClose, meter }) => {
     const [history, setHistory] = useState([]);
@@ -54,55 +53,53 @@ const MeterHistoryModal = ({ open, onClose, meter }) => {
                 </Typography>
             </GlassDialogTitle>
 
-            <ModalContentBox>
-                {loading ? (
-                    <LoadingBox>
-                        <CircularProgress />
-                    </LoadingBox>
-                ) : (
-                    <HistoryTableContainer>
-                        <Table stickyHeader>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Дата</TableCell>
-                                    <TableCell align="right">Значение</TableCell>
-                                    <TableCell align="center">Статус</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {history.map((reading) => (
-                                    <TableRow key={reading.readingId} hover>
-                                        <TableCell>
-                                            {new Date(reading.period).toLocaleDateString()}
-                                        </TableCell>
-                                        <HistoryValueCell align="right">
-                                            {reading.value}
-                                        </HistoryValueCell>
-                                        <TableCell align="center">
-                                            {reading.validated ? (
-                                                <StatusBox component="span" status="validated">
-                                                    Подтверждено
-                                                </StatusBox>
-                                            ) : (
-                                                <StatusBox component="span" status="pending">
-                                                    На проверке
-                                                </StatusBox>
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                                {history.length === 0 && (
-                                    <TableRow>
-                                        <TableCell colSpan={3} align="center">
-                                            Нет истории показаний
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </HistoryTableContainer>
-                )}
-            </ModalContentBox>
+            <DialogContent>
+                <ModalContentBox>
+                    {loading ? (
+                        <LoadingBox>
+                            <CircularProgress />
+                        </LoadingBox>
+                    ) : (
+                        <HistoryTableContainer>
+                            <Table stickyHeader>
+                                <TableHead>
+                                    <StyledTableRow>
+                                        <StyledTableHeadCell>Дата</StyledTableHeadCell>
+                                        <StyledTableHeadCell align="center">Значение</StyledTableHeadCell>
+                                        <StyledTableHeadCell align="center">Статус</StyledTableHeadCell>
+                                    </StyledTableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {history.map((reading) => (
+                                        <StyledTableRow key={reading.readingId} hover>
+                                            <StyledTableCell>
+                                                {new Date(reading.period).toLocaleDateString()}
+                                            </StyledTableCell>
+                                            <HistoryValueCell align="center">
+                                                {reading.value}
+                                            </HistoryValueCell>
+                                            <StyledTableCell align="center">
+                                                {reading.validated ? (
+                                                    <StatusPill status="paid">Подтверждено</StatusPill>
+                                                ) : (
+                                                    <StatusPill status="pending">На проверке</StatusPill>
+                                                )}
+                                            </StyledTableCell>
+                                        </StyledTableRow>
+                                    ))}
+                                    {history.length === 0 && (
+                                        <StyledTableRow>
+                                            <StyledTableCell colSpan={3} align="center">
+                                                Нет истории показаний
+                                            </StyledTableCell>
+                                        </StyledTableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </HistoryTableContainer>
+                    )}
+                </ModalContentBox>
+            </DialogContent>
             
             <GlassDialogActions>
                 <GlassButton onClick={onClose}>Закрыть</GlassButton>

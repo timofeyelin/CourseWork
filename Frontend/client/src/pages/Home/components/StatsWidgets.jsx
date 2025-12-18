@@ -1,5 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { AccountBalanceWallet, Assignment } from '@mui/icons-material';
+import { useAuth } from '../../../context/AuthContext';
 import { 
     WidgetsGrid, 
     WidgetCard, 
@@ -10,6 +11,11 @@ import {
 } from '../Home.styles';
 
 const StatsWidgets = ({ balance, openRequestsCount }) => {
+    const { user } = useAuth();
+    const isAdminOrOperator = user?.role === 'Admin' || user?.role === 'Operator';
+
+    if (isAdminOrOperator) return null;
+
     return (
         <WidgetsGrid>
             <WidgetCard color="#0288D1">

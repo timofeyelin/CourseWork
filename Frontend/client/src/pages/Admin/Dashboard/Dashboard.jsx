@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Typography, Box, Button } from '@mui/material';
 import { Analytics as AnalyticsIcon } from '@mui/icons-material';
 import { adminService } from '../../../api';
-import { AppSnackbar, GlassDatePicker } from '../../../components/common';
+import { AppSnackbar, GlassDatePicker, GlassButton } from '../../../components/common';
 import { ADMIN_MESSAGES } from '../../../utils/constants';
 import {
     PageContainer,
@@ -49,7 +49,6 @@ const Dashboard = () => {
 
     useEffect(() => {
         loadData(null, null);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleApplyPeriod = () => {
@@ -100,20 +99,20 @@ const Dashboard = () => {
                             placeholder="DD.MM.YYYY"
                             format="DD.MM.YYYY"
                         />
-                        <Button
+                        <GlassButton
                             variant="contained"
                             onClick={handleApplyPeriod}
-                            sx={{ height: 40, borderRadius: '12px' }}
+                            sx={{ height: 40 }}
                         >
                             Применить
-                        </Button>
-                        <Button
+                        </GlassButton>
+                        <GlassButton
                             variant="outlined"
                             onClick={handleResetPeriod}
-                            sx={{ height: 40, borderRadius: '12px' }}
+                            sx={{ height: 40 }}
                         >
                             Сбросить
-                        </Button>
+                        </GlassButton>
                     </Box>
                 </HeaderSection>
 

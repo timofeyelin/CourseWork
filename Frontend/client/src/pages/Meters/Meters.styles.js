@@ -93,7 +93,7 @@ export const FilterSection = styled('div')(({ theme }) => ({
 }));
 
 export const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
-    borderRadius: '20px',
+    borderRadius: '12px',
     overflow: 'hidden',
     border: 'none',
     background: 'rgba(255, 255, 255, 0.5)',
@@ -112,6 +112,12 @@ export const StyledTableHeadCell = styled(TableCell)(({ theme }) => ({
     letterSpacing: '0.5px',
     fontSize: '0.8rem',
     padding: '20px 16px',
+    '&:first-of-type': {
+        borderTopLeftRadius: '12px',
+    },
+    '&:last-of-type': {
+        borderTopRightRadius: '12px',
+    },
     '&:last-child': {
         borderRight: 'none',
     },
@@ -198,12 +204,20 @@ export const ActionsBox = styled(Box)(({ theme }) => ({
 
 export const ModalTitleBox = styled(Box)(({ theme }) => ({
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
+    '& .MuiIconButton-root': {
+        position: 'absolute',
+        right: 0,
+        top: 0,
+    },
 }));
 
 export const ModalContentBox = styled(Box)(({ theme }) => ({
     padding: theme.spacing(3),
+    borderRadius: '12px',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
 }));
 
 export const StyledAlert = styled(Alert)(({ theme }) => ({
@@ -219,37 +233,14 @@ export const LastReadingBox = styled(Box)(({ theme }) => ({
 }));
 
 export const HistoryTableContainer = styled(StyledTableContainer)(({ theme }) => ({
-    maxHeight: 400,
+    maxHeight: 'none',
+    overflow: 'hidden',
+    background: 'transparent',
+    borderRadius: '12px',
 }));
 
 export const HistoryValueCell = styled(TableCell)(({ theme }) => ({
     fontWeight: 'bold',
 }));
 
-export const StatusBox = styled(Box)(({ theme, status }) => ({
-    color: status === 'validated' ? theme.palette.success.dark : theme.palette.warning.dark,
-    backgroundColor: status === 'validated' ? theme.palette.success.light : theme.palette.warning.light,
-    padding: '4px 8px',
-    borderRadius: '8px',
-    fontSize: '0.75rem',
-    fontWeight: 600,
-    display: 'inline-block',
-}));
 
-export const StyledDatePicker = styled(DatePicker)(({ theme }) => ({
-    width: '100%',
-    '& .MuiOutlinedInput-root': {
-        backgroundColor: 'rgba(255, 255, 255, 0.6)',
-        backdropFilter: 'blur(10px)',
-        borderRadius: '12px',
-        '& fieldset': {
-            borderColor: 'rgba(255, 255, 255, 0.5)',
-        },
-        '&:hover fieldset': {
-            borderColor: 'rgba(2, 136, 209, 0.5)',
-        },
-        '&.Mui-focused fieldset': {
-            borderColor: '#0288D1',
-        },
-    }
-}));

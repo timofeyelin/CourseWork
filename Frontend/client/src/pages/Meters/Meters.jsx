@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { ROUTES } from '../../utils/constants';
 import { InputAdornment, CircularProgress } from '@mui/material';
 import { Search, Add, Speed } from '@mui/icons-material';
 import { 
@@ -36,9 +39,21 @@ const MetersPage = () => {
         severity: 'success'
     });
 
+    const { user, isAuthenticated } = useAuth();
+    const navigate = useNavigate();
+
     useEffect(() => {
+        if (!isAuthenticated) {
+            navigate(ROUTES.HOME);
+            return;
+        }
+        if (user && (user.role === 'Admin' || user.role === 'Operator')) {
+            navigate(ROUTES.HOME);
+            return;
+        }
+
         loadData();
-    }, []);
+    }, [isAuthenticated, user, navigate]);
 
     const loadData = async () => {
         setLoading(true);

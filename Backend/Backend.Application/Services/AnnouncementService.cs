@@ -51,6 +51,23 @@ namespace Backend.Application.Services
             return announcement;
         }
 
+        public async Task<Announcement> UpdateAnnouncementAsync(int announcementId, string title, string content, bool isEmergency, CancellationToken ct)
+        {
+            var announcement = await _context.Announcements.FindAsync(new object[] { announcementId }, ct);
+            if (announcement == null)
+            {
+                throw new KeyNotFoundException("Объявление не найдено.");
+            }
+
+            announcement.Title = title;
+            announcement.Content = content;
+            announcement.IsEmergency = isEmergency;
+
+            _context.Announcements.Update(announcement);
+            await _context.SaveChangesAsync(ct);
+            return announcement;
+        }
+
         public async Task DeleteAnnouncementAsync(int announcementId, CancellationToken ct)
         {
             var announcement = await _context.Announcements.FindAsync(new object[] { announcementId }, ct);

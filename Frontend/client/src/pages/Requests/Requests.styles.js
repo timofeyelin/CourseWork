@@ -86,16 +86,7 @@ export const FilterSection = styled('div')(({ theme }) => ({
     },
 }));
 
-export const FilterControl = styled(FormControl)(({ theme }) => ({
-    minWidth: '200px',
-    '& .MuiOutlinedInput-root': {
-        backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    },
-    [theme.breakpoints.down('md')]: {
-        width: '100%',
-        minWidth: 'auto',
-    },
-}));
+
 
 export const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
     borderRadius: '20px',
@@ -153,27 +144,7 @@ export const LoadingContainer = styled('div')(({ theme }) => ({
     backgroundColor: theme.palette.background.default,
 }));
 
-export const ErrorContainer = styled('div')(({ theme }) => ({
-    minHeight: '100vh',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: theme.palette.background.default,
-    padding: '2rem',
-}));
 
-export const ErrorCard = styled('div')(({ theme }) => ({
-    background: theme.palette.background.paper,
-    padding: '2rem',
-    borderRadius: '12px',
-    textAlign: 'center',
-    maxWidth: '400px',
-    boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-}));
-
-export const RetryButton = styled(Button)(({ theme }) => ({
-    marginTop: theme.spacing(2),
-}));
 
 export const ModalContent = styled(Box)(({ theme }) => ({
     display: 'flex',

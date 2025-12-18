@@ -27,6 +27,7 @@ import {
 } from './AdminAnnouncements.styles';
 import AnnouncementsTable from './components/AnnouncementsTable';
 import CreateAnnouncementModal from './components/CreateAnnouncementModal';
+import EditAnnouncementModal from './components/EditAnnouncementModal';
 
 const AdminAnnouncements = () => {
     const { user, isAuthenticated } = useAuth();
@@ -43,16 +44,19 @@ const AdminAnnouncements = () => {
     });
     const [submitting, setSubmitting] = useState(false);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+    const [editOpen, setEditOpen] = useState(false);
+    const [editingAnnouncement, setEditingAnnouncement] = useState(null);
+    const [editSubmitting, setEditSubmitting] = useState(false);
 
     useEffect(() => {
         if (!isAuthenticated) {
             navigate(ROUTES.HOME);
             return;
         }
-        if (user && user.role !== 'Admin') {
+        if (user && user.role !== 'Operator') {
             navigate(ROUTES.HOME);
         }
-        if (user && user.role === 'Admin') {
+        if (user && user.role === 'Operator') {
             fetchAnnouncements();
         } else {
             setLoading(false);
@@ -143,7 +147,7 @@ const AdminAnnouncements = () => {
         );
     }
 
-    if (!user || user.role !== 'Admin') {
+    if (!user || user.role !== 'Operator') {
         return null; 
     }
 
@@ -167,6 +171,15 @@ const AdminAnnouncements = () => {
                     <AnnouncementsTable 
                         announcements={announcements}
                         onDeleteClick={handleDeleteClick}
+                        onEditClick={(a) => {
+                            setEditingAnnouncement({
+                                announcementId: a.announcementId,
+                                title: a.title,
+                                content: a.content,
+                                isEmergency: a.isEmergency
+                            });
+                            setEditOpen(true);
+                        }}
                     />
                 </ContentSection>
             </PageCard>
@@ -178,6 +191,39 @@ const AdminAnnouncements = () => {
                 onInputChange={handleInputChange}
                 onSubmit={handleSubmit}
                 submitting={submitting}
+            />
+
+            <EditAnnouncementModal
+                open={editOpen}
+                onClose={() => setEditOpen(false)}
+                announcement={editingAnnouncement}
+                onChange={(e) => {
+                    const { name, value, checked, type } = e.target;
+                    setEditingAnnouncement(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+                }}
+                onSubmit={async () => {
+                    if (!editingAnnouncement.title || !editingAnnouncement.content) {
+                        showSnackbar(ANNOUNCEMENTS_MESSAGES.VALIDATION_REQUIRED, 'error');
+                        return;
+                    }
+                    setEditSubmitting(true);
+                        try {
+                            await announcementsService.update(editingAnnouncement.announcementId, {
+                                title: editingAnnouncement.title,
+                                content: editingAnnouncement.content,
+                                isEmergency: !!editingAnnouncement.isEmergency
+                            });
+                            showSnackbar(ANNOUNCEMENTS_MESSAGES.UPDATE_SUCCESS, 'success');
+                            setEditOpen(false);
+                            fetchAnnouncements();
+                        } catch (error) {
+                            console.error('Failed to update announcement:', error);
+                            showSnackbar(ANNOUNCEMENTS_MESSAGES.UPDATE_FAILED, 'error');
+                        } finally {
+                            setEditSubmitting(false);
+                        }
+                }}
+                submitting={editSubmitting}
             />
 
             {/* Delete Confirmation Dialog */}

@@ -134,9 +134,64 @@ export const FormContainer = styled(Box)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
     gap: '1.5rem',
-    padding: '1rem 0',
+    padding: `${theme.spacing(2)} ${theme.spacing(3)}`,
 }));
 
 export const StyledFormControlLabel = styled(FormControlLabel)(({ theme }) => ({
     color: theme.palette.text.primary,
+}));
+
+export const FormOptions = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: '1rem',
+    '& .MuiCheckbox-root': {
+        color: theme.palette.text.secondary,
+    },
+    '& .MuiCheckbox-root.Mui-checked': {
+        color: theme.palette.primary.main,
+    },
+    '& .MuiCheckbox-root:focus': {
+        outline: 'none',
+    },
+    '& .MuiTypography-root': {
+        fontSize: '0.813rem',
+        color: theme.palette.text.secondary,
+    },
+}));
+
+export const ModalHeader = styled('div')(({ theme }) => ({
+    position: 'relative',
+    padding: theme.spacing(3),
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: theme.spacing(1),
+}));
+
+export const ModalIconWrapper = styled('div')(({ theme }) => ({
+    background: 'rgba(2,136,209,0.08)',
+    borderRadius: '50%',
+    padding: theme.spacing(1.25),
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    '& .MuiSvgIcon-root': {
+        fontSize: '36px',
+    },
+}));
+
+export const ModalSubtitle = styled('p')(({ theme }) => ({
+    color: theme.palette.text.secondary,
+    fontSize: '0.95rem',
+    textAlign: 'center',
+    margin: 0,
+    maxWidth: '560px',
+}));
+
+export const ModalCloseButton = styled('div')(({ theme }) => ({
+    position: 'absolute',
+    right: theme.spacing(1),
+    top: theme.spacing(1),
 }));
