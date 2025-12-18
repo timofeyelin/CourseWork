@@ -1,8 +1,9 @@
 import React from 'react';
-import { DialogContent, Checkbox, CircularProgress, IconButton } from '@mui/material';
+import { DialogContent, CircularProgress, IconButton, MenuItem } from '@mui/material';
 import { Close as CloseIcon, Campaign as CampaignIcon } from '@mui/icons-material';
-import { GlassButton, GlassDialog, GlassDialogTitle, GlassDialogActions, GlassInput } from '../../../../components/common';
-import { FormContainer, StyledFormControlLabel, FormOptions, ModalHeader, ModalIconWrapper, ModalSubtitle, ModalCloseButton } from '../AdminAnnouncements.styles';
+import { GlassButton, GlassDialog, GlassDialogTitle, GlassDialogActions, GlassInput, GlassSelect } from '../../../../components/common';
+import { FormContainer, ModalHeader, ModalIconWrapper, ModalSubtitle, ModalCloseButton } from '../AdminAnnouncements.styles';
+import { ANNOUNCEMENT_TYPES, ANNOUNCEMENT_TYPE_LABELS } from '../../../../utils/constants';
 
 const EditAnnouncementModal = ({ open, onClose, announcement, onChange, onSubmit, submitting }) => {
     if (!announcement) return null;
@@ -19,7 +20,7 @@ const EditAnnouncementModal = ({ open, onClose, announcement, onChange, onSubmit
                     <CampaignIcon color="primary" />
                 </ModalIconWrapper>
                 <GlassDialogTitle>Редактировать объявление</GlassDialogTitle>
-                <ModalSubtitle>Измените заголовок, содержание и срочность объявления.</ModalSubtitle>
+                <ModalSubtitle>Измените заголовок, содержание и тип объявления.</ModalSubtitle>
             </ModalHeader>
 
             <DialogContent>
@@ -32,6 +33,26 @@ const EditAnnouncementModal = ({ open, onClose, announcement, onChange, onSubmit
                         fullWidth
                         required
                     />
+                    
+                    {/* ЗАМЕНА ЧЕКБОКСА НА SELECT */}
+                    <GlassSelect
+                        label="Тип объявления"
+                        name="type"
+                        value={announcement.type} // Теперь используем type
+                        onChange={onChange}
+                        fullWidth
+                    >
+                        <MenuItem value={ANNOUNCEMENT_TYPES.INFO}>
+                            {ANNOUNCEMENT_TYPE_LABELS[ANNOUNCEMENT_TYPES.INFO]}
+                        </MenuItem>
+                        <MenuItem value={ANNOUNCEMENT_TYPES.OUTAGE}>
+                            {ANNOUNCEMENT_TYPE_LABELS[ANNOUNCEMENT_TYPES.OUTAGE]}
+                        </MenuItem>
+                        <MenuItem value={ANNOUNCEMENT_TYPES.EMERGENCY}>
+                            {ANNOUNCEMENT_TYPE_LABELS[ANNOUNCEMENT_TYPES.EMERGENCY]}
+                        </MenuItem>
+                    </GlassSelect>
+
                     <GlassInput
                         label="Содержание"
                         name="content"
@@ -42,18 +63,6 @@ const EditAnnouncementModal = ({ open, onClose, announcement, onChange, onSubmit
                         rows={6}
                         required
                     />
-                    <FormOptions>
-                        <StyledFormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={!!announcement.isEmergency}
-                                    onChange={onChange}
-                                    name="isEmergency"
-                                />
-                            }
-                            label="Срочное объявление"
-                        />
-                    </FormOptions>
                 </FormContainer>
             </DialogContent>
 

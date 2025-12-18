@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { CircularProgress } from '@mui/material';
 import { billsService, requestsService, announcementsService } from '../../api';
-import { ERROR_MESSAGES } from '../../utils/constants';
+import { ERROR_MESSAGES, ANNOUNCEMENT_TYPES } from '../../utils/constants'; 
 import { 
     HomeContainer, 
     HomeContent, 
@@ -66,7 +66,11 @@ const Home = () => {
 
         try {
             const newsRes = await announcementsService.getAll();
-            const sortedNews = newsRes.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            // Сортировка: сначала тип (Аварии=2, Отключения=1, Инфо=0), потом дата
+            const sortedNews = newsRes.data.sort((a, b) => {
+                if (b.type !== a.type) return b.type - a.type;
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            });
             setAnnouncements(sortedNews);
             setNewsError(false);
         } catch (e) {
@@ -108,7 +112,10 @@ const Home = () => {
         setTimeout(() => setSelectedNews(null), 300); 
     };
 
-    const outages = announcements.filter(a => a.isEmergency);
+    const outages = announcements.filter(a => 
+        a.type === ANNOUNCEMENT_TYPES.EMERGENCY || 
+        a.type === ANNOUNCEMENT_TYPES.OUTAGE
+    );
 
     if (loading && announcements.length === 0 && balance === 0 && openRequestsCount === 0) {
         return (
@@ -129,6 +136,7 @@ const Home = () => {
                         openRequestsCount={openRequestsCount} 
                     />
 
+                    {/* Баннеры теперь получают отфильтрованные по типу новости */}
                     <OutageBanners outages={outages} />
 
                     <NewsFeed 

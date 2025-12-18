@@ -1,5 +1,7 @@
 using Backend.Api.Dtos;
 using Backend.Application.Interfaces;
+using Backend.Domain.Entities;
+using Backend.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -22,7 +24,7 @@ namespace Backend.Api.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<List<AnnouncementDto>>> GetAllAnnouncements(CancellationToken ct)
+        public async Task<ActionResult<List<AnnouncementDto>>> GetAllAnnouncements([FromQuery] AnnouncementType? type, CancellationToken ct)
         {
             int? userId = null;
             if (User.Identity?.IsAuthenticated == true)
@@ -30,7 +32,7 @@ namespace Backend.Api.Controllers
                 userId = GetUserId();
             }
 
-            var announcements = await _announcementService.GetAllAnnouncementsAsync(userId, ct);
+            var announcements = await _announcementService.GetAllAnnouncementsAsync(userId, type, ct);
             var dtos = announcements.Select(MapToDto).ToList();
             return Ok(dtos);
         }
@@ -61,7 +63,7 @@ namespace Backend.Api.Controllers
         [Authorize(Roles = "Admin,Operator")]
         public async Task<ActionResult<AnnouncementDto>> CreateAnnouncement([FromBody] CreateAnnouncementRequest dto, CancellationToken ct)
         {
-            var announcement = await _announcementService.CreateAnnouncementAsync(dto.Title, dto.Content, dto.IsEmergency, ct);
+            var announcement = await _announcementService.CreateAnnouncementAsync(dto.Title, dto.Content, dto.Type, ct);
             return CreatedAtAction(nameof(GetAllAnnouncements), new { id = announcement.AnnouncementId }, MapToDto(announcement));
         }
 
@@ -71,7 +73,7 @@ namespace Backend.Api.Controllers
         {
             try
             {
-                var updated = await _announcementService.UpdateAnnouncementAsync(announcementId, dto.Title, dto.Content, dto.IsEmergency, ct);
+                var updated = await _announcementService.UpdateAnnouncementAsync(announcementId, dto.Title, dto.Content, dto.Type, ct);
                 return Ok(MapToDto(updated));
             }
             catch (KeyNotFoundException ex)
@@ -103,7 +105,7 @@ namespace Backend.Api.Controllers
                 Title = announcement.Title,
                 Content = announcement.Content,
                 CreatedAt = announcement.CreatedAt,
-                IsEmergency = announcement.IsEmergency,
+                Type = announcement.Type,
                 IsRead = announcement.Reads.Any()
             };
         }

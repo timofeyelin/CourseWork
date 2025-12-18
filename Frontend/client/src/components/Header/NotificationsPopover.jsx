@@ -17,8 +17,8 @@ import InfoIcon from '@mui/icons-material/Info';
 import ErrorIcon from '@mui/icons-material/Error';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import BuildIcon from '@mui/icons-material/Build';
-import CampaignIcon from '@mui/icons-material/Campaign';
-import PowerOffIcon from '@mui/icons-material/PowerOff';
+import NotificationsIcon from '@mui/icons-material/Notifications'; 
+import WarningIcon from '@mui/icons-material/Warning'; 
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../utils/constants';
@@ -52,14 +52,28 @@ const NotificationItem = styled(ListItem)(({ theme, isread }) => ({
 }));
 
 // Иконка в зависимости от типа
-const getIconByType = (type) => {
+const getNotificationIcon = (notification) => {
+    const { type, title } = notification;
+
     switch (type) {
-        case 'Bill': return <ReceiptIcon color="primary" />;
-        case 'Debt': return <ErrorIcon color="error" />;
-        case 'Request': return <BuildIcon color="info" />;
-        case 'Outage': return <PowerOffIcon color="warning" />;
-        case 'Announcement': return <CampaignIcon color="secondary" />;
-        default: return <InfoIcon color="action" />;
+        case 'Bill': 
+            return <ReceiptIcon color="primary" />;
+        case 'Debt': 
+            return <ErrorIcon color="error" />;
+        case 'Request': 
+            return <BuildIcon color="info" />;
+        
+        case 'Outage':
+            if (title && title.toUpperCase().includes('АВАРИЯ')) {
+                return <WarningIcon color="error" />;
+            }
+            return <InfoIcon sx={{ color: '#ed6c02' }} />; 
+            
+        case 'Announcement': 
+            return <NotificationsIcon color="primary" />;
+            
+        default: 
+            return <InfoIcon color="action" />;
     }
 };
 
@@ -141,7 +155,7 @@ const NotificationsPopover = ({ notifications, loading, onMarkAllRead, onMarkRea
                                     onClick={() => handleItemClick(n)}
                                 >
                                     <ListItemIcon sx={{ minWidth: 40, mt: 0.5 }}>
-                                        {getIconByType(n.type)}
+                                        {getNotificationIcon(n)}
                                     </ListItemIcon>
                                     <ListItemText 
                                         primary={

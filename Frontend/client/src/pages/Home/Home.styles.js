@@ -101,16 +101,33 @@ export const WidgetIcon = styled(Box)(({ theme, color }) => ({
     backgroundColor: `${color}15` || `${theme.palette.primary.main}15`,
 }));
 
-export const OutageBanner = styled(GlassCard)(({ theme }) => ({
-    padding: theme.spacing(2),
-    marginBottom: theme.spacing(3),
-    backgroundColor: '#ffebee', // Light red
-    border: '1px solid #ef9a9a',
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(2),
-    color: '#c62828',
-}));
+export const OutageBanner = styled(GlassCard)(({ theme, $severity }) => {
+    // Дефолтные значения (для 'warning' / отключения)
+    let styles = {
+        backgroundColor: '#fff3e0', // Orange light
+        borderColor: '#ffcc80',
+        color: '#e65100',
+    };
+
+    // Переопределение для аварий
+    if ($severity === 'error') {
+        styles = {
+            backgroundColor: '#ffebee', // Red light
+            borderColor: '#ef9a9a',
+            color: '#c62828',
+        };
+    }
+
+    return {
+        padding: theme.spacing(2),
+        marginBottom: theme.spacing(3),
+        border: '1px solid', // Цвет границы берется из объекта styles
+        display: 'flex',
+        alignItems: 'center',
+        gap: theme.spacing(2),
+        ...styles
+    };
+});
 
 export const NewsSectionHeader = styled(Box)(({ theme }) => ({
     marginBottom: theme.spacing(3),
@@ -248,20 +265,26 @@ export const ModalHeader = styled(Box)(({ theme }) => ({
     width: '100%',
 }));
 
-export const ModalIconWrapper = styled(Box)(({ theme, isEmergency }) => ({
-    width: '64px',
-    height: '64px',
-    borderRadius: '50%',
-    backgroundColor: isEmergency ? 'rgba(211, 47, 47, 0.1)' : 'rgba(2, 136, 209, 0.1)',
-    color: isEmergency ? theme.palette.error.main : theme.palette.primary.main,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: theme.spacing(1),
-    '& svg': {
-        fontSize: '32px',
-    }
-}));
+export const ModalIconWrapper = styled(Box)(({ theme, $color }) => {
+    // Получаем цвет из темы (primary, error, warning) или используем дефолтный
+    const themeColor = theme.palette[$color] || theme.palette.primary;
+
+    return {
+        width: '64px',
+        height: '64px',
+        borderRadius: '50%',
+        // Прозрачный фон соответствующего цвета
+        backgroundColor: `${themeColor.main}15`, // 15 = ~10% opacity
+        color: themeColor.main,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: theme.spacing(1),
+        '& svg': {
+            fontSize: '32px',
+        }
+    };
+});
 
 export const ModalDateWrapper = styled(Box)(({ theme }) => ({
     display: 'flex',

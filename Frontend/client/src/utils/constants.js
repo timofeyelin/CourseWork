@@ -181,6 +181,18 @@ export const REQUEST_PRIORITY_LABELS = {
     4: 'Критический',
 }
 
+export const ANNOUNCEMENT_TYPES = {
+    INFO: 0,
+    OUTAGE: 1,
+    EMERGENCY: 2
+};
+
+export const ANNOUNCEMENT_TYPE_LABELS = {
+    [ANNOUNCEMENT_TYPES.INFO]: 'Информация',
+    [ANNOUNCEMENT_TYPES.OUTAGE]: 'Плановое отключение',
+    [ANNOUNCEMENT_TYPES.EMERGENCY]: 'Авария'
+};
+
 export const ADMIN_MESSAGES = {
     ANALYTICS_LOAD_FAILED: 'Не удалось загрузить данные аналитики',
     NO_DATA: 'Нет данных за выбранный период'

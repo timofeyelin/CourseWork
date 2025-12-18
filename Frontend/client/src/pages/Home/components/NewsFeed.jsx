@@ -1,5 +1,6 @@
+import { Chip } from '@mui/material'; // Добавили Chip
 import { Notifications, ArrowForward } from '@mui/icons-material';
-import { ERROR_MESSAGES } from '../../../utils/constants';
+import { ERROR_MESSAGES, ANNOUNCEMENT_TYPES } from '../../../utils/constants'; // Добавили константы
 import { 
     NewsSectionHeader, 
     NewsSectionTitle, 
@@ -46,8 +47,29 @@ const NewsFeed = ({ announcements, newsError, onOpenNews }) => {
                             <NewsHeader>
                                 <NewsTitleWrapper>
                                     <NewsTitle>{news.title}</NewsTitle>
+                                    
+                                    {/* Бейдж "Новое" */}
                                     {!news.isRead && <NewBadge>Новое</NewBadge>}
+                                    
+                                    {/* Бейджи типов */}
+                                    {news.type === ANNOUNCEMENT_TYPES.EMERGENCY && (
+                                        <Chip 
+                                            label="Авария" 
+                                            color="error" 
+                                            size="small" 
+                                            sx={{ ml: 1, height: 20, fontSize: '0.7rem', fontWeight: 600 }} 
+                                        />
+                                    )}
+                                    {news.type === ANNOUNCEMENT_TYPES.OUTAGE && (
+                                        <Chip 
+                                            label="Отключение" 
+                                            color="warning" 
+                                            size="small" 
+                                            sx={{ ml: 1, height: 20, fontSize: '0.7rem', fontWeight: 600 }} 
+                                        />
+                                    )}
                                 </NewsTitleWrapper>
+                                
                                 <NewsDate>
                                     {new Date(news.createdAt).toLocaleDateString('ru-RU')}
                                 </NewsDate>

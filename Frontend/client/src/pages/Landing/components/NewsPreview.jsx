@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material';
+import { Typography, Chip, Box } from '@mui/material'; 
 import { 
     Section, 
     SectionTitle, 
@@ -8,8 +8,21 @@ import {
     NewsContent,
     NoNewsText
 } from '../Landing.styles';
+import { ANNOUNCEMENT_TYPES } from '../../../utils/constants'; 
 
 const NewsPreview = ({ news }) => {
+
+    // Хелпер для выбора чипа
+    const getTypeChip = (type) => {
+        if (type === ANNOUNCEMENT_TYPES.EMERGENCY) {
+            return <Chip label="Авария" color="error" size="small" sx={{ height: 24, fontSize: '0.75rem', fontWeight: 600 }} />;
+        }
+        if (type === ANNOUNCEMENT_TYPES.OUTAGE) {
+            return <Chip label="Отключение" color="warning" size="small" sx={{ height: 24, fontSize: '0.75rem', fontWeight: 600 }} />;
+        }
+        return null; 
+    };
+
     return (
         <Section id="news">
             <SectionTitle variant="h4" component="h2">
@@ -19,13 +32,17 @@ const NewsPreview = ({ news }) => {
                 {news.length > 0 ? (
                     news.map((item) => (
                         <NewsCard key={item.announcementId}>
-                            <NewsDate variant="caption" color="primary">
-                                {new Date(item.createdAt).toLocaleDateString('ru-RU', {
-                                    day: 'numeric',
-                                    month: 'long',
-                                    year: 'numeric'
-                                })}
-                            </NewsDate>
+                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                                <NewsDate variant="caption" color="primary" sx={{ mb: 0 }}>
+                                    {new Date(item.createdAt).toLocaleDateString('ru-RU', {
+                                        day: 'numeric',
+                                        month: 'long',
+                                        year: 'numeric'
+                                    })}
+                                </NewsDate>
+                                {getTypeChip(item.type)}
+                            </Box>
+
                             <Typography variant="h6" gutterBottom fontWeight="bold">
                                 {item.title}
                             </Typography>
