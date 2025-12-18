@@ -40,7 +40,7 @@ const AdminAnnouncements = () => {
     const [formData, setFormData] = useState({
         title: '',
         content: '',
-        isEmergency: false
+        type: 0 
     });
     const [submitting, setSubmitting] = useState(false);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
@@ -76,7 +76,7 @@ const AdminAnnouncements = () => {
     };
 
     const handleOpenDialog = () => {
-        setFormData({ title: '', content: '', isEmergency: false });
+        setFormData({ title: '', content: '', type: 0 });
         setOpenDialog(true);
     };
 
@@ -85,10 +85,10 @@ const AdminAnnouncements = () => {
     };
 
     const handleInputChange = (e) => {
-        const { name, value, checked, type } = e.target;
+        const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : value
+            [name]: value
         }));
     };
 
@@ -176,7 +176,7 @@ const AdminAnnouncements = () => {
                                 announcementId: a.announcementId,
                                 title: a.title,
                                 content: a.content,
-                                isEmergency: a.isEmergency
+                                type: a.type // Используем type
                             });
                             setEditOpen(true);
                         }}
@@ -198,8 +198,8 @@ const AdminAnnouncements = () => {
                 onClose={() => setEditOpen(false)}
                 announcement={editingAnnouncement}
                 onChange={(e) => {
-                    const { name, value, checked, type } = e.target;
-                    setEditingAnnouncement(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+                    const { name, value } = e.target;
+                    setEditingAnnouncement(prev => ({ ...prev, [name]: value }));
                 }}
                 onSubmit={async () => {
                     if (!editingAnnouncement.title || !editingAnnouncement.content) {
@@ -211,7 +211,7 @@ const AdminAnnouncements = () => {
                             await announcementsService.update(editingAnnouncement.announcementId, {
                                 title: editingAnnouncement.title,
                                 content: editingAnnouncement.content,
-                                isEmergency: !!editingAnnouncement.isEmergency
+                                type: editingAnnouncement.type // Отправляем type
                             });
                             showSnackbar(ANNOUNCEMENTS_MESSAGES.UPDATE_SUCCESS, 'success');
                             setEditOpen(false);
@@ -226,7 +226,6 @@ const AdminAnnouncements = () => {
                 submitting={editSubmitting}
             />
 
-            {/* Delete Confirmation Dialog */}
             <GlassDialog
                 open={deleteConfirmOpen}
                 onClose={() => setDeleteConfirmOpen(false)}

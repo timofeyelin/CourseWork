@@ -1,3 +1,5 @@
+using Backend.Domain.Enums;
+
 namespace Backend.Api.Dtos
 {
     public class AnnouncementDto
@@ -6,7 +8,7 @@ namespace Backend.Api.Dtos
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
-        public bool IsEmergency { get; set; }
+         public AnnouncementType Type { get; set; }
         public bool IsRead { get; set; } 
     }
 }

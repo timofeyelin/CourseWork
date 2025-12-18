@@ -14,44 +14,62 @@ namespace Backend.Application.Services
             _context = context;
         }
 
-        public async Task<Announcement> CreateAnnouncementAsync(string title, string content, bool isEmergency, CancellationToken ct)
+        public async Task<Announcement> CreateAnnouncementAsync(string title, string content, AnnouncementType type, CancellationToken ct)
         {
             var announcement = new Announcement
             {
                 Title = title,
                 Content = content,
-                IsEmergency = isEmergency,
+                Type = type,
                 CreatedAt = DateTime.UtcNow
             };
 
             _context.Announcements.Add(announcement);
             await _context.SaveChangesAsync(ct);
 
-            if (announcement.IsEmergency)
+            // Теперь рассылаем уведомление для ЛЮБОГО типа новости
+            var userIds = await _context.Users
+                .Where(u => u.Role == UserRole.Resident) // Только жителям
+                .Select(u => u.UserId)
+                .ToListAsync(ct);
+
+            string notificationTitle;
+            NotificationType notifType;
+
+            switch (type)
             {
-                var userIds = await _context.Users
-                    .Select(u => u.UserId)
-                    .ToListAsync(ct);
-
-                var notifications = userIds.Select(userId => new Notification
-                {
-                    UserId = userId,
-                    Type = NotificationType.Announcement,
-                    Title = "Срочное объявление",
-                    Text = announcement.Title, 
-                    CreatedAt = DateTime.UtcNow,
-                    IsRead = false,
-                    RelatedEntityId = announcement.AnnouncementId
-                });
-
-                _context.Notifications.AddRange(notifications);
-                await _context.SaveChangesAsync(ct);
+                case AnnouncementType.Emergency:
+                    notificationTitle = "АВАРИЯ: " + title;
+                    notifType = NotificationType.Outage; // Красная иконка
+                    break;
+                case AnnouncementType.Outage:
+                    notificationTitle = "Отключение: " + title;
+                    notifType = NotificationType.Outage; // Желтая иконка (на фронте Outage обрабатывается как warning)
+                    break;
+                default:
+                    notificationTitle = "Новость: " + title;
+                    notifType = NotificationType.Announcement; // Синяя иконка
+                    break;
             }
+
+            var notifications = userIds.Select(userId => new Notification
+            {
+                UserId = userId,
+                Type = notifType,
+                Title = notificationTitle,
+                Text = content.Length > 100 ? content.Substring(0, 100) + "..." : content, // Обрезаем длинный текст
+                CreatedAt = DateTime.UtcNow,
+                IsRead = false,
+                RelatedEntityId = announcement.AnnouncementId
+            });
+
+            _context.Notifications.AddRange(notifications);
+            await _context.SaveChangesAsync(ct);
 
             return announcement;
         }
 
-        public async Task<Announcement> UpdateAnnouncementAsync(int announcementId, string title, string content, bool isEmergency, CancellationToken ct)
+        public async Task<Announcement> UpdateAnnouncementAsync(int announcementId, string title, string content, AnnouncementType type, CancellationToken ct)
         {
             var announcement = await _context.Announcements.FindAsync(new object[] { announcementId }, ct);
             if (announcement == null)
@@ -61,7 +79,7 @@ namespace Backend.Application.Services
 
             announcement.Title = title;
             announcement.Content = content;
-            announcement.IsEmergency = isEmergency;
+            announcement.Type = type;
 
             _context.Announcements.Update(announcement);
             await _context.SaveChangesAsync(ct);
@@ -79,18 +97,24 @@ namespace Backend.Application.Services
             await _context.SaveChangesAsync(ct);
         }
 
-        public async Task<List<Announcement>> GetAllAnnouncementsAsync(int? userId, CancellationToken ct)
+        public async Task<List<Announcement>> GetAllAnnouncementsAsync(int? userId, AnnouncementType? filterType, CancellationToken ct)
         {
             var query = _context.Announcements.AsQueryable();
+
+            if (filterType.HasValue)
+            {
+                query = query.Where(a => a.Type == filterType.Value);
+            }
 
             if (userId.HasValue)
             {
                 query = query.Include(a => a.Reads.Where(r => r.UserId == userId.Value));
             }
-
+            
             return await query
-                .OrderByDescending(a => a.IsEmergency) 
-                .ThenByDescending(a => a.CreatedAt)    
+                .OrderByDescending(a => a.Type == AnnouncementType.Emergency)
+                .ThenByDescending(a => a.Type == AnnouncementType.Outage)
+                .ThenByDescending(a => a.CreatedAt)
                 .ToListAsync(ct);
         }
 
@@ -98,7 +122,8 @@ namespace Backend.Application.Services
         {
             return await _context.Announcements
                 .Where(a => !a.Reads.Any(r => r.UserId == userId))
-                .OrderByDescending(a => a.IsEmergency)
+                .OrderByDescending(a => a.Type == AnnouncementType.Emergency)
+                .ThenByDescending(a => a.Type == AnnouncementType.Outage)
                 .ThenByDescending(a => a.CreatedAt)
                 .ToListAsync(ct);
         }

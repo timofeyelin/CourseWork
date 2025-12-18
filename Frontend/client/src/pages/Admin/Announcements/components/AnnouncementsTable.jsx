@@ -6,7 +6,7 @@ import {
     Chip,
     Tooltip
 } from '@mui/material';
-import { Delete as DeleteIcon } from '@mui/icons-material';
+import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material'; // Добавил EditIcon для красоты
 import { GlassIconButton } from '../../../../components/common';
 import {
     StyledTableContainer,
@@ -14,8 +14,43 @@ import {
     StyledTableCell,
     StyledTableHeadCell
 } from '../AdminAnnouncements.styles';
+import { ANNOUNCEMENT_TYPES, ANNOUNCEMENT_TYPE_LABELS } from '../../../../utils/constants'; // <-- Импорт констант
 
 const AnnouncementsTable = ({ announcements, onDeleteClick, onEditClick }) => {
+    
+    // Вспомогательная функция для определения цвета и текста чипа
+    const getTypeChip = (type) => {
+        switch (type) {
+            case ANNOUNCEMENT_TYPES.EMERGENCY:
+                return (
+                    <Chip 
+                        label={ANNOUNCEMENT_TYPE_LABELS[ANNOUNCEMENT_TYPES.EMERGENCY]} 
+                        color="error" 
+                        size="small" 
+                        variant="filled" // Для аварий можно сделать заливку, чтобы бросалось в глаза
+                    />
+                );
+            case ANNOUNCEMENT_TYPES.OUTAGE:
+                return (
+                    <Chip 
+                        label={ANNOUNCEMENT_TYPE_LABELS[ANNOUNCEMENT_TYPES.OUTAGE]} 
+                        color="warning" 
+                        size="small" 
+                        variant="outlined"
+                    />
+                );
+            default: // INFO
+                return (
+                    <Chip 
+                        label={ANNOUNCEMENT_TYPE_LABELS[ANNOUNCEMENT_TYPES.INFO] || 'Инфо'} 
+                        color="primary" 
+                        size="small" 
+                        variant="outlined"
+                    />
+                );
+        }
+    };
+
     return (
         <StyledTableContainer>
             <Table>
@@ -23,7 +58,7 @@ const AnnouncementsTable = ({ announcements, onDeleteClick, onEditClick }) => {
                     <TableRow>
                         <StyledTableHeadCell>Заголовок</StyledTableHeadCell>
                         <StyledTableHeadCell>Дата создания</StyledTableHeadCell>
-                        <StyledTableHeadCell>Срочность</StyledTableHeadCell>
+                        <StyledTableHeadCell>Тип</StyledTableHeadCell> {/* БЫЛО: Срочность */}
                         <StyledTableHeadCell align="right">Действия</StyledTableHeadCell>
                     </TableRow>
                 </TableHead>
@@ -32,17 +67,17 @@ const AnnouncementsTable = ({ announcements, onDeleteClick, onEditClick }) => {
                         <StyledTableRow key={announcement.announcementId} hover>
                             <StyledTableCell>{announcement.title}</StyledTableCell>
                             <StyledTableCell>
-                                {new Date(announcement.createdAt).toLocaleDateString('ru-RU')}
+                                {new Date(announcement.createdAt).toLocaleDateString('ru-RU', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}
                             </StyledTableCell>
                             <StyledTableCell>
-                                {announcement.isEmergency && (
-                                    <Chip 
-                                        label="Срочно" 
-                                        color="error" 
-                                        size="small" 
-                                        variant="outlined"
-                                    />
-                                )}
+                                {/* Вывод чипа в зависимости от типа */}
+                                {getTypeChip(announcement.type)}
                             </StyledTableCell>
                             <StyledTableCell align="right">
                                 <Tooltip title="Редактировать">
@@ -50,8 +85,7 @@ const AnnouncementsTable = ({ announcements, onDeleteClick, onEditClick }) => {
                                         onClick={() => onEditClick && onEditClick(announcement)}
                                         size="small"
                                     >
-                                        {/* use built-in edit icon */}
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/></svg>
+                                        <EditIcon fontSize="small" />
                                     </GlassIconButton>
                                 </Tooltip>
                                 <Tooltip title="Удалить">
