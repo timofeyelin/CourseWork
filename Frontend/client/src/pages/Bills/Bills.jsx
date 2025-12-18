@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
     Typography, 
-    CircularProgress,
-    Select,
-    MenuItem,
-    InputLabel
+    CircularProgress
 } from '@mui/material';
 import { 
     ReceiptLong as BillIcon, 
@@ -21,14 +18,12 @@ import {
     ContentSection,
     FilterSection,
     FilterControl,
-    LoadingContainer,
-    ErrorContainer,
-    ErrorCard,
-    RetryButton
+    LoadingContainer
 } from './Bills.styles';
+import { ErrorBox } from '../../components/common';
 
 import BillsTable from './components/BillsTable';
-import { AppSnackbar } from '../../components/common';
+import { AppSnackbar, GlassSelect } from '../../components/common';
 import BillDetailsModal from './components/BillDetailsModal';
 import PaymentModal from './components/PaymentModal';
 
@@ -115,11 +110,7 @@ const Bills = () => {
             setDetailsModalOpen(true);
         } catch (err) {
             console.error('Error fetching bill details:', err);
-            setSnackbar({
-                open: true,
-                message: 'Не удалось загрузить детали счета',
-                severity: 'error'
-            });
+            setSnackbar({ open: true, message: ERROR_MESSAGES.BILL_DETAILS_LOAD_FAILED, severity: 'error' });
         }
     };
 
@@ -184,7 +175,7 @@ const Bills = () => {
             });
             
             handleClosePayment();
-            fetchData(); // Refresh list
+            fetchData();
         } catch (err) {
             console.error('Payment error:', err);
             setPaymentError(err.response?.data?.message || ERROR_MESSAGES.PAYMENT_FAILED);
@@ -211,14 +202,7 @@ const Bills = () => {
     }
 
     if (error) {
-        return (
-            <ErrorContainer>
-                <ErrorCard>
-                    <Typography color="error" variant="h6">{error}</Typography>
-                    <RetryButton onClick={() => window.location.reload()}>Повторить</RetryButton>
-                </ErrorCard>
-            </ErrorContainer>
-        );
+        return <ErrorBox message={error} onRetry={() => window.location.reload()} />;
     }
 
     return (
@@ -237,19 +221,13 @@ const Bills = () => {
                     <FilterSection>
                         <FilterIcon color="action" />
                         <FilterControl variant="outlined" size="small">
-                            <InputLabel>Лицевой счет</InputLabel>
-                            <Select
+                            <GlassSelect
+                                label="Лицевой счет"
                                 value={selectedAccount}
                                 onChange={handleAccountFilterChange}
-                                label="Лицевой счет"
-                            >
-                                <MenuItem value="all">Все счета</MenuItem>
-                                {accounts.map(acc => (
-                                    <MenuItem key={acc.id} value={acc.accountNumber}>
-                                        {acc.accountNumber}
-                                    </MenuItem>
-                                ))}
-                            </Select>
+                                options={[{ value: 'all', label: 'Все счета' }, ...accounts.map(acc => ({ value: acc.accountNumber, label: acc.accountNumber }))]}
+                                size="small"
+                            />
                         </FilterControl>
                     </FilterSection>
 

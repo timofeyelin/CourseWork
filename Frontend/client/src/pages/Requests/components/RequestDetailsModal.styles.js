@@ -62,9 +62,7 @@ export const RatingContainer = styled(Box)(({ theme }) => ({
     borderRadius: theme.shape.borderRadius * 2,
 }));
 
-export const AttachmentItemStyled = styled(Box)(({ theme }) => ({
-    cursor: 'pointer',
-}));
+
 
 export const RatingInput = styled(GlassInput)(({ theme }) => ({
     marginTop: theme.spacing(2),

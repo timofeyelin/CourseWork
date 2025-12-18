@@ -48,7 +48,6 @@ const Header = () => {
 
      const handleNotifClick = (event) => {
         setNotifAnchorEl(event.currentTarget);
-        // При открытии можно обновить список, чтобы убедиться в актуальности
         reloadNotifications();
     };
 
@@ -108,18 +107,25 @@ const Header = () => {
 
     const userLinks = [
         { title: 'Главная', path: ROUTES.HOME },
-        { title: 'Счетчики', path: ROUTES.METERS },
-        { title: 'Платежи', path: ROUTES.PAYMENTS },
-        { title: 'Заявки', path: ROUTES.REQUESTS },
     ];
 
+    const isAdminOrOperator = user?.role === 'Admin' || user?.role === 'Operator';
+    if (!isAdminOrOperator) {
+        userLinks.push(
+            { title: 'Счетчики', path: ROUTES.METERS },
+            { title: 'Платежи', path: ROUTES.PAYMENTS },
+            { title: 'Заявки', path: ROUTES.REQUESTS },
+            { title: 'Документы', path: ROUTES.DOCUMENTS },
+        );
+    }
+
     if (user?.role === 'Admin') {
-        userLinks.push({ title: 'Объявления', path: ROUTES.ADMIN_ANNOUNCEMENTS });
         userLinks.push({ title: 'Жители', path: ROUTES.ADMIN_RESIDENTS });
         userLinks.push({ title: 'Аналитика', path: ROUTES.ADMIN_DASHBOARD });
     }
 
     if (user?.role === 'Operator') {
+        userLinks.push({ title: 'Объявления', path: ROUTES.ADMIN_ANNOUNCEMENTS });
         userLinks.push({ title: 'Диспетчерская', path: ROUTES.OPERATOR_REQUESTS });
     }
 
@@ -156,10 +162,12 @@ const Header = () => {
                     <ActionsContainer>
                         {isAuthenticated ? (
                             <>
-                                <BalanceWidget>
-                                    <AccountBalanceWallet fontSize="small" />
-                                    0.00 ₽
-                                </BalanceWidget>
+                                {!isAdminOrOperator && (
+                                    <BalanceWidget>
+                                        <AccountBalanceWallet fontSize="small" />
+                                        0.00 ₽
+                                    </BalanceWidget>
+                                )}
                                 
                                 <IconButton 
                                     color="inherit" 

@@ -37,11 +37,9 @@ import {
     StyledTableRow,
     StyledTableCell,
     LoadingContainer,
-    ErrorContainer,
-    ErrorCard,
-    RetryButton,
     StyledGlassDatePicker
 } from './HistoryTab.styles';
+import { ErrorBox } from '../../../components/common';
 
 const HistoryTab = ({ initialAccount }) => {
     const [payments, setPayments] = useState([]);
@@ -207,14 +205,7 @@ const HistoryTab = ({ initialAccount }) => {
     }
 
     if (error) {
-        return (
-            <ErrorContainer>
-                <ErrorCard>
-                    <Typography color="error" variant="h6">{error}</Typography>
-                    <RetryButton onClick={() => window.location.reload()}>Повторить</RetryButton>
-                </ErrorCard>
-            </ErrorContainer>
-        );
+        return <ErrorBox message={error} onRetry={() => window.location.reload()} />;
     }
 
     return (
@@ -280,14 +271,14 @@ const HistoryTab = ({ initialAccount }) => {
                         </TableHead>
                         <TableBody>
                             {filteredPayments.length === 0 ? (
-                                <TableRow>
-                                    <StyledTableCell colSpan={5} align="center">
-                                        Платежей не найдено
+                                <StyledTableRow>
+                                    <StyledTableCell colSpan={5}>
+                                        <Typography>Платежи не найдены</Typography>
                                     </StyledTableCell>
-                                </TableRow>
+                                </StyledTableRow>
                             ) : (
-                                filteredPayments.map((payment) => (
-                                    <StyledTableRow key={payment.id} hover>
+                                filteredPayments.map(payment => (
+                                    <StyledTableRow key={payment.id}>
                                         <StyledTableCell>{formatDate(payment.date)}</StyledTableCell>
                                         <StyledTableCell>{payment.accountNumber}</StyledTableCell>
                                         <StyledTableCell>{formatCurrency(payment.amount)}</StyledTableCell>
@@ -298,22 +289,18 @@ const HistoryTab = ({ initialAccount }) => {
                                         </StyledTableCell>
                                         <StyledTableCell align="right">
                                             {payment.status === 'Pending' && (
-                                                <>
-                                                    <Tooltip title="Отменить платеж">
-                                                        <GlassIconButton 
-                                                            size="small" 
-                                                            onClick={() => handleCancelClick(payment)}
-                                                            disabled={isProcessing}
-                                                        >
-                                                            <CancelIcon fontSize="small" />
-                                                        </GlassIconButton>
-                                                    </Tooltip>
-                                                </>
+                                                <Tooltip title="Отменить платеж">
+                                                    <GlassIconButton 
+                                                        size="small" 
+                                                        onClick={() => handleCancelClick(payment)}
+                                                        disabled={isProcessing}
+                                                    >
+                                                        <CancelIcon fontSize="small" />
+                                                    </GlassIconButton>
+                                                </Tooltip>
                                             )}
                                             <Tooltip title="Детали">
-                                                <GlassIconButton 
-                                                    size="small" 
-                                                >
+                                                <GlassIconButton size="small">
                                                     <InfoIcon fontSize="small" />
                                                 </GlassIconButton>
                                             </Tooltip>

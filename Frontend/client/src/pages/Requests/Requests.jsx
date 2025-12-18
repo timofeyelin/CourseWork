@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { ROUTES } from '../../utils/constants';
 import { 
     CircularProgress,
     Typography,
@@ -19,7 +22,9 @@ import {
     REQUEST_STATUSES, 
     REQUEST_CATEGORIES, 
     REQUEST_CATEGORY_LABELS,
-    VALIDATION_MESSAGES
+    VALIDATION_MESSAGES,
+    REQUESTS_MESSAGES,
+    SUCCESS_MESSAGES
 } from '../../utils/constants';
 import {
     PageContainer,
@@ -28,11 +33,9 @@ import {
     PageTitle,
     ContentSection,
     FilterSection,
-    LoadingContainer,
-    ErrorContainer,
-    ErrorCard,
-    RetryButton
+    LoadingContainer
 } from './Requests.styles';
+import { ErrorBox } from '../../components/common';
 import RequestsTable from './components/RequestsTable';
 import CreateRequestModal from './components/CreateRequestModal';
 import RequestDetailsModal from './components/RequestDetailsModal';
@@ -44,10 +47,8 @@ const Requests = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     
-    // Filters
     const [statusFilter, setStatusFilter] = useState('All');
 
-    // Create Modal State
     const [createModalOpen, setCreateModalOpen] = useState(false);
     const [newRequest, setNewRequest] = useState({
         accountId: '',
@@ -57,7 +58,6 @@ const Requests = () => {
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Details Modal State
     const [detailsModalOpen, setDetailsModalOpen] = useState(false);
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [newComment, setNewComment] = useState('');
@@ -91,9 +91,22 @@ const Requests = () => {
         }
     };
 
+    const { user, isAuthenticated } = useAuth();
+    const navigate = useNavigate();
+
     useEffect(() => {
+        if (!isAuthenticated) {
+            navigate(ROUTES.HOME);
+            return;
+        }
+        // Запретить доступ к странице заявок для админов и операторов
+        if (user && (user.role === 'Admin' || user.role === 'Operator')) {
+            navigate(ROUTES.HOME);
+            return;
+        }
+
         fetchData();
-    }, []);
+    }, [isAuthenticated, user, navigate]);
 
     const handleCreateOpen = () => {
         setNewRequest({
@@ -112,11 +125,7 @@ const Requests = () => {
     const handleFileChange = (event) => {
         const files = Array.from(event.target.files);
         if (newRequest.files.length + files.length > 3) {
-            setSnackbar({
-                open: true,
-                message: 'Максимум 3 файла',
-                severity: 'warning'
-            });
+            setSnackbar({ open: true, message: REQUESTS_MESSAGES.FILES_TOO_MANY, severity: 'warning' });
             return;
         }
         setNewRequest(prev => ({
@@ -134,11 +143,7 @@ const Requests = () => {
 
     const handleSubmitRequest = async () => {
         if (!newRequest.accountId) {
-            setSnackbar({
-                open: true,
-                message: 'Выберите лицевой счет',
-                severity: 'error'
-            });
+            setSnackbar({ open: true, message: REQUESTS_MESSAGES.SELECT_ACCOUNT, severity: 'error' });
             return;
         }
 
@@ -168,20 +173,12 @@ const Requests = () => {
                 ));
             }
 
-            setSnackbar({
-                open: true,
-                message: 'Заявка успешно создана',
-                severity: 'success'
-            });
+            setSnackbar({ open: true, message: SUCCESS_MESSAGES.REQUEST_CREATED, severity: 'success' });
             handleCreateClose();
             fetchData();
         } catch (err) {
             console.error('Error creating request:', err);
-            setSnackbar({
-                open: true,
-                message: 'Ошибка при создании заявки',
-                severity: 'error'
-            });
+            setSnackbar({ open: true, message: REQUESTS_MESSAGES.CREATE_FAILED, severity: 'error' });
         } finally {
             setIsSubmitting(false);
         }
@@ -198,11 +195,7 @@ const Requests = () => {
             }
         } catch (err) {
             console.error('Error fetching request details:', err);
-            setSnackbar({
-                open: true,
-                message: 'Не удалось загрузить детали заявки',
-                severity: 'error'
-            });
+            setSnackbar({ open: true, message: REQUESTS_MESSAGES.DETAILS_LOAD_FAILED, severity: 'error' });
         }
     };
 
@@ -224,11 +217,7 @@ const Requests = () => {
             setNewComment('');
         } catch (err) {
             console.error('Error adding comment:', err);
-            setSnackbar({
-                open: true,
-                message: 'Не удалось отправить комментарий',
-                severity: 'error'
-            });
+            setSnackbar({ open: true, message: REQUESTS_MESSAGES.COMMENT_SEND_FAILED, severity: 'error' });
         } finally {
             setIsSendingComment(false);
         }
@@ -236,11 +225,7 @@ const Requests = () => {
 
     const handleRateRequest = async () => {
         if (rating === 0) {
-            setSnackbar({
-                open: true,
-                message: 'Поставьте оценку',
-                severity: 'warning'
-            });
+            setSnackbar({ open: true, message: REQUESTS_MESSAGES.RATE_REQUIRED, severity: 'warning' });
             return;
         }
 
@@ -251,21 +236,13 @@ const Requests = () => {
                 comment: ratingComment 
             });
             
-            setSnackbar({
-                open: true,
-                message: 'Спасибо за оценку!',
-                severity: 'success'
-            });
+            setSnackbar({ open: true, message: REQUESTS_MESSAGES.RATE_THANK_YOU, severity: 'success' });
             
             const response = await requestsService.getRequestDetails(selectedRequest.requestId);
             setSelectedRequest(response.data);
         } catch (err) {
             console.error('Error rating request:', err);
-            setSnackbar({
-                open: true,
-                message: 'Не удалось отправить оценку',
-                severity: 'error'
-            });
+            setSnackbar({ open: true, message: REQUESTS_MESSAGES.RATE_SEND_FAILED, severity: 'error' });
         } finally {
             setIsSubmittingRating(false);
         }
@@ -285,14 +262,7 @@ const Requests = () => {
     }
 
     if (error) {
-        return (
-            <ErrorContainer>
-                <ErrorCard>
-                    <Typography color="error" variant="h6">{error}</Typography>
-                    <RetryButton onClick={() => window.location.reload()}>Повторить</RetryButton>
-                </ErrorCard>
-            </ErrorContainer>
-        );
+        return <ErrorBox message={error} onRetry={() => window.location.reload()} />;
     }
 
     return (

@@ -1,8 +1,13 @@
 import { 
     DialogContent, 
     Checkbox, 
-    CircularProgress 
+    CircularProgress,
+    Box,
+    IconButton,
+    Typography,
+    Divider
 } from '@mui/material';
+import { Close as CloseIcon, Campaign as CampaignIcon } from '@mui/icons-material';
 import { 
     GlassButton, 
     GlassDialog, 
@@ -12,7 +17,12 @@ import {
 } from '../../../../components/common';
 import {
     FormContainer,
-    StyledFormControlLabel
+    StyledFormControlLabel,
+    FormOptions,
+    ModalHeader,
+    ModalIconWrapper,
+    ModalSubtitle,
+    ModalCloseButton
 } from '../AdminAnnouncements.styles';
 
 const CreateAnnouncementModal = ({ 
@@ -30,7 +40,21 @@ const CreateAnnouncementModal = ({
             maxWidth="sm"
             fullWidth
         >
-            <GlassDialogTitle>Новое объявление</GlassDialogTitle>
+            <ModalHeader>
+                <ModalCloseButton>
+                    <IconButton aria-label="close" onClick={onClose} size="large">
+                        <CloseIcon />
+                    </IconButton>
+                </ModalCloseButton>
+                <ModalIconWrapper>
+                    <CampaignIcon color="primary" />
+                </ModalIconWrapper>
+                <GlassDialogTitle>Новое объявление</GlassDialogTitle>
+                <ModalSubtitle>
+                    Создайте уведомление для жителей. Срочные объявления будут отображаться вверху и как оповещение.
+                </ModalSubtitle>
+            </ModalHeader>
+
             <DialogContent>
                 <FormContainer>
                     <GlassInput
@@ -48,31 +72,35 @@ const CreateAnnouncementModal = ({
                         onChange={onInputChange}
                         fullWidth
                         multiline
-                        rows={4}
+                        rows={6}
                         required
                     />
-                    <StyledFormControlLabel
-                        control={
-                            <Checkbox
-                                checked={formData.isEmergency}
-                                onChange={onInputChange}
-                                name="isEmergency"
-                                color="error"
-                            />
-                        }
-                        label="Срочное объявление"
-                    />
+                    <FormOptions>
+                        <StyledFormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={formData.isEmergency}
+                                    onChange={onInputChange}
+                                    name="isEmergency"
+                                />
+                            }
+                            label="Срочное объявление"
+                        />
+                    </FormOptions>
                 </FormContainer>
             </DialogContent>
+
             <GlassDialogActions>
-                <GlassButton onClick={onClose} color="inherit">
+                <GlassButton onClick={onClose} variant="text">
                     Отмена
                 </GlassButton>
                 <GlassButton 
                     onClick={onSubmit}
+                    variant="contained"
+                    color="primary"
                     disabled={submitting}
                 >
-                    {submitting ? <CircularProgress size={24} /> : 'Опубликовать'}
+                    {submitting ? <CircularProgress size={20} color="inherit" /> : 'Опубликовать'}
                 </GlassButton>
             </GlassDialogActions>
         </GlassDialog>

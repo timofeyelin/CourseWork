@@ -282,14 +282,7 @@ export const LoadingContainer = styled(Box)(({ theme }) => ({
     height: '80vh',
 }));
 
-export const ModalContent = styled(Box)(({ theme }) => ({
-    marginTop: theme.spacing(2),
-    '& img': {
-        maxWidth: '100%',
-        borderRadius: '8px',
-        marginTop: theme.spacing(2),
-    },
-}));
+
 
 export const OutageTitle = styled(Typography)(({ theme }) => ({
     fontWeight: 700,

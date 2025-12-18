@@ -58,15 +58,30 @@ namespace Backend.Api.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Operator")]
         public async Task<ActionResult<AnnouncementDto>> CreateAnnouncement([FromBody] CreateAnnouncementRequest dto, CancellationToken ct)
         {
             var announcement = await _announcementService.CreateAnnouncementAsync(dto.Title, dto.Content, dto.IsEmergency, ct);
             return CreatedAtAction(nameof(GetAllAnnouncements), new { id = announcement.AnnouncementId }, MapToDto(announcement));
         }
 
+        [HttpPut("{announcementId}")]
+        [Authorize(Roles = "Admin,Operator")]
+        public async Task<ActionResult<AnnouncementDto>> UpdateAnnouncement(int announcementId, [FromBody] CreateAnnouncementRequest dto, CancellationToken ct)
+        {
+            try
+            {
+                var updated = await _announcementService.UpdateAnnouncementAsync(announcementId, dto.Title, dto.Content, dto.IsEmergency, ct);
+                return Ok(MapToDto(updated));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
         [HttpDelete("{announcementId}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Operator")]
         public async Task<IActionResult> DeleteAnnouncement(int announcementId, CancellationToken ct)
         {
             try

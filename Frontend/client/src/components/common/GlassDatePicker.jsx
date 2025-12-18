@@ -37,7 +37,7 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
     }
 }));
 
-const popperSx = {
+const popperSx = (theme) => ({
     '& .MuiPaper-root': {
         borderRadius: '16px',
         backgroundColor: 'rgba(255, 255, 255, 0.9)',
@@ -52,7 +52,7 @@ const popperSx = {
             backgroundColor: 'rgba(2, 136, 209, 0.1)',
         },
         '&.Mui-selected': {
-            backgroundColor: '#0288d1', // theme.palette.primary.main
+            backgroundColor: theme.palette.primary.main,
             '&:hover': {
                 backgroundColor: '#01579b',
             }
@@ -62,7 +62,7 @@ const popperSx = {
         color: '#0288d1',
         fontWeight: 600,
     }
-};
+});
 
 export const GlassDatePicker = ({
     label,

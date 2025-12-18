@@ -14,9 +14,10 @@ import {
     StyledTableRow, 
     StyledTableCell, 
     StyledTableHeadCell,
-    UserStatusPill, 
-    ActionButton 
+    UserStatusPill
 } from '../Residents.styles';
+import { ErrorBox } from '../../../../components/common';
+import { GlassIconButton } from '../../../../components/common';
 
 const ResidentsTable = ({ users, loading, error, onRefresh, setSnackbar, onDetails }) => {
     const [blockConfirmOpen, setBlockConfirmOpen] = useState(false);
@@ -52,7 +53,7 @@ const ResidentsTable = ({ users, loading, error, onRefresh, setSnackbar, onDetai
     };
 
     if (loading) return <Box display="flex" justifyContent="center" p={4}><CircularProgress /></Box>;
-    if (error) return <Box display="flex" justifyContent="center" p={4}><Typography color="error">{error}</Typography><Button onClick={onRefresh}>Повторить</Button></Box>;
+    if (error) return <ErrorBox message={error} onRetry={onRefresh} />;
 
     return (
         <>
@@ -98,22 +99,21 @@ const ResidentsTable = ({ users, loading, error, onRefresh, setSnackbar, onDetai
                                 </StyledTableCell>
                                 <StyledTableCell align="right">
                                     <Box display="flex" justifyContent="flex-end" gap={1}>
-                                        <ActionButton 
+                                        <GlassIconButton 
                                             size="small" 
                                             onClick={() => onDetails(user)}
                                             title="Подробности"
-                                            color="primary"
                                         >
                                             <Visibility fontSize="small" />
-                                        </ActionButton>
-                                        <ActionButton 
+                                        </GlassIconButton>
+                                        <GlassIconButton 
                                             size="small" 
                                             color={user.isActive ? "error" : "success"}
                                             onClick={() => handleBlockClick(user)}
                                             title={user.isActive ? "Заблокировать" : "Разблокировать"}
                                         >
                                             {user.isActive ? <Block fontSize="small" /> : <CheckCircle fontSize="small" />}
-                                        </ActionButton>
+                                        </GlassIconButton>
                                     </Box>
                                 </StyledTableCell>
                             </StyledTableRow>

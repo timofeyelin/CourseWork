@@ -22,7 +22,7 @@ import {
     Numbers as NumbersIcon,
     CreditCard as CardIcon
 } from '@mui/icons-material';
-import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill, GlassSelect, AppSnackbar } from '../../../components/common';
+import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill, GlassSelect, AppSnackbar, ErrorBox } from '../../../components/common';
 import { billsService, userService } from '../../../api';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../../utils/constants';
 import { paymentValidationSchema } from '../../../utils/validationSchemas';
@@ -37,8 +37,6 @@ import {
     StyledTableRow,
     StyledTableCell,
     LoadingContainer,
-    ErrorContainer,
-    ErrorCard,
     ModalInfoSection,
     ModalInfoRow,
     BillDetailsTable,
@@ -47,7 +45,6 @@ import {
     ModalTableRow,
     TotalAmount,
     PaymentInput,
-    RetryButton,
     PaymentModalContent,
     PaymentAmountContainer,
     PaymentWalletIconWrapper,
@@ -214,7 +211,7 @@ const PaymentTab = ({ initialAccount }) => {
             });
             
             handleClosePayment();
-            fetchData(); // Refresh list
+            fetchData();
         } catch (err) {
             console.error('Payment error:', err);
             setPaymentError(err.response?.data?.message || ERROR_MESSAGES.PAYMENT_FAILED);
@@ -241,14 +238,7 @@ const PaymentTab = ({ initialAccount }) => {
     }
 
     if (error) {
-        return (
-            <ErrorContainer>
-                <ErrorCard>
-                    <Typography color="error" variant="h6">{error}</Typography>
-                    <RetryButton onClick={() => window.location.reload()}>Повторить</RetryButton>
-                </ErrorCard>
-            </ErrorContainer>
-        );
+        return <ErrorBox message={error} onRetry={() => window.location.reload()} />;
     }
 
     return (

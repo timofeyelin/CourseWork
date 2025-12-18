@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { 
-    Typography, IconButton, 
-    MenuItem,
+    Typography, IconButton
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import dayjs from 'dayjs';
@@ -13,7 +12,7 @@ import {
     LastReadingBox
 } from '../Meters.styles';
 import { metersService } from '../../../api/meters';
-import { GlassDialog, GlassDialogTitle, GlassDialogActions, GlassButton, GlassInput } from '../../../components/common';
+import { GlassDialog, GlassDialogTitle, GlassDialogActions, GlassButton, GlassInput, GlassSelect } from '../../../components/common';
 import { ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../utils/constants';
 
 const SubmitReadingModal = ({ open, onClose, meters, initialMeterId, onSuccess, readings }) => {
@@ -48,9 +47,12 @@ const SubmitReadingModal = ({ open, onClose, meters, initialMeterId, onSuccess, 
         const lastReading = readings[selectedMeterId];
         const newValue = parseFloat(value);
 
-        if (lastReading && newValue < lastReading.value && date.isAfter(dayjs(lastReading.period))) {
-            setError(`${VALIDATION_MESSAGES.READING_LESS_THAN_PREVIOUS} (${lastReading.value})`);
-            return;
+        if (lastReading) {
+            const prevValue = parseFloat(lastReading.value);
+            if (!isNaN(prevValue) && newValue < prevValue && dayjs().isAfter(dayjs(lastReading.period))) {
+                setError(`${VALIDATION_MESSAGES.READING_LESS_THAN_PREVIOUS} (${prevValue})`);
+                return;
+            }
         }
 
         setSubmitting(true);
@@ -90,19 +92,17 @@ const SubmitReadingModal = ({ open, onClose, meters, initialMeterId, onSuccess, 
 
                 <form onSubmit={handleSubmit} id="submit-reading-form">
                     <FormContainer>
-                        <GlassInput
-                            select
+                        <GlassSelect
                             label="Счетчик"
                             value={selectedMeterId}
                             onChange={(e) => setSelectedMeterId(e.target.value)}
                             fullWidth
-                        >
-                            {meters.map((meter) => (
-                                <MenuItem key={meter.meterId} value={meter.meterId}>
-                                    {meter.serialNumber} ({meter.type === 0 ? 'ХВ' : meter.type === 1 ? 'ГВ' : meter.type === 2 ? 'Эл' : 'Газ'})
-                                </MenuItem>
-                            ))}
-                        </GlassInput>
+                            options={meters.map((meter) => ({
+                                value: meter.meterId,
+                                label: `${meter.serialNumber} (${meter.type === 0 ? 'ХВ' : meter.type === 1 ? 'ГВ' : meter.type === 2 ? 'Эл' : 'Газ'})`
+                            }))}
+                            sx={{ backgroundColor: 'rgba(255,255,255,0.95)' }}
+                        />
 
                         {lastReading && (
                             <LastReadingBox>

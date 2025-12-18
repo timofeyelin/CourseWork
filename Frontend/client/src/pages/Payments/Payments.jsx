@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { ROUTES } from '../../utils/constants';
 import { AccountBalanceWallet, History } from '@mui/icons-material';
 import { PageContainer, PageContent, StyledTabs, StyledTab, TabPanel } from './Payments.styles';
 import PaymentTab from './components/PaymentTab';
@@ -11,7 +13,18 @@ const Payments = () => {
     const [activeTab, setActiveTab] = useState(0);
     const [initialAccount, setInitialAccount] = useState(null);
 
+    const { user, isAuthenticated } = useAuth();
+
     useEffect(() => {
+        if (!isAuthenticated) {
+            navigate(ROUTES.HOME);
+            return;
+        }
+        if (user && (user.role === 'Admin' || user.role === 'Operator')) {
+            navigate(ROUTES.HOME);
+            return;
+        }
+
         const tabParam = searchParams.get('tab');
         const accountParam = searchParams.get('account');
         
@@ -24,7 +37,7 @@ const Payments = () => {
         if (accountParam) {
             setInitialAccount(accountParam);
         }
-    }, [searchParams]);
+    }, [searchParams, isAuthenticated, user, navigate]);
 
     const handleTabChange = (event, newValue) => {
         setActiveTab(newValue);

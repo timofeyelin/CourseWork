@@ -1,11 +1,8 @@
 import { useState } from 'react';
-import { MenuItem } from '@mui/material';
+import { MenuItem, IconButton } from '@mui/material';
 import { adminService } from '../../api';
 import { GlassInput } from '../common';
 import {
-    Header,
-    Title,
-    Subtitle,
     StyledAlert,
     Form,
     FormField,
@@ -13,6 +10,16 @@ import {
     SubmitButton,
 } from './Auth.styles';
 import { StyledDialog, ModalLoginCard } from './Modal.styles';
+import OpacityIcon from '@mui/icons-material/Opacity';
+import CloseIcon from '@mui/icons-material/Close';
+import { GlassDialogTitle } from '../common';
+import {
+    ModalHeader,
+    ModalIconWrapper,
+    ModalSubtitle,
+    ModalCloseButton
+} from '../../pages/Admin/Announcements/AdminAnnouncements.styles';
+import { menuPaperStyles } from '../common/GlassSelect.styles';
 
 const METER_TYPES = [
     { value: 0, label: 'Холодная вода' },
@@ -57,14 +64,18 @@ const AddMeterModal = ({ open, onClose, onSuccess }) => {
             scroll="body"
         >
             <ModalLoginCard elevation={3}>
-                <Header>
-                    <Title variant='h5' component='h2' sx={{ mb: 1 }}>
-                        Установка счетчика
-                    </Title>
-                    <Subtitle variant='body2'>
-                        Привяжите прибор учета к лицевому счету
-                    </Subtitle>
-                </Header>
+                <ModalHeader>
+                    <ModalCloseButton>
+                        <IconButton aria-label="close" onClick={onClose} size="large">
+                            <CloseIcon />
+                        </IconButton>
+                    </ModalCloseButton>
+                    <ModalIconWrapper>
+                        <OpacityIcon color="primary" />
+                    </ModalIconWrapper>
+                    <GlassDialogTitle>Установка счетчика</GlassDialogTitle>
+                    <ModalSubtitle>Привяжите прибор учета к лицевому счету</ModalSubtitle>
+                </ModalHeader>
 
                 {error && (
                     <StyledAlert severity='error'>
@@ -73,9 +84,9 @@ const AddMeterModal = ({ open, onClose, onSuccess }) => {
                 )}
                 
                 <Form onSubmit={handleSubmit}>
-                    <FormField>
-                        <FieldLabel variant='body2'>Номер лицевого счета</FieldLabel>
+                    <FormField sx={{ mb: 1.5 }}>
                         <GlassInput
+                            label="Номер лицевого счета"
                             fullWidth
                             type="text"
                             placeholder='Например: 100200300'
@@ -87,12 +98,15 @@ const AddMeterModal = ({ open, onClose, onSuccess }) => {
                     </FormField>
 
                     <FormField>
-                        <FieldLabel variant='body2'>Тип счетчика</FieldLabel>
                         <GlassInput
+                            label="Тип счетчика"
                             select
                             fullWidth
                             value={type}
                             onChange={(e) => setType(e.target.value)}
+                            SelectProps={{
+                                MenuProps: { PaperProps: { sx: menuPaperStyles } }
+                            }}
                         >
                             {METER_TYPES.map((option) => (
                                 <MenuItem key={option.value} value={option.value}>
@@ -103,8 +117,8 @@ const AddMeterModal = ({ open, onClose, onSuccess }) => {
                     </FormField>
 
                     <FormField>
-                        <FieldLabel variant='body2'>Серийный номер</FieldLabel>
                         <GlassInput
+                            label="Серийный номер"
                             fullWidth
                             placeholder='Например: SN-123456'
                             value={serialNumber}

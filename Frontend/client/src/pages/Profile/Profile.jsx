@@ -8,11 +8,9 @@ import {
     ProfileContainer, 
     ProfileCard, 
     LoadingContainer, 
-    ErrorContainer, 
-    ErrorCard, 
     StyledAlert 
 } from './Profile.styles';
-import { AppSnackbar } from '../../components/common';
+import { AppSnackbar, ErrorBox } from '../../components/common';
 import ProfileHeader from './components/ProfileHeader';
 import AccountsList from './components/AccountsList';
 import AddAccountModal from './components/AddAccountModal';
@@ -49,13 +47,15 @@ import DeleteAccountModal from './components/DeleteAccountModal';const Profile =
             }
 
             setLoading(true);
-            const [profileRes, accountsRes] = await Promise.all([
-                userService.getProfile(),
-                userService.getAccounts()
-            ]);
-
+            const profileRes = await userService.getProfile();
             setProfile(profileRes.data);
-            setAccounts(accountsRes.data);
+
+            if (profileRes.data && profileRes.data.role && (profileRes.data.role === 'Admin' || profileRes.data.role === 'Operator')) {
+                setAccounts([]);
+            } else {
+                const accountsRes = await userService.getAccounts();
+                setAccounts(accountsRes.data);
+            }
         } catch (err) {
             console.error('Error fetching profile data:', err);
             if (err.response && (err.response.status === 401 || err.response.status === 403)) {
@@ -181,58 +181,47 @@ import DeleteAccountModal from './components/DeleteAccountModal';const Profile =
     }
 
     if (error) {
-        return (
-            <ErrorContainer>
-                <ErrorCard>
-                    <Typography color="error" variant="h6" gutterBottom>
-                        Ошибка
-                    </Typography>
-                    <Typography variant="body1">
-                        {error}
-                    </Typography>
-                    <Button 
-                        variant="contained" 
-                        onClick={() => window.location.reload()}
-                    >
-                        Повторить
-                    </Button>
-                </ErrorCard>
-            </ErrorContainer>
-        );
+        return <ErrorBox message={error} onRetry={() => window.location.reload()} />;
     }
 
     return (
-        <ProfileContainer>
-            <ProfileCard elevation={0}>
+        <ProfileContainer compact={!!profile}>
+            <ProfileCard elevation={0} compact={!!profile}>
                 <ProfileHeader 
                     profile={profile} 
                     onEditProfile={handleEditProfile} 
                 />
 
-                <AccountsList 
-                    accounts={accounts} 
-                    onAddAccount={handleOpenAddAccount} 
-                    onDeleteAccount={handleDeleteClick} 
-                    navigate={navigate} 
-                />
+                {profile && profile.role && (profile.role === 'Admin' || profile.role === 'Operator') ? null : (
+                    <AccountsList 
+                        accounts={accounts} 
+                        onAddAccount={handleOpenAddAccount} 
+                        onDeleteAccount={handleDeleteClick} 
+                        navigate={navigate} 
+                    />
+                )}
             </ProfileCard>
 
-            <AddAccountModal 
-                open={openAddAccount} 
-                onClose={handleCloseAddAccount} 
-                onAdd={handleAddAccount} 
-                accountNumber={newAccountNumber} 
-                setAccountNumber={setNewAccountNumber} 
-                error={addAccountError} 
-                isSubmitting={isSubmitting} 
-            />
+                {!profile || (profile.role && (profile.role !== 'Admin' && profile.role !== 'Operator')) ? (
+                    <>
+                        <AddAccountModal 
+                            open={openAddAccount} 
+                            onClose={handleCloseAddAccount} 
+                            onAdd={handleAddAccount} 
+                            accountNumber={newAccountNumber} 
+                            setAccountNumber={setNewAccountNumber} 
+                            error={addAccountError} 
+                            isSubmitting={isSubmitting} 
+                        />
 
-            <DeleteAccountModal 
-                open={deleteConfirmation.open} 
-                onClose={handleCloseDeleteConfirmation} 
-                onConfirm={handleConfirmDelete} 
-                isDeleting={isDeleting} 
-            />
+                        <DeleteAccountModal 
+                            open={deleteConfirmation.open} 
+                            onClose={handleCloseDeleteConfirmation} 
+                            onConfirm={handleConfirmDelete} 
+                            isDeleting={isDeleting} 
+                        />
+                    </>
+                ) : null}
 
             <AppSnackbar
                 open={snackbar.open}

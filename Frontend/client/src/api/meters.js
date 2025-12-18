@@ -17,7 +17,6 @@ export const metersService = {
     },
 
     async submitReading(meterId, data) {
-        // data should be { value: number }
         const response = await api.post(`/meters/${meterId}/readings`, data);
         return response.data;
     }

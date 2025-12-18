@@ -8,13 +8,10 @@ import {
     Chip,
     Divider,
     Rating,
-    Select,
-    MenuItem,
-    FormControl,
-    InputLabel,
     TextField
 } from '@mui/material';
 import { useState, useEffect } from 'react';  
+import { useAuth } from '../../../context/AuthContext';
 import dayjs from 'dayjs';
 import { 
     Close as CloseIcon, 
@@ -30,7 +27,8 @@ import {
     GlassDialogTitle, 
     GlassDialogActions, 
     GlassInput,
-    GlassDatePicker
+    GlassDatePicker,
+    GlassSelect
 } from '../../../components/common';
 import { 
     REQUEST_STATUS_LABELS, 
@@ -96,6 +94,8 @@ const RequestDetailsModal = ({
             setEditDeadline(request.deadline ? dayjs(request.deadline) : null);
         }
     }, [request]);
+
+    const { user } = useAuth();
 
     if (!request) return null;
 
@@ -199,37 +199,14 @@ const handleSaveChanges = () => {
                                     
                                     <Box display="flex" gap={2} flexWrap="wrap" mt={1}>
                                         {/* Приоритет */}
-                                        <FormControl size="small" sx={{ minWidth: 180 }}>
-                                            <InputLabel>Приоритет</InputLabel>
-                                            <Select
-                                                value={editPriority}
-                                                label="Приоритет"
-                                                onChange={(e) => setEditPriority(Number(e.target.value))}
-                                                MenuProps={{
-                                                    PaperProps: {
-                                                        sx: {
-                                                            backgroundColor: 'rgba(255, 255, 255, 0.98)',
-                                                            backdropFilter: 'blur(20px)',
-                                                            borderRadius: '12px',
-                                                            boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-                                                            border: '1px solid rgba(0,0,0,0.08)',
-                                                        }
-                                                    }
-                                                }}
-                                                sx={{
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                                                    '& .MuiOutlinedInput-notchedOutline': {
-                                                        borderColor: 'rgba(0, 0, 0, 0.15)',
-                                                    },
-                                                }}
-                                            >
-                                                {Object.entries(REQUEST_PRIORITY_LABELS).map(([value, label]) => (
-                                                    <MenuItem key={value} value={Number(value)}>
-                                                        {label}
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                        </FormControl>
+                                        <GlassSelect
+                                            label="Приоритет"
+                                            value={editPriority}
+                                            onChange={(e) => setEditPriority(Number(e.target.value))}
+                                            options={Object.entries(REQUEST_PRIORITY_LABELS).map(([value, label]) => ({ value: Number(value), label }))}
+                                            size="small"
+                                            sx={{ minWidth: 180, backgroundColor: 'rgba(255,255,255,0.95)' }}
+                                        />
 
                                         {/* Дедлайн */}
                                         <GlassDatePicker
@@ -342,24 +319,27 @@ const handleSaveChanges = () => {
                             <Typography variant="h6" gutterBottom>Комментарии</Typography>
                             <CommentList>
                                 {request.comments && request.comments.length > 0 ? (
-                                    request.comments.map((comment) => (
-                                        <CommentItem key={comment.commentId} isOwn={true}>
-                                            <CommentHeader>
-                                                <Box display="flex" alignItems="center" gap={1}>
-                                                    <CommentAvatar>
-                                                        {comment.authorName[0]}
-                                                    </CommentAvatar>
-                                                    <Typography variant="caption" fontWeight="bold">
-                                                        {comment.authorName}
+                                    request.comments.map((comment) => {
+                                        const isOwn = user && comment.authorId === user.id;
+                                        return (
+                                            <CommentItem key={comment.commentId} isOwn={isOwn}>
+                                                <CommentHeader>
+                                                    <Box display="flex" alignItems="center" gap={1}>
+                                                        <CommentAvatar>
+                                                            {comment.authorName[0]}
+                                                        </CommentAvatar>
+                                                        <Typography variant="caption" fontWeight="bold">
+                                                            {comment.authorName}
+                                                        </Typography>
+                                                    </Box>
+                                                    <Typography variant="caption">
+                                                        {new Date(comment.createdAt).toLocaleString('ru-RU')}
                                                     </Typography>
-                                                </Box>
-                                                <Typography variant="caption">
-                                                    {new Date(comment.createdAt).toLocaleString('ru-RU')}
-                                                </Typography>
-                                            </CommentHeader>
-                                            <CommentText>{comment.text}</CommentText>
-                                        </CommentItem>
-                                    ))
+                                                </CommentHeader>
+                                                <CommentText>{comment.text}</CommentText>
+                                            </CommentItem>
+                                        );
+                                    })
                                 ) : (
                                     <Typography variant="body2" color="textSecondary" align="center">
                                         Нет комментариев

@@ -114,10 +114,7 @@ export const UserName = styled(Typography)(({ theme }) => ({
     },
 }));
 
-export const StyledMenuItem = styled('div')({
-    display: 'flex',
-    alignItems: 'center',
-});
+
 
 export const IconWrapper = styled(Box)({
     marginRight: '16px',
