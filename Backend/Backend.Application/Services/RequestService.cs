@@ -21,6 +21,7 @@ namespace Backend.Application.Services
             return await _context.Requests
                 .Where(r => r.Account != null && r.Account.UserId == userId)
                 .Include(r => r.Account)
+                .Include(r => r.Category)
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync(ct);
         }
@@ -29,6 +30,7 @@ namespace Backend.Application.Services
         {
             var request = await _context.Requests
                 .Include(r => r.Account)
+                .Include(r => r.Category)
                 .Include(r => r.Comments)
                     .ThenInclude(c => c.Author)
                 .Include(r => r.Attachments)
@@ -46,7 +48,7 @@ namespace Backend.Application.Services
             return request;
         }
         
-        public async Task<Request> CreateRequestAsync(int userId, int accountId, string category, string description, CancellationToken ct)
+        public async Task<Request> CreateRequestAsync(int userId, int accountId, int categoryId, string description, CancellationToken ct)
         {
             var account = await _context.Accounts.FirstOrDefaultAsync(a => a.AccountId == accountId && a.UserId == userId, ct);
             if (account == null)
@@ -54,9 +56,16 @@ namespace Backend.Application.Services
                 throw new UnauthorizedAccessException("У вас нет доступа к этому лицевому счету.");
             }
 
+            var category = await _context.RequestCategories
+                .FirstOrDefaultAsync(c => c.Id == categoryId, ct);
+            
+            if (category == null)
+                throw new ArgumentException("Категория не найдена.", nameof(categoryId));
+
             var newRequest = new Request
             {
                 AccountId = accountId,
+                CategoryId = categoryId,
                 Category = category,
                 Description = description,
                 Status = RequestStatus.New,
@@ -65,6 +74,7 @@ namespace Backend.Application.Services
 
             _context.Requests.Add(newRequest);
             await _context.SaveChangesAsync(ct);
+
             return newRequest;
         }
 
@@ -204,18 +214,19 @@ namespace Backend.Application.Services
 
         // Backend.Application.Services.RequestService
 
-        public async Task<List<Request>> GetAllRequestsForOperatorAsync(RequestStatus? status, string? category, string? search, CancellationToken ct)
+        public async Task<List<Request>> GetAllRequestsForOperatorAsync(RequestStatus? status, int? categoryId, string? search, CancellationToken ct)
         {
             var query = _context.Requests
                 .Include(r => r.Account)
                 .ThenInclude(a => a.User)
+                .Include(r => r.Category)
                 .AsQueryable();
 
             if (status.HasValue) 
                 query = query.Where(r => r.Status == status.Value);
 
-            if (!string.IsNullOrEmpty(category)) 
-                query = query.Where(r => r.Category == category);
+            if (categoryId.HasValue)
+                query = query.Where(r => r.CategoryId == categoryId.Value);
 
             if (!string.IsNullOrEmpty(search))
             {

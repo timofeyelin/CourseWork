@@ -9,8 +9,6 @@ import {
     Event as DeadlineIcon
 } from '@mui/icons-material';
 import { StyledCard, CardHeader, CardMeta, CardTitle, PriorityIndicator } from '../OperatorRequests.styles';
-import { REQUEST_CATEGORY_LABELS } from '../../../../utils/constants';
-
 // Маппинг приоритетов
 const PRIORITY_CONFIG = {
     1: { label: 'Низкий', color: '#4caf50', bgColor: 'rgba(76, 175, 80, 0.1)' },
@@ -82,7 +80,7 @@ const RequestCard = ({ request, index, onClick }) => {
                                 </PriorityIndicator>
                             </Box>
                             <Chip 
-                                label={REQUEST_CATEGORY_LABELS[request.category] || request.category} 
+                                label={request.category || '—'} 
                                 size="small" 
                                 color="primary"
                                 variant="filled"

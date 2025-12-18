@@ -7,13 +7,13 @@ namespace Backend.Application.Interfaces
     {
         Task<List<Request>> GetUserRequestsAsync(int userId, CancellationToken ct);
         Task<Request> GetRequestDetailsAsync(int userId, UserRole userRole, int requestId, CancellationToken ct);
-        Task<Request> CreateRequestAsync(int userId, int accountId, string category, string description, CancellationToken ct);
+        Task<Request> CreateRequestAsync(int userId, int accountId, int categoryId, string description, CancellationToken ct);
         Task<Request> UpdateRequestStatusAsync(int requestId, RequestStatus newStatus, CancellationToken ct); // Admin-only
         Task<Request> RateRequestAsync(int userId, int requestId, int rating, string? comment, CancellationToken ct);
         Task<RequestComment> AddCommentAsync(int userId, UserRole userRole, int requestId, string text, CancellationToken ct);
         Task<bool> ValidateUserAccessAsync(int userId, int requestId, CancellationToken ct);
          Task<RequestAttachment> AddAttachmentAsync(int userId, int requestId, string fileUri, string fileType, CancellationToken ct);
-         Task<List<Request>> GetAllRequestsForOperatorAsync(RequestStatus? status, string? category, string? search, CancellationToken ct);
+         Task<List<Request>> GetAllRequestsForOperatorAsync(RequestStatus? status, int? categoryId, string? search, CancellationToken ct);
         Task<Request> UpdateRequestByOperatorAsync(int requestId, RequestStatus? status, RequestPriority? priority, DateTime? deadline, bool updateDeadline, CancellationToken ct);
     }
 }

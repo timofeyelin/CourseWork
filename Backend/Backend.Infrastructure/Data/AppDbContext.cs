@@ -23,6 +23,8 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<AnnouncementRead> AnnouncementReads { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
+      public DbSet<RequestCategory> RequestCategories => Set<RequestCategory>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -73,10 +75,9 @@ public class AppDbContext : DbContext, IAppDbContext
         {
             entity.HasKey(r => r.RequestId);
 
-            entity.Property(r => r.Category)
-                  .IsRequired()
-                  .HasMaxLength(100);
-
+            entity.Property(r => r.CategoryId)
+                  .IsRequired();
+    
             entity.Property(r => r.Description)
                   .IsRequired();
 
@@ -87,6 +88,11 @@ public class AppDbContext : DbContext, IAppDbContext
                   .WithMany()
                   .HasForeignKey(r => r.AccountId)
                   .OnDelete(DeleteBehavior.Cascade);
+            
+             entity.HasOne(r => r.Category)
+                  .WithMany(c => c.Requests)
+                  .HasForeignKey(r => r.CategoryId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<RequestComment>(entity =>
@@ -188,5 +194,19 @@ public class AppDbContext : DbContext, IAppDbContext
                   .HasForeignKey(n => n.UserId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
+
+        modelBuilder.Entity<RequestCategory>()
+            .HasData(
+                new RequestCategory { Id = 1, Name = "Сантехника" },
+                new RequestCategory { Id = 2, Name = "Электрика" },
+                new RequestCategory { Id = 3, Name = "Лифт" },
+                new RequestCategory { Id = 4, Name = "Уборка" }
+            );
+
+        modelBuilder.Entity<Request>()
+            .HasOne(r => r.Category)
+            .WithMany(c => c.Requests)
+            .HasForeignKey(r => r.CategoryId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
