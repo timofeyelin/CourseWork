@@ -155,6 +155,18 @@ export const requestsService = {
         return await api.post(`/requests/${requestId}/rate`, ratingData);
     },
 
+    async getCategories() {
+        return await api.get('/categories');
+    },
+
+    async createCategory(name) {
+        return await api.post('/categories', { name });
+    },
+
+    async deleteCategory(id) {
+        return await api.delete(`/categories/${id}`);
+    },
+
     async uploadAttachment(requestId, file) {
         const formData = new FormData();
         formData.append('file', file);

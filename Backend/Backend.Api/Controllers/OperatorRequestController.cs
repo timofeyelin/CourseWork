@@ -23,11 +23,11 @@ namespace Backend.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<List<OperatorRequestDto>>> GetRequests(
             [FromQuery] RequestStatus? status,
-            [FromQuery] string? category,
+            [FromQuery] int? categoryId,
             [FromQuery] string? search,
             CancellationToken ct)
         {
-            var requests = await _requestService.GetAllRequestsForOperatorAsync(status, category, search, ct);
+            var requests = await _requestService.GetAllRequestsForOperatorAsync(status, categoryId, search, ct);
             var dtos = requests.Select(MapToDto).ToList();
             return Ok(dtos);
         }
@@ -74,7 +74,7 @@ namespace Backend.Api.Controllers
             Description = r.Description,
             ShortDescription = r.Description.Length > 60 ? r.Description[..60] + "..." : r.Description,
             Status = r.Status,
-            Category = r.Category,
+            Category = r.Category?.Name ?? "Не указана",
             Priority = r.Priority,
             CreatedAt = r.CreatedAt,
             Deadline = r.Deadline,

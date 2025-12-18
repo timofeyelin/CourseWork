@@ -14,14 +14,13 @@ import {
 } from '@mui/icons-material';
 import { 
     GlassButton,
-    AppSnackbar
+    AppSnackbar,
+    ErrorBox
 } from '../../components/common';
 import { requestsService, userService } from '../../api';
 import { 
     ERROR_MESSAGES, 
     REQUEST_STATUSES, 
-    REQUEST_CATEGORIES, 
-    REQUEST_CATEGORY_LABELS,
     VALIDATION_MESSAGES,
     REQUESTS_MESSAGES,
     SUCCESS_MESSAGES
@@ -35,7 +34,6 @@ import {
     FilterSection,
     LoadingContainer
 } from './Requests.styles';
-import { ErrorBox } from '../../components/common';
 import RequestsTable from './components/RequestsTable';
 import CreateRequestModal from './components/CreateRequestModal';
 import RequestDetailsModal from './components/RequestDetailsModal';
@@ -50,9 +48,10 @@ const Requests = () => {
     const [statusFilter, setStatusFilter] = useState('All');
 
     const [createModalOpen, setCreateModalOpen] = useState(false);
+    // ИЗМЕНЕНИЕ: category -> categoryId
     const [newRequest, setNewRequest] = useState({
         accountId: '',
-        category: '',
+        categoryId: '', 
         description: '',
         files: []
     });
@@ -99,7 +98,6 @@ const Requests = () => {
             navigate(ROUTES.HOME);
             return;
         }
-        // Запретить доступ к странице заявок для админов и операторов
         if (user && (user.role === 'Admin' || user.role === 'Operator')) {
             navigate(ROUTES.HOME);
             return;
@@ -109,9 +107,10 @@ const Requests = () => {
     }, [isAuthenticated, user, navigate]);
 
     const handleCreateOpen = () => {
+        // ИЗМЕНЕНИЕ: categoryId пустой по умолчанию
         setNewRequest({
             accountId: accounts.length > 0 ? accounts[0].id : '',
-            category: REQUEST_CATEGORIES.PLUMBING,
+            categoryId: '', 
             description: '',
             files: []
         });
@@ -147,6 +146,12 @@ const Requests = () => {
             return;
         }
 
+        // ИЗМЕНЕНИЕ: Проверка categoryId вместо category
+        if (!newRequest.categoryId) {
+            setSnackbar({ open: true, message: "Выберите категорию", severity: 'error' });
+            return;
+        }
+
         if (!newRequest.description.trim()) {
             setSnackbar({
                 open: true,
@@ -158,9 +163,10 @@ const Requests = () => {
 
         setIsSubmitting(true);
         try {
+            // ИЗМЕНЕНИЕ: Отправляем categoryId напрямую
             const requestData = {
                 accountId: parseInt(newRequest.accountId),
-                category: REQUEST_CATEGORY_LABELS[newRequest.category] || newRequest.category,
+                categoryId: parseInt(newRequest.categoryId),
                 description: newRequest.description
             };
             
@@ -250,6 +256,8 @@ const Requests = () => {
 
     const filteredRequests = requests.filter(req => {
         if (statusFilter === 'All') return true;
+        // Здесь можно добавить проверку и по категориям, если нужно,
+        // но пока фильтруем только по статусу
         return req.status.toString() === statusFilter || REQUEST_STATUSES[statusFilter] === req.status;
     });
 

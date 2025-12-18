@@ -61,7 +61,7 @@ const RequestsTable = ({ requests = [], onViewDetails }) => {
                         safeRequests.map((req) => (
                             <StyledTableRow key={req.requestId} hover>
                                 <StyledTableCell>{formatDate(req.createdAt)}</StyledTableCell>
-                                <StyledTableCell>{REQUEST_CATEGORY_LABELS[req.category] || req.category}</StyledTableCell>
+                                <StyledTableCell>{req.category}</StyledTableCell>
                                 <StyledTableCell>
                                     <Tooltip title={req.description || req.Description || ''}>
                                         <span>

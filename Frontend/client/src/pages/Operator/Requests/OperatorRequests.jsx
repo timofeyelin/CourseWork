@@ -15,16 +15,18 @@ import {
 import { GlassInput, AppSnackbar, GlassSelect } from '../../../components/common';
 import KanbanColumn from './components/KanbanColumn';
 import RequestDetailsModal from '../../Requests/components/RequestDetailsModal';
-import { REQUEST_STATUSES, REQUEST_CATEGORY_LABELS, REQUESTS_MESSAGES, ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../../utils/constants';
+import { REQUEST_STATUSES, REQUESTS_MESSAGES, ERROR_MESSAGES } from '../../../utils/constants';
 
 
 const OperatorRequests = () => {
     const [updatingRequest, setUpdatingRequest] = useState(false);
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [categories, setCategories] = useState([]);
+    const [categoriesLoading, setCategoriesLoading] = useState(false);
     const [filters, setFilters] = useState({
         search: '',
-        category: '' // Изначально пусто
+        categoryId: '' // Изначально пусто
     });
     
     // Модалка
@@ -43,8 +45,29 @@ const OperatorRequests = () => {
     ];
 
     useEffect(() => {
+        const loadCategories = async () => {
+            try {
+                setCategoriesLoading(true);
+                const res = await requestsService.getCategories(); 
+                setCategories(res.data || []);
+            } catch (e) {
+                console.error('Error fetching categories:', e);
+                setSnackbar({
+                    open: true,
+                    message: ERROR_MESSAGES.REQUESTS_LOAD_FAILED,
+                    severity: 'error'
+                });
+            } finally {
+                setCategoriesLoading(false);
+            }
+        };
+
+        loadCategories();
+    }, []);
+
+    useEffect(() => {
         fetchRequests();
-    }, [filters.category]); 
+    }, [filters.categoryId]); 
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -55,12 +78,10 @@ const OperatorRequests = () => {
 
     const fetchRequests = async () => {
         try {
-            // Передаем параметры как есть.
-            // Если category выбрана, передаем её название (например, "Сантехника").
-            // Бэкенд должен ожидать именно строку, если в методе сервиса параметр string? category.
+            setLoading(true);
             const params = {
                 search: filters.search || undefined,
-                category: filters.category || undefined
+                categoryId: filters.categoryId || undefined
             };
             const response = await requestsService.getOperatorRequests(params);
             setRequests(response.data);
@@ -70,11 +91,6 @@ const OperatorRequests = () => {
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleFilterChange = (e) => {
-        const { name, value } = e.target;
-        setFilters(prev => ({ ...prev, [name]: value }));
     };
 
     const onDragEnd = async (result) => {
@@ -164,6 +180,11 @@ const OperatorRequests = () => {
         }
     };
 
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters(prev => ({ ...prev, [name]: value }));
+    };
+
     const getRequestsByStatus = (status) => {
         return requests.filter(r => r.status === status);
     };
@@ -186,7 +207,7 @@ const OperatorRequests = () => {
                         onChange={handleFilterChange}
                         size="small"
                         sx={{ width: 350, m: 0 }}
-                        slotProps={{
+                        InputProps={{
                             input: {
                                 startAdornment: (
                                     <InputAdornment position="start">
@@ -200,10 +221,14 @@ const OperatorRequests = () => {
                     <StyledFilterControl size="small">
                         <GlassSelect
                             label="Категория"
-                            name="category"
-                            value={filters.category}
+                            name="categoryId"
+                            value={filters.categoryId}
                             onChange={handleFilterChange}
-                            options={[{ value: '', label: 'Все категории' }, ...Object.entries(REQUEST_CATEGORY_LABELS).map(([key, label]) => ({ value: label, label }))]}
+                            disabled={categoriesLoading}
+                            options={[
+                                { value: '', label: 'Все категории' },
+                                ...(categories || []).map(c => ({ value: c.id, label: c.name }))
+                            ]}
                             size="small"
                             sx={{ minWidth: '220px' }}
                         />

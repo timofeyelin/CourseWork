@@ -20,6 +20,7 @@ public interface IAppDbContext
     DbSet<AnnouncementRead> AnnouncementReads { get; set; }
     DbSet<Notification> Notifications { get; set; }
     DbSet<AuditLog> AuditLogs { get; set; }
+    DbSet<RequestCategory> RequestCategories { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

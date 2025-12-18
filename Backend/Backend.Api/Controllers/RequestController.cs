@@ -45,7 +45,7 @@ namespace Backend.Api.Controllers
             var dtos = requests.Select(r => new RequestListDto
             {
                 RequestId = r.RequestId,
-                Category = r.Category,
+                Category = r.Category?.Name ?? "Неизвестная категория",
                 Description = r.Description,
                 Status = r.Status,
                 CreatedAt = r.CreatedAt,
@@ -67,7 +67,7 @@ namespace Backend.Api.Controllers
                 {
                     RequestId = request.RequestId,
                     AccountId = request.AccountId,
-                    Category = request.Category,
+                    Category = request.Category?.Name ?? "Неизвестная категория",
                     Description = request.Description,
                     Status = request.Status,
                     CreatedAt = request.CreatedAt,
@@ -103,13 +103,13 @@ namespace Backend.Api.Controllers
         {
             try
             {   var userId = GetUserId();
-                var newRequest = await _requestService.CreateRequestAsync(userId, dto.AccountId, dto.Category, dto.Description, ct);
+                var newRequest = await _requestService.CreateRequestAsync(userId, dto.AccountId, dto.CategoryId, dto.Description, ct);
                 
                 var response = new RequestDetailsDto
                 {
                     RequestId = newRequest.RequestId,
                     AccountId = newRequest.AccountId,
-                    Category = newRequest.Category,
+                    Category = newRequest.Category?.Name ?? "Новая заявка",
                     Description = newRequest.Description,
                     Status = newRequest.Status,
                     CreatedAt = newRequest.CreatedAt,
@@ -128,7 +128,7 @@ namespace Backend.Api.Controllers
                     "CreateRequest",
                     "Request",
                     newRequest.RequestId.ToString(),
-                    $"Категория: {dto.Category}",
+                    $"Категория: {dto.CategoryId}",
                     ct);
                 }
                 catch (Exception ex)

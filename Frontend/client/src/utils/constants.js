@@ -15,7 +15,8 @@ export const ROUTES = {
     DOCUMENTS: '/documents',
     FORGOT_PASSWORD: '/forgot-password',
     OPERATOR_REQUESTS: '/operator/requests',
-    ADMIN_DASHBOARD: '/admin/dashboard'
+    ADMIN_DASHBOARD: '/admin/dashboard',
+    ADMIN_CATEGORIES: '/admin/categories'
 }
 
 export const VALIDATION_MESSAGES = {

@@ -179,7 +179,7 @@ const handleSaveChanges = () => {
                     <Box display="flex" flexDirection="column" gap={2}>
                         <Box>
                             <Typography variant="subtitle2" color="textSecondary">Категория</Typography>
-                            <Typography variant="body1">{REQUEST_CATEGORY_LABELS[request.category] || request.category}</Typography>
+                            <Typography variant="body1">{request.category}</Typography>
                         </Box>
                         
                         <Box>

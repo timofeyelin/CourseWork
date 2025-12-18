@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { 
     DialogContent, 
     MenuItem, 
@@ -18,7 +19,7 @@ import {
     GlassInput,
     GlassSelect
 } from '../../../components/common';
-import { REQUEST_CATEGORY_LABELS } from '../../../utils/constants';
+import { requestsService } from '../../../api'; // Импортируем сервис
 import {
     ModalContent,
     FileUploadArea,
@@ -37,6 +38,34 @@ const CreateRequestModal = ({
     onFileChange,
     onRemoveFile
 }) => {
+    // Состояние для категорий
+    const [categories, setCategories] = useState([]);
+    const [loadingCategories, setLoadingCategories] = useState(false);
+
+    // Загружаем категории при открытии
+    useEffect(() => {
+        if (open) {
+            loadCategories();
+        }
+    }, [open]);
+
+    const loadCategories = async () => {
+        setLoadingCategories(true);
+        try {
+            const response = await requestsService.getCategories();
+            setCategories(response.data);
+            
+            // Если категория еще не выбрана и список не пуст, выберем первую по умолчанию
+            if (!newRequest.categoryId && response.data.length > 0) {
+                setNewRequest(prev => ({ ...prev, categoryId: response.data[0].id }));
+            }
+        } catch (error) {
+            console.error("Не удалось загрузить категории", error);
+        } finally {
+            setLoadingCategories(false);
+        }
+    };
+
     return (
         <GlassDialog 
             open={open} 
@@ -60,15 +89,23 @@ const CreateRequestModal = ({
                         ))}
                     </GlassSelect>
 
+                    {/* Выпадающий список категорий с Бэкенда */}
                     <GlassSelect
                         label="Категория"
-                        value={newRequest.category}
-                        onChange={(e) => setNewRequest({...newRequest, category: e.target.value})}
+                        value={newRequest.categoryId || ''} // Используем categoryId
+                        onChange={(e) => setNewRequest({...newRequest, categoryId: e.target.value})}
                         fullWidth
+                        disabled={loadingCategories}
                     >
-                        {Object.entries(REQUEST_CATEGORY_LABELS).map(([key, label]) => (
-                            <MenuItem key={key} value={key}>{label}</MenuItem>
-                        ))}
+                        {loadingCategories ? (
+                            <MenuItem disabled>Загрузка...</MenuItem>
+                        ) : (
+                            categories.map((cat) => (
+                                <MenuItem key={cat.id} value={cat.id}>
+                                    {cat.name}
+                                </MenuItem>
+                            ))
+                        )}
                     </GlassSelect>
 
                     <GlassInput

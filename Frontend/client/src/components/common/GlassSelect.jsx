@@ -7,11 +7,12 @@ import {
     menuPaperStyles 
 } from './GlassSelect.styles';
 
-export const GlassSelect = ({ label, value, onChange, options, children, ...props }) => {
+export const GlassSelect = ({ label, name, value, onChange, options, children, ...props }) => {
     return (
         <StyledFormControl variant="outlined" size="small" {...props}>
             <InputLabel>{label}</InputLabel>
             <StyledSelect
+                name = {name}
                 value={value}
                 onChange={onChange}
                 label={label}

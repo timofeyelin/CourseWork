@@ -15,6 +15,7 @@ import Documents from './pages/Documents';
 import { useAuth } from './context/AuthContext';
 import { ROUTES } from './utils/constants';
 import { LoadingContainer, AppContainer, MainContent } from './App.styles';
+import AdminCategories from './pages/Admin/Categories/AdminCategories';
 
 function App() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -47,6 +48,7 @@ function App() {
             <Route path={ROUTES.PAYMENT_HISTORY} element={<Navigate to={`${ROUTES.PAYMENTS}?tab=history`} replace />}/>
             <Route path={ROUTES.OPERATOR_REQUESTS} element={isAuthenticated ? <OperatorRequests/> : <Navigate to={ROUTES.HOME} />}/>
             <Route path={ROUTES.ADMIN_DASHBOARD} element={isAuthenticated ? <Dashboard/> : <Navigate to={ROUTES.HOME} />}/>
+            <Route path={ROUTES.ADMIN_CATEGORIES} element={isAuthenticated ? <AdminCategories/> : <Navigate to={ROUTES.HOME} />}/>
           </Routes>
         </MainContent>
       </AppContainer>
