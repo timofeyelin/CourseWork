@@ -148,6 +148,22 @@ namespace Backend.Api.Controllers
             try
             {
                 await _requestService.UpdateRequestStatusAsync(requestId, dto.Status, ct);
+
+                try
+                {
+                    await _auditService.LogAsync(
+                        GetUserId(),
+                        "UpdateRequestStatus",
+                        "Request",
+                        requestId.ToString(),
+                        $"Новый статус: {dto.Status}",
+                        ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Не удалось записать аудит");
+                }
+
                 return NoContent();
             }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
@@ -172,6 +188,22 @@ namespace Backend.Api.Controllers
                     Text = comment.Text,
                     CreatedAt = comment.CreatedAt
                 };
+
+                try
+                {
+                    await _auditService.LogAsync(
+                        userId,
+                        "AddComment",
+                        "RequestComment",
+                        comment.CommentId.ToString(),
+                        $"Заявка: {requestId}",
+                        ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Не удалось записать аудит");
+                }
+
                 return Ok(commentDto);
             }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
@@ -184,6 +216,22 @@ namespace Backend.Api.Controllers
             try
             {
                 await _requestService.RateRequestAsync(GetUserId(), requestId, dto.Rating, dto.Comment, ct);
+
+                try
+                {
+                    await _auditService.LogAsync(
+                        GetUserId(),
+                        "RateRequest",
+                        "Request",
+                        requestId.ToString(),
+                        $"Оценка: {dto.Rating}",
+                        ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Не удалось записать аудит");
+                }
+
                 return NoContent();
             }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }

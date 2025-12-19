@@ -115,16 +115,50 @@ const Requests = () => {
         setCreateModalOpen(false);
     };
 
+    // Константы для валидации файлов (синхронизированы с бэкендом)
+    const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.pdf'];
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
+    const validateFile = (file) => {
+        const extension = '.' + file.name.split('.').pop().toLowerCase();
+        if (!ALLOWED_EXTENSIONS.includes(extension)) {
+            return `Файл "${file.name}": недопустимый тип. Разрешены: JPG, PNG, PDF`;
+        }
+        if (file.size > MAX_FILE_SIZE) {
+            return `Файл "${file.name}": размер превышает 5 МБ`;
+        }
+        return null;
+    };
+
     const handleFileChange = (event) => {
         const files = Array.from(event.target.files);
         if (newRequest.files.length + files.length > 3) {
             setSnackbar({ open: true, message: REQUESTS_MESSAGES.FILES_TOO_MANY, severity: 'warning' });
             return;
         }
-        setNewRequest(prev => ({
-            ...prev,
-            files: [...prev.files, ...files]
-        }));
+
+        // Валидация каждого файла
+        const errors = [];
+        const validFiles = [];
+        for (const file of files) {
+            const error = validateFile(file);
+            if (error) {
+                errors.push(error);
+            } else {
+                validFiles.push(file);
+            }
+        }
+
+        if (errors.length > 0) {
+            setSnackbar({ open: true, message: errors.join('; '), severity: 'error' });
+        }
+
+        if (validFiles.length > 0) {
+            setNewRequest(prev => ({
+                ...prev,
+                files: [...prev.files, ...validFiles]
+            }));
+        }
     };
 
     const handleRemoveFile = (index) => {
@@ -155,6 +189,15 @@ const Requests = () => {
             return;
         }
 
+        // Дополнительная валидация файлов перед отправкой
+        for (const file of newRequest.files) {
+            const error = validateFile(file);
+            if (error) {
+                setSnackbar({ open: true, message: error, severity: 'error' });
+                return;
+            }
+        }
+
         setIsSubmitting(true);
         try {
             // ИЗМЕНЕНИЕ: Отправляем categoryId напрямую
@@ -167,10 +210,25 @@ const Requests = () => {
             const response = await requestsService.createRequest(requestData);
             const requestId = response.data.requestId;
 
+            // Загружаем файлы и отслеживаем ошибки
             if (newRequest.files.length > 0) {
-                await Promise.all(newRequest.files.map(file => 
-                    requestsService.uploadAttachment(requestId, file)
-                ));
+                const uploadResults = await Promise.allSettled(
+                    newRequest.files.map(file => requestsService.uploadAttachment(requestId, file))
+                );
+
+                const failedUploads = uploadResults.filter(r => r.status === 'rejected');
+                if (failedUploads.length > 0) {
+                    // Некоторые файлы не загрузились, но заявка создана
+                    const successCount = uploadResults.length - failedUploads.length;
+                    setSnackbar({ 
+                        open: true, 
+                        message: `Заявка создана, но ${failedUploads.length} файл(ов) не загружено. Успешно: ${successCount}`, 
+                        severity: 'warning' 
+                    });
+                    handleCreateClose();
+                    fetchData();
+                    return;
+                }
             }
 
             setSnackbar({ open: true, message: SUCCESS_MESSAGES.REQUEST_CREATED, severity: 'success' });
@@ -178,7 +236,8 @@ const Requests = () => {
             fetchData();
         } catch (err) {
             console.error('Error creating request:', err);
-            setSnackbar({ open: true, message: REQUESTS_MESSAGES.CREATE_FAILED, severity: 'error' });
+            const errorMessage = err.response?.data?.message || REQUESTS_MESSAGES.CREATE_FAILED;
+            setSnackbar({ open: true, message: errorMessage, severity: 'error' });
         } finally {
             setIsSubmitting(false);
         }

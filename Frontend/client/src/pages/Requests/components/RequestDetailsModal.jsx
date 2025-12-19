@@ -205,7 +205,7 @@ const handleSaveChanges = () => {
                                             onChange={(e) => setEditPriority(Number(e.target.value))}
                                             options={Object.entries(REQUEST_PRIORITY_LABELS).map(([value, label]) => ({ value: Number(value), label }))}
                                             size="small"
-                                            sx={{ minWidth: 180, backgroundColor: 'rgba(255,255,255,0.95)' }}
+                                            sx={{ minWidth: 180 }}
                                         />
 
                                         {/* Дедлайн */}

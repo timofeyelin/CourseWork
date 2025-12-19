@@ -13,10 +13,12 @@ namespace Backend.Api.Controllers;
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
+    private readonly IAuditService _auditService;
     private readonly ILogger<UserController> _logger;  
-    public UserController(IUserService userService, ILogger<UserController> logger)
+    public UserController(IUserService userService, IAuditService auditService, ILogger<UserController> logger)
     {
         _userService = userService;
+        _auditService = auditService;
         _logger = logger;    
     }
 
@@ -69,6 +71,22 @@ public class UserController : ControllerBase
         {
             var userId = GetCurrentUserId();
             var updatedUser = await _userService.UpdateProfileAsync(ct, userId, request.FullName, request.Email, request.Phone, request.NewPassword);
+
+            try
+            {
+                await _auditService.LogAsync(
+                    userId,
+                    "UpdateProfile",
+                    "User",
+                    userId.ToString(),
+                    "Профиль обновлён",
+                    ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Не удалось записать аудит");
+            }
+
             return Ok(new { message = "Профиль успешно обновлен" });
         }
         catch (KeyNotFoundException ex)
@@ -123,6 +141,22 @@ public class UserController : ControllerBase
         {
             var userId = GetCurrentUserId();
             await _userService.LinkAccountAsync(ct, userId, request.AccountNumber);
+
+            try
+            {
+                await _auditService.LogAsync(
+                    userId,
+                    "LinkAccount",
+                    "Account",
+                    request.AccountNumber,
+                    $"Привязан лицевой счёт: {request.AccountNumber}",
+                    ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Не удалось записать аудит");
+            }
+
             return Ok(new { message = "Лицевой счет успешно привязан." });
         }
         catch (KeyNotFoundException ex)
@@ -147,6 +181,22 @@ public class UserController : ControllerBase
         {
             var userId = GetCurrentUserId();
             await _userService.UnlinkAccountAsync(ct, userId, accountId);
+
+            try
+            {
+                await _auditService.LogAsync(
+                    userId,
+                    "UnlinkAccount",
+                    "Account",
+                    accountId.ToString(),
+                    $"Отвязан лицевой счёт: {accountId}",
+                    ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Не удалось записать аудит");
+            }
+
             return Ok(new { message = "Лицевой счет успешно отвязан." });
         }
         catch (KeyNotFoundException ex)

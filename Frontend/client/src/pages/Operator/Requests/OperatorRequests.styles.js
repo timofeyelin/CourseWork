@@ -98,7 +98,9 @@ export const ColumnHeader = styled(Box)(({ theme, color }) => ({
     }
 }));
 
-export const TaskList = styled(Box)(({ theme, $isDraggingOver }) => ({
+export const TaskList = styled(Box, {
+    shouldForwardProp: (prop) => prop !== '$isDraggingOver',
+})(({ theme, $isDraggingOver }) => ({
     padding: theme.spacing(1.5),
     flexGrow: 1,
     overflowY: 'auto', 
@@ -118,7 +120,9 @@ export const TaskList = styled(Box)(({ theme, $isDraggingOver }) => ({
 
 // --- Стили Карточки ---
 
-export const PriorityIndicator = styled(Box)(({ theme, $priority }) => {
+export const PriorityIndicator = styled(Box, {
+    shouldForwardProp: (prop) => prop !== '$priority',
+})(({ theme, $priority }) => {
     const colors = {
         1: { color: '#4caf50', bg: 'rgba(76, 175, 80, 0.1)' },
         2: { color: '#2196f3', bg: 'rgba(33, 150, 243, 0.1)' },
@@ -142,7 +146,9 @@ export const PriorityIndicator = styled(Box)(({ theme, $priority }) => {
     };
 });
 
-export const StyledCard = styled(Paper)(({ theme, $isDragging, $priority }) => {
+export const StyledCard = styled(Paper, {
+    shouldForwardProp: (prop) => prop !== '$isDragging' && prop !== '$priority',
+})(({ theme, $isDragging, $priority }) => {
     let borderLeftColor = 'transparent';
     switch ($priority) {
         case 4: borderLeftColor = theme.palette.error.main; break; 

@@ -58,7 +58,7 @@ const AnnouncementsTable = ({ announcements, onDeleteClick, onEditClick }) => {
                     <TableRow>
                         <StyledTableHeadCell>Заголовок</StyledTableHeadCell>
                         <StyledTableHeadCell>Дата создания</StyledTableHeadCell>
-                        <StyledTableHeadCell>Тип</StyledTableHeadCell> {/* БЫЛО: Срочность */}
+                        <StyledTableHeadCell>Тип</StyledTableHeadCell>
                         <StyledTableHeadCell align="right">Действия</StyledTableHeadCell>
                     </TableRow>
                 </TableHead>

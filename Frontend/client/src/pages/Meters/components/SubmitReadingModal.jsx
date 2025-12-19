@@ -101,7 +101,6 @@ const SubmitReadingModal = ({ open, onClose, meters, initialMeterId, onSuccess, 
                                 value: meter.meterId,
                                 label: `${meter.serialNumber} (${meter.type === 0 ? 'ХВ' : meter.type === 1 ? 'ГВ' : meter.type === 2 ? 'Эл' : 'Газ'})`
                             }))}
-                            sx={{ backgroundColor: 'rgba(255,255,255,0.95)' }}
                         />
 
                         {lastReading && (

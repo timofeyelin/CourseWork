@@ -14,10 +14,14 @@ namespace Backend.Api.Controllers
     public class AnnouncementController : ControllerBase
     {
         private readonly IAnnouncementService _announcementService;
+        private readonly IAuditService _auditService;
+        private readonly ILogger<AnnouncementController> _logger;
 
-        public AnnouncementController(IAnnouncementService announcementService)
+        public AnnouncementController(IAnnouncementService announcementService, IAuditService auditService, ILogger<AnnouncementController> logger)
         {
             _announcementService = announcementService;
+            _auditService = auditService;
+            _logger = logger;
         }
 
         private int GetUserId() => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -64,6 +68,22 @@ namespace Backend.Api.Controllers
         public async Task<ActionResult<AnnouncementDto>> CreateAnnouncement([FromBody] CreateAnnouncementRequest dto, CancellationToken ct)
         {
             var announcement = await _announcementService.CreateAnnouncementAsync(dto.Title, dto.Content, dto.Type, ct);
+
+            try
+            {
+                await _auditService.LogAsync(
+                    GetUserId(),
+                    "CreateAnnouncement",
+                    "Announcement",
+                    announcement.AnnouncementId.ToString(),
+                    $"Создано объявление: {dto.Title}",
+                    ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Не удалось записать аудит");
+            }
+
             return CreatedAtAction(nameof(GetAllAnnouncements), new { id = announcement.AnnouncementId }, MapToDto(announcement));
         }
 
@@ -74,6 +94,22 @@ namespace Backend.Api.Controllers
             try
             {
                 var updated = await _announcementService.UpdateAnnouncementAsync(announcementId, dto.Title, dto.Content, dto.Type, ct);
+
+                try
+                {
+                    await _auditService.LogAsync(
+                        GetUserId(),
+                        "UpdateAnnouncement",
+                        "Announcement",
+                        announcementId.ToString(),
+                        $"Обновлено объявление: {dto.Title}",
+                        ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Не удалось записать аудит");
+                }
+
                 return Ok(MapToDto(updated));
             }
             catch (KeyNotFoundException ex)
@@ -89,6 +125,22 @@ namespace Backend.Api.Controllers
             try
             {
                 await _announcementService.DeleteAnnouncementAsync(announcementId, ct);
+
+                try
+                {
+                    await _auditService.LogAsync(
+                        GetUserId(),
+                        "DeleteAnnouncement",
+                        "Announcement",
+                        announcementId.ToString(),
+                        "Удалено объявление",
+                        ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Не удалось записать аудит");
+                }
+
                 return NoContent();
             }
             catch (KeyNotFoundException ex)

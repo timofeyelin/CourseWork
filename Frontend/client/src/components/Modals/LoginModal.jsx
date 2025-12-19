@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Checkbox, FormControlLabel, InputAdornment, IconButton } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
@@ -39,7 +39,18 @@ const LoginModal = ({ open, onClose, onSwitchToRegister }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [touched, setTouched] = useState({});
 
-    const { errors, validate, validateField } = useFormValidation(loginValidationSchema);
+    const { errors, validate, validateField, clearAllErrors } = useFormValidation(loginValidationSchema);
+
+    useEffect(() => {
+        if (!open) {
+            setFormData({ email: '', password: '', rememberMe: false });
+            setShowPassword(false);
+            setApiError(null);
+            setTouched({});
+            clearAllErrors();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open]);
 
     const handleChange = (e) => {
         const { name, value, checked } = e.target;
@@ -128,7 +139,7 @@ const LoginModal = ({ open, onClose, onSwitchToRegister }) => {
                             disabled={isSubmitting}
                             variant='outlined'
                             autoComplete='email'
-                            autoFocus
+
                         />
                     </FormField>
 
