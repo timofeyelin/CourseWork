@@ -1,4 +1,5 @@
 using Backend.Application.Interfaces;
+using Backend.Application.Dtos;
 using Backend.Api.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -70,7 +71,6 @@ namespace Backend.Api.Controllers
             }
 
             // Проверка владения: получаем все платежи пользователя и ищем среди них нужный.
-            // Это не самый эффективный способ, но он работает в рамках текущего интерфейса IPaymentService.
             var userPayments = await _paymentService.GetUserPaymentsAsync(userId, ct);
             if (!userPayments.Any(p => p.PaymentId == paymentId))
             {
@@ -102,6 +102,45 @@ namespace Backend.Api.Controllers
             catch (UnauthorizedAccessException)
             {
                 return Forbid();
+            }
+        }
+
+        // GET: api/payments/balance
+        [HttpGet("balance")]
+        public async Task<ActionResult<BalanceDetailsDto>> GetBalance(CancellationToken ct)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            try
+            {
+                var balance = await _paymentService.GetBalanceAsync(userId, ct);
+                return Ok(balance);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
+        // POST: api/payments/init
+        [HttpPost("init")]
+        public async Task<ActionResult> InitPayment([FromBody] InitPaymentRequest request, CancellationToken ct)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            try
+            {
+                var payment = await _paymentService.InitPaymentAsync(userId, request.Amount, request.Method, ct);
+                return Ok(new { 
+                    paymentId = payment.PaymentId, 
+                    testUrl = $"https://test-payment-gateway.com/pay?id={payment.PaymentId}&amount={payment.Amount}" 
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
         }
 

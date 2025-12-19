@@ -8,7 +8,7 @@ export const ROUTES = {
     BILLS: '/bills',
     METERS: '/meters',
     REQUESTS: '/requests',
-    ADMIN_ANNOUNCEMENTS: '/admin/announcements',
+    OPERATOR_ANNOUNCEMENTS: '/operator/announcements',
     ADMIN_RESIDENTS: '/admin/residents',
     PAYMENT_HISTORY: '/payment-history',
     PAYMENTS: '/payments',
@@ -40,7 +40,7 @@ export const VALIDATION_MESSAGES = {
 }
 
 export const ERROR_MESSAGES = {
-    LOGIN_FAILED: 'Ошибка входа. Проверьте email или пароль.',
+    LOGIN_FAILED: 'Ошибка входа. Проверьте пароль.',
     REGISTRATION_FAILED: 'Ошибка регистрации. Попробуйте снова.',
     GENERIC_ERROR: 'Произошла ошибка. Попробуйте позже.',
     PROFILE_LOAD_FAILED: 'Не удалось загрузить данные профиля',
@@ -88,7 +88,8 @@ export const SUCCESS_MESSAGES = {
     READING_SUBMITTED: 'Показания успешно переданы'
 }
 
-// Добавляем отдельные успешные сообщения, используемые в админке
+SUCCESS_MESSAGES.PROFILE_UPDATED = 'Профиль успешно обновлён';
+
 SUCCESS_MESSAGES.METER_ADDED = 'Счетчик успешно добавлен';
 SUCCESS_MESSAGES.REQUEST_CREATED = REQUESTS_MESSAGES.CREATE_SUCCESS;
 SUCCESS_MESSAGES.REQUEST_UPDATED = REQUESTS_MESSAGES.REQUEST_UPDATED;

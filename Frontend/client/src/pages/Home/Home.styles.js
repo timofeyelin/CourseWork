@@ -101,7 +101,9 @@ export const WidgetIcon = styled(Box)(({ theme, color }) => ({
     backgroundColor: `${color}15` || `${theme.palette.primary.main}15`,
 }));
 
-export const OutageBanner = styled(GlassCard)(({ theme, $severity }) => {
+export const OutageBanner = styled(GlassCard, {
+    shouldForwardProp: (prop) => prop !== '$severity',
+})(({ theme, $severity }) => {
     // Дефолтные значения (для 'warning' / отключения)
     let styles = {
         backgroundColor: '#fff3e0', // Orange light

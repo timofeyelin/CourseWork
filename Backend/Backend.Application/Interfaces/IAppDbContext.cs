@@ -9,6 +9,7 @@ public interface IAppDbContext
     DbSet<Account> Accounts { get; set; }
     DbSet<Bill> Bills { get; set; }
     DbSet<BillItem> BillItems { get; set; } 
+    DbSet<AccountBalance> AccountBalances { get; set; }
     DbSet<Payment> Payment { get; set; }
     DbSet<RefreshToken> RefreshTokens { get; set; }
     DbSet<Request> Requests { get; set; }

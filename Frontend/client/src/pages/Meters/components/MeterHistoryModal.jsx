@@ -12,7 +12,7 @@ import {
     StyledTableCell
 } from '../Meters.styles';
 import { metersService } from '../../../api/meters';
-import { GlassDialog, GlassDialogTitle, GlassDialogActions, GlassButton, StatusPill } from '../../../components/common';
+import { GlassDialog, GlassDialogTitle, GlassDialogActions, GlassButton } from '../../../components/common';
 
 const MeterHistoryModal = ({ open, onClose, meter }) => {
     const [history, setHistory] = useState([]);
@@ -66,7 +66,6 @@ const MeterHistoryModal = ({ open, onClose, meter }) => {
                                     <StyledTableRow>
                                         <StyledTableHeadCell>Дата</StyledTableHeadCell>
                                         <StyledTableHeadCell align="center">Значение</StyledTableHeadCell>
-                                        <StyledTableHeadCell align="center">Статус</StyledTableHeadCell>
                                     </StyledTableRow>
                                 </TableHead>
                                 <TableBody>
@@ -78,18 +77,11 @@ const MeterHistoryModal = ({ open, onClose, meter }) => {
                                             <HistoryValueCell align="center">
                                                 {reading.value}
                                             </HistoryValueCell>
-                                            <StyledTableCell align="center">
-                                                {reading.validated ? (
-                                                    <StatusPill status="paid">Подтверждено</StatusPill>
-                                                ) : (
-                                                    <StatusPill status="pending">На проверке</StatusPill>
-                                                )}
-                                            </StyledTableCell>
                                         </StyledTableRow>
                                     ))}
                                     {history.length === 0 && (
                                         <StyledTableRow>
-                                            <StyledTableCell colSpan={3} align="center">
+                                            <StyledTableCell colSpan={2} align="center">
                                                 Нет истории показаний
                                             </StyledTableCell>
                                         </StyledTableRow>

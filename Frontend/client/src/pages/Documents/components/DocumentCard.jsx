@@ -52,9 +52,13 @@ const Title = styled(Typography)({
     fontWeight: 600,
     fontSize: '1rem',
     marginBottom: '4px',
-    whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical',
+    lineHeight: '1.2em',
+    maxHeight: '2.4em',
 });
 
 const Meta = styled(Typography)(({ theme }) => ({

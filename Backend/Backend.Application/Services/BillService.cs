@@ -66,6 +66,46 @@ namespace Backend.Application.Services
             return billWithDetails;
         }
 
+        public async Task RegenerateBillPdfAsync(int billId, CancellationToken ct)
+        {
+            var billWithDetails = await _context.Bills
+                .Include(b => b.Account)
+                .Include(b => b.BillItems)
+                .Include(b => b.Payment)
+                .FirstOrDefaultAsync(b => b.BillId == billId, ct);
+
+            if (billWithDetails == null) throw new KeyNotFoundException("Счет не найден.");
+
+            var pdfBytes = _pdfGeneratorService.GenerateBillPdf(billWithDetails);
+
+            var fileName = $"bill_{billWithDetails.BillId}_{System.Guid.NewGuid()}.pdf";
+            var webRootPath = _hostingEnvironment.WebRootPath ?? Path.Combine(_hostingEnvironment.ContentRootPath, "wwwroot");
+            var directoryPath = Path.Combine(webRootPath, "bills");
+
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            var filePath = Path.Combine(directoryPath, fileName);
+            await File.WriteAllBytesAsync(filePath, pdfBytes, ct);
+
+            if (!string.IsNullOrEmpty(billWithDetails.PdfLink))
+            {
+                try
+                {
+                    var oldRelative = billWithDetails.PdfLink.TrimStart('/');
+                    var oldPath = Path.Combine(_hostingEnvironment.WebRootPath ?? webRootPath, oldRelative);
+                    if (File.Exists(oldPath)) File.Delete(oldPath);
+                }
+                catch { /* ignore deletion errors */ }
+            }
+
+            billWithDetails.PdfLink = $"/bills/{fileName}";
+            _context.Bills.Update(billWithDetails);
+            await _context.SaveChangesAsync(ct);
+        }
+
         public async Task<List<Bill>> GetUserBillsAsync(CancellationToken ct, int userId)
         {
             return await _context.Bills
@@ -168,7 +208,6 @@ namespace Backend.Application.Services
 
                     if (processedInCurrentBatch.Contains((accountId, item.BillData.Period)))
                     {
-                        // Такой счет уже был выше в этом же файле
                         errorCount++;
                         continue;
                     }

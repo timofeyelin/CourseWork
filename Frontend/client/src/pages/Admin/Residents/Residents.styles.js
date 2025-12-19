@@ -94,6 +94,19 @@ export const ModalContentBox = styled(Box)(({ theme }) => ({
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
 }));
 
+export const ModalTitleBox = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    paddingBottom: theme.spacing(1),
+    '& .MuiIconButton-root': {
+        position: 'absolute',
+        right: 0,
+        top: 0,
+    },
+}));
+
 export const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
     borderRadius: '20px',
     overflow: 'hidden',

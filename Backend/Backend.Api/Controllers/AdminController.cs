@@ -111,6 +111,209 @@ namespace Backend.Api.Controllers
             }
         }
 
+        [HttpPost("generate-bills-now")]
+        public async Task<IActionResult> GenerateBillsNow([FromQuery] string? period = null, [FromQuery] bool force = false, CancellationToken ct = default)
+        {
+            DateOnly periodDate;
+            if (!string.IsNullOrWhiteSpace(period))
+            {
+                if (DateOnly.TryParse(period, out var p))
+                {
+                    periodDate = new DateOnly(p.Year, p.Month, 1);
+                }
+                else
+                {
+                    var parts = period.Split('-', StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length >= 2 && int.TryParse(parts[0], out var y) && int.TryParse(parts[1], out var m))
+                    {
+                        periodDate = new DateOnly(y, m, 1);
+                    }
+                    else
+                    {
+                        return BadRequest("Неверный формат периода. Используйте 'yyyy-MM' или распознаваемую дату.");
+                    }
+                }
+            }
+            else
+            {
+                var now = DateTime.UtcNow;
+                periodDate = DateOnly.FromDateTime(now.AddMonths(-1));
+            }
+
+            int createdCount = 0;
+            int skippedCount = 0;
+            int errorCount = 0;
+
+            var tariffs = new Dictionary<int, decimal>
+            {
+                { (int)MeterType.ColdWater, 45.90m },
+                { (int)MeterType.HotWater, 60.00m },
+                { (int)MeterType.Electricity, 5.47m },
+                { (int)MeterType.Gas, 7.50m }
+            };
+
+            var accounts = await _context.Accounts.ToListAsync(ct);
+
+            var usersRoles = await _context.Users
+                .ToDictionaryAsync(u => u.UserId, u => u.Role, ct);
+
+            foreach (var account in accounts)
+            {
+                try
+                {
+                    if (account.UserId.HasValue && usersRoles.TryGetValue(account.UserId.Value, out var role) && (role == UserRole.Admin || role == UserRole.Operator))
+                    {
+                        skippedCount++;
+                        continue;
+                    }
+                    var existingBills = await _context.Bills
+                        .Where(b => b.AccountId == account.AccountId && b.Period == periodDate)
+                        .Include(b => b.BillItems)
+                        .Include(b => b.Payment)
+                        .ToListAsync(ct);
+
+                    if (existingBills.Any() && !force)
+                    {
+                        // Уже есть квитанция и не требуется принудительное пересоздание
+                        skippedCount++;
+                        continue;
+                    }
+
+                    var billItems = new List<BillItem>();
+
+                    var meters = await _context.Meters.Where(m => m.AccountId == account.AccountId).ToListAsync(ct);
+
+                    var monthEndLocal = new DateTime(periodDate.Year, periodDate.Month, DateTime.DaysInMonth(periodDate.Year, periodDate.Month), 23, 59, 59);
+                    var monthEnd = DateTime.SpecifyKind(monthEndLocal, DateTimeKind.Utc);
+
+                    foreach (var meter in meters)
+                    {
+                        var currentReadingQuery = _context.MeterReadings
+                            .Where(r => r.MeterId == meter.MeterId && r.Period <= monthEnd);
+                        if (!force)
+                            currentReadingQuery = currentReadingQuery.Where(r => r.Validated);
+                        var currentReading = await currentReadingQuery
+                            .OrderByDescending(r => r.Period)
+                            .FirstOrDefaultAsync(ct);
+
+                        if (currentReading == null) continue;
+
+                        var previousReadingQuery = _context.MeterReadings
+                            .Where(r => r.MeterId == meter.MeterId && r.Period < currentReading.Period);
+                        if (!force)
+                            previousReadingQuery = previousReadingQuery.Where(r => r.Validated);
+                        var previousReading = await previousReadingQuery
+                            .OrderByDescending(r => r.Period)
+                            .FirstOrDefaultAsync(ct);
+
+                        decimal consumption = 0;
+                        if (previousReading != null) consumption = currentReading.Value - previousReading.Value;
+                        else consumption = currentReading.Value;
+
+                        if (consumption <= 0) continue;
+
+                        var mType = (int)meter.Type;
+                        if (!tariffs.TryGetValue(mType, out var tariff)) tariff = 0m;
+
+                        var serviceName = meter.Type switch
+                        {
+                            MeterType.ColdWater => "Холодная вода",
+                            MeterType.HotWater => "Горячая вода",
+                            MeterType.Electricity => "Электроэнергия",
+                            MeterType.Gas => "Газ",
+                            _ => "Услуга"
+                        };
+
+                        var amount = Math.Round(consumption * tariff, 2);
+
+                        billItems.Add(new BillItem
+                        {
+                            ServiceName = serviceName,
+                            Tariff = tariff,
+                            Consumption = consumption,
+                            Amount = amount
+                        });
+                    }
+
+                    if (!billItems.Any())
+                    {
+                        skippedCount++;
+                        continue;
+                    }
+
+                    // Если есть существующие квитанции и запрошен force, сравним содержимое.
+                    if (existingBills.Any() && force)
+                    {
+                        var existing = existingBills.First();
+                        bool identical = false;
+                        try
+                        {
+                            var existingItems = existing.BillItems.OrderBy(i => i.ServiceName).ToList();
+                            var newItems = billItems.OrderBy(i => i.ServiceName).ToList();
+                            if (existingItems.Count == newItems.Count)
+                            {
+                                identical = true;
+                                for (int i = 0; i < existingItems.Count; i++)
+                                {
+                                    if (existingItems[i].ServiceName != newItems[i].ServiceName
+                                        || existingItems[i].Consumption != newItems[i].Consumption
+                                        || existingItems[i].Tariff != newItems[i].Tariff
+                                        || existingItems[i].Amount != newItems[i].Amount)
+                                    {
+                                        identical = false;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, $"Ошибка при сравнении существующей и новой квитанции для ЛС {account.AccountNumber}");
+                        }
+
+                        if (identical)
+                        {
+                            // Ничего не изменилось — пропускаем генерацию
+                            skippedCount++;
+                            continue;
+                        }
+
+                        // Иначе удаляем старые квитанции и продолжим создание новых
+                        try
+                        {
+                            _context.Bills.RemoveRange(existingBills);
+                            await _context.SaveChangesAsync(ct);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, $"Не удалось удалить существующие квитанции для лицевого счета {account.AccountNumber}");
+                            errorCount++;
+                            continue;
+                        }
+                    }
+
+                    var bill = new Bill
+                    {
+                        AccountId = account.AccountId,
+                        Period = periodDate,
+                        CreatedAt = DateTime.UtcNow,
+                        BillItems = billItems,
+                        TotalAmount = billItems.Sum(i => i.Amount)
+                    };
+
+                    await _billService.CreateBillWithPdfAsync(bill, ct);
+                    createdCount++;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"Ошибка при создании квитанции для лицевого счета {account.AccountNumber}");
+                    errorCount++;
+                }
+            }
+
+            return Ok(new { message = "Генерация завершена", created = createdCount, skipped = skippedCount, errors = errorCount, period = periodDate.ToString("MM.yyyy") });
+        }
+
         [HttpPost("add-meter")]
         public async Task<IActionResult> AddMeter(string accountNumber, MeterType type, string serialNumber, CancellationToken ct)
         {

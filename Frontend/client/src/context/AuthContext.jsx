@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { authService, userService } from '../api';
+import { paymentService } from '../api/payments';
 
 const AuthContext = createContext(null);
 
@@ -31,8 +32,25 @@ export const AuthProvider = ({ children }) => {
         setIsLoading(false);
     };
 
+    const [balance, setBalance] = useState(0);
+    const [debt, setDebt] = useState(0);
+
+    const refreshBalance = async () => {
+        try {
+            const data = await paymentService.getBalance();
+            setBalance(data.balance ?? 0);
+            setDebt(data.debt ?? 0);
+        } catch (e) {
+            console.warn('Failed to refresh balance', e);
+        }
+    };
+
     useEffect(() => {
-        checkAuth();
+        (async () => {
+            await checkAuth();
+            const token = localStorage.getItem('accessToken');
+            if (token) await refreshBalance();
+        })();
     }, []);
 
     const login = async (email, password) => {
@@ -40,6 +58,7 @@ export const AuthProvider = ({ children }) => {
             await authService.login(email, password);
             await checkAuth();
             closeModals();
+            await refreshBalance();
             return true;
         } catch (error) {
             throw error;
@@ -67,6 +86,11 @@ export const AuthProvider = ({ children }) => {
         setIsRegisterOpen(false);
     };
 
+    const isAdmin = !!user && user.role === 'Admin';
+    const isOperator = !!user && user.role === 'Operator';
+    const isAdminOrOperator = isAdmin || isOperator;
+    const isResident = isAuthenticated && !isAdminOrOperator;
+
     return (
         <AuthContext.Provider value={{
             user,
@@ -74,6 +98,13 @@ export const AuthProvider = ({ children }) => {
             isLoading,
             isLoginOpen,
             isRegisterOpen,
+            balance,
+            debt,
+            refreshBalance,
+            isAdmin,
+            isOperator,
+            isAdminOrOperator,
+            isResident,
             login,
             logout,
             openLogin,

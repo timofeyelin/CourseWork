@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { InputAdornment, Stack } from '@mui/material';
-import { Search, People, Add, Speed } from '@mui/icons-material';
+import { Search, People, Add, ReceiptLong, Description } from '@mui/icons-material';
 import debounce from 'lodash/debounce';
 import { adminService } from '../../../api';
 import { AppSnackbar } from '../../../components/common';
@@ -9,6 +9,7 @@ import ResidentsTable from './components/ResidentsTable';
 import UserDetailsModal from './components/UserDetailsModal';
 import CreateAccountModal from '../../../components/Modals/CreateAccountModal';
 import AddMeterModal from '../../../components/Modals/AddMeterModal';
+import GenerateBillsModal from '../../../components/Modals/GenerateBillsModal';
 import { GlassButton } from '../../../components/common';
 
 import { 
@@ -33,6 +34,7 @@ const Residents = () => {
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
     const [isAccountModalOpen, setAccountModalOpen] = useState(false);
     const [isMeterModalOpen, setMeterModalOpen] = useState(false);
+    const [isGenerateModalOpen, setGenerateModalOpen] = useState(false);
 
     const fetchUsers = async (query = '') => {
         setLoading(true);
@@ -135,11 +137,19 @@ const Residents = () => {
                             </GlassButton>
                             <GlassButton 
                                 variant="outlined" 
-                                startIcon={<Speed />}
+                                startIcon={<ReceiptLong />}
                                 onClick={() => setMeterModalOpen(true)}
                                 sx={{ whiteSpace: 'nowrap' }}
                             >
                                 Счетчик
+                            </GlassButton>
+                            <GlassButton
+                                variant="outlined"
+                                startIcon={<Description />}
+                                onClick={() => setGenerateModalOpen(true)}
+                                sx={{ whiteSpace: 'nowrap' }}
+                            >
+                                Сформировать квитанции
                             </GlassButton>
                         </Stack>
                     </Stack>
@@ -163,7 +173,15 @@ const Residents = () => {
                     open={isDetailsOpen}
                     onClose={handleCloseDetails}
                     user={selectedUser}
-                    onUpdate={() => fetchUsers(searchQuery)}
+                    onUpdate={async () => {
+                        await fetchUsers(searchQuery);
+                        try {
+                            const updated = (await adminService.getUsers(searchQuery)).data.find(u => u.id === selectedUser.id);
+                            if (updated) setSelectedUser(updated);
+                        } catch (e) {
+                            console.warn('Failed to refresh selected user after update', e);
+                        }
+                    }}
                     setSnackbar={setSnackbar}
                 />
             )}
@@ -179,6 +197,19 @@ const Residents = () => {
                 open={isMeterModalOpen} 
                 onClose={() => setMeterModalOpen(false)} 
                 onSuccess={handleMeterSuccess}
+            />
+            
+            <GenerateBillsModal
+                open={isGenerateModalOpen}
+                onClose={() => setGenerateModalOpen(false)}
+                onResult={(err, data) => {
+                    if (err) {
+                        console.error(err);
+                        setSnackbar({ open: true, message: 'Ошибка при генерации квитанций', severity: 'error' });
+                    } else if (data) {
+                        setSnackbar({ open: true, message: `Готово: ${data.created} квитанций, пропущено: ${data.skipped}, ошибки: ${data.errors}`, severity: 'success' });
+                    }
+                }}
             />
             
             <AppSnackbar
