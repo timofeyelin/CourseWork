@@ -11,7 +11,10 @@ namespace Backend.Domain.Entities
         public string? TransactionId { get; set; }
         public Boolean IsTest { get; set; }
 
-        public int BillId { get; set; }
+        public int? BillId { get; set; }
         public Bill? Bill { get; set; }
+
+        public int? AccountId { get; set; }
+        public Account? Account { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { CircularProgress } from '@mui/material';
 import { billsService, requestsService, announcementsService } from '../../api';
+import { useAuth } from '../../context/AuthContext';
 import { ERROR_MESSAGES, ANNOUNCEMENT_TYPES } from '../../utils/constants'; 
 import { 
     HomeContainer, 
@@ -13,10 +14,11 @@ import StatsWidgets from './components/StatsWidgets';
 import OutageBanners from './components/OutageBanners';
 import NewsFeed from './components/NewsFeed';
 import NewsModal from './components/NewsModal';
+import PaymentModal from '../../components/Modals/PaymentModal';
 import { AppSnackbar } from '../../components/common';
 
 const Home = () => {
-    const [balance, setBalance] = useState(0);
+    const { balance, debt, refreshBalance } = useAuth();
     const [openRequestsCount, setOpenRequestsCount] = useState(0);
     const [announcements, setAnnouncements] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -24,6 +26,7 @@ const Home = () => {
     
     const [selectedNews, setSelectedNews] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isPaymentOpen, setIsPaymentOpen] = useState(false);
 
     const [snackbar, setSnackbar] = useState({
         open: false,
@@ -39,11 +42,7 @@ const Home = () => {
         setLoading(true);
         
         try {
-            const billsRes = await billsService.getBills();
-            const unpaid = billsRes.data
-                .filter(b => b.status === 0 || b.status === 'Pending')
-                .reduce((sum, b) => sum + b.totalAmount, 0);
-            setBalance(unpaid);
+            await refreshBalance();
         } catch (e) {
             setSnackbar({
                 open: true,
@@ -132,8 +131,9 @@ const Home = () => {
                     <WelcomeBlock />
 
                     <StatsWidgets 
-                        balance={balance} 
+                        balanceData={{ balance, debt }} 
                         openRequestsCount={openRequestsCount} 
+                        onPaymentClick={() => setIsPaymentOpen(true)}
                     />
 
                     {/* Баннеры теперь получают отфильтрованные по типу новости */}
@@ -149,6 +149,12 @@ const Home = () => {
                         open={isModalOpen} 
                         news={selectedNews} 
                         onClose={handleCloseModal} 
+                    />
+
+                    <PaymentModal 
+                        open={isPaymentOpen} 
+                        onClose={() => setIsPaymentOpen(false)} 
+                        onSuccess={() => refreshBalance()} 
                     />
 
                 </DashboardContainer>

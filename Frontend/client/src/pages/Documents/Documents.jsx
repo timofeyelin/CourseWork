@@ -57,11 +57,6 @@ const Documents = () => {
             navigate(ROUTES.HOME);
             return;
         }
-        if (user && (user.role === 'Admin' || user.role === 'Operator')) {
-            navigate(ROUTES.HOME);
-            return;
-        }
-
         loadDocuments();
     }, [activeTab, isAuthenticated, user, navigate]);
 

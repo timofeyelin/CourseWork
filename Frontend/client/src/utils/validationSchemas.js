@@ -138,3 +138,47 @@ export const getPasswordStrength = (password) => {
         return { strength: PASSWORD_STRENGTH.STRONG, color: '#4caf50', width: 100 };
     }
 };
+
+export const validateEmailForProfile = (email) => {
+    const errors = {};
+    if (!email || email.trim() === '') {
+        errors.email = VALIDATION_MESSAGES.REQUIRED;
+    } else {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            errors.email = VALIDATION_MESSAGES.INVALID_EMAIL;
+        }
+    }
+    if (Object.keys(errors).length > 0) throw errors;
+    return true;
+}
+
+export const validatePhoneForProfile = (phone) => {
+    const errors = {};
+    if (phone && phone.trim() !== '') {
+        const phoneRegex = /^(\+7|8)?[\s\-]?\(?[489][0-9]{2}\)?[\s\-]?[0-9]{3}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$/;
+        if (!phoneRegex.test(phone)) {
+            errors.phone = VALIDATION_MESSAGES.INVALID_PHONE;
+        }
+    }
+    if (Object.keys(errors).length > 0) throw errors;
+    return true;
+}
+
+export const validateProfilePassword = (password, confirmPassword) => {
+    const errors = {};
+    if (password) {
+        if (password.length < 8) {
+            errors.password = VALIDATION_MESSAGES.PASSWORD_MIN_LENGTH;
+        } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+            errors.password = VALIDATION_MESSAGES.PASSWORD_REQUIREMENTS;
+        }
+        if (!confirmPassword || confirmPassword.trim() === '') {
+            errors.confirmPassword = VALIDATION_MESSAGES.CONFIRM_PASSWORD;
+        } else if (confirmPassword !== password) {
+            errors.confirmPassword = VALIDATION_MESSAGES.PASSWORDS_DO_NOT_MATCH;
+        }
+    }
+    if (Object.keys(errors).length > 0) throw errors;
+    return true;
+}

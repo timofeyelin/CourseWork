@@ -20,11 +20,6 @@ const Payments = () => {
             navigate(ROUTES.HOME);
             return;
         }
-        if (user && (user.role === 'Admin' || user.role === 'Operator')) {
-            navigate(ROUTES.HOME);
-            return;
-        }
-
         const tabParam = searchParams.get('tab');
         const accountParam = searchParams.get('account');
         
@@ -34,9 +29,7 @@ const Payments = () => {
             setActiveTab(0);
         }
 
-        if (accountParam) {
-            setInitialAccount(accountParam);
-        }
+        setInitialAccount(accountParam || null);
     }, [searchParams, isAuthenticated, user, navigate]);
 
     const handleTabChange = (event, newValue) => {
@@ -47,8 +40,11 @@ const Payments = () => {
         } else {
             newParams.set('tab', 'history');
         }
-        if (initialAccount) {
-            newParams.set('account', initialAccount);
+        const accountParamCurrent = searchParams.get('account');
+        if (accountParamCurrent) {
+            newParams.set('account', accountParamCurrent);
+        } else {
+            newParams.delete('account');
         }
         setSearchParams(newParams);
     };

@@ -47,11 +47,6 @@ const MetersPage = () => {
             navigate(ROUTES.HOME);
             return;
         }
-        if (user && (user.role === 'Admin' || user.role === 'Operator')) {
-            navigate(ROUTES.HOME);
-            return;
-        }
-
         loadData();
     }, [isAuthenticated, user, navigate]);
 

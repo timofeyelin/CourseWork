@@ -98,16 +98,10 @@ const Requests = () => {
             navigate(ROUTES.HOME);
             return;
         }
-        if (user && (user.role === 'Admin' || user.role === 'Operator')) {
-            navigate(ROUTES.HOME);
-            return;
-        }
-
         fetchData();
     }, [isAuthenticated, user, navigate]);
 
     const handleCreateOpen = () => {
-        // ИЗМЕНЕНИЕ: categoryId пустой по умолчанию
         setNewRequest({
             accountId: accounts.length > 0 ? accounts[0].id : '',
             categoryId: '', 

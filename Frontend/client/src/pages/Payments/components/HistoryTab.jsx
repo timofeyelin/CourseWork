@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
+    Paper,
     Typography, 
     Table, 
     TableBody, 
@@ -15,6 +17,7 @@ import {
     CreditCard as CardIcon,
     Cancel as CancelIcon,
     Info as InfoIcon
+    , Download as DownloadIcon
 } from '@mui/icons-material';
 import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill, GlassSelect, GlassDatePicker, AppSnackbar } from '../../../components/common';
 import { paymentsService, billsService, userService } from '../../../api';
@@ -39,6 +42,16 @@ import {
     LoadingContainer,
     StyledGlassDatePicker
 } from './HistoryTab.styles';
+// reuse modal styles/components from PaymentTab
+import {
+    ModalInfoSection,
+    ModalInfoRow,
+    BillDetailsTable,
+    ModalTableCellHead,
+    ModalTableCell,
+    ModalTableRow,
+    TotalAmount
+} from './PaymentTab.styles';
 import { ErrorBox } from '../../../components/common';
 
 const HistoryTab = ({ initialAccount }) => {
@@ -49,12 +62,16 @@ const HistoryTab = ({ initialAccount }) => {
     
     const [statusFilter, setStatusFilter] = useState('all');
     const [accountFilter, setAccountFilter] = useState('all');
+    const [searchParams, setSearchParams] = useSearchParams();
     const [dateFrom, setDateFrom] = useState(null);
     const [dateTo, setDateTo] = useState(null);
     
     const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
     const [selectedPayment, setSelectedPayment] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
+
+    const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+    const [selectedBill, setSelectedBill] = useState(null);
 
     const [snackbar, setSnackbar] = useState({
         open: false,
@@ -63,9 +80,7 @@ const HistoryTab = ({ initialAccount }) => {
     });
 
     useEffect(() => {
-        if (initialAccount) {
-            setAccountFilter(initialAccount);
-        }
+        setAccountFilter(initialAccount || 'all');
     }, [initialAccount]);
 
     const fetchData = async () => {
@@ -81,7 +96,9 @@ const HistoryTab = ({ initialAccount }) => {
             const accountsData = accountsRes.data || [];
             setAccounts(accountsData);
             
-            const paymentsData = (paymentsRes.data || []).map(payment => {
+            const paymentsData = (paymentsRes.data || [])
+                .filter(payment => payment.billId != null)
+                .map(payment => {
                 const bill = bills.find(b => b.billId === payment.billId);
                 const account = bill ? accountsData.find(a => a.id === bill.accountId) : null;
                 
@@ -91,10 +108,13 @@ const HistoryTab = ({ initialAccount }) => {
 
                 return {
                     id: payment.paymentId,
+                    billId: payment.billId,
                     date: payment.createdAt,
                     amount: payment.amount,
                     status: statusStr,
-                    accountNumber: account ? account.accountNumber : 'Н/Д'
+                    accountNumber: account ? account.accountNumber : 'Н/Д',
+                    period: bill ? bill.period : null,
+                    isPaid: payment.status === 1
                 };
             });
 
@@ -116,7 +136,19 @@ const HistoryTab = ({ initialAccount }) => {
     };
 
     const handleAccountFilterChange = (event) => {
-        setAccountFilter(event.target.value);
+        const value = event.target.value;
+        setAccountFilter(value);
+        try {
+            const newParams = new URLSearchParams(searchParams);
+            if (value === 'all') {
+                newParams.delete('account');
+            } else {
+                newParams.set('account', value);
+            }
+            setSearchParams(newParams);
+        } catch (e) {
+            console.warn('Failed to update search params for account', e);
+        }
     };
 
     const filteredPayments = payments.filter(payment => {
@@ -181,6 +213,54 @@ const HistoryTab = ({ initialAccount }) => {
             hour: '2-digit',
             minute: '2-digit'
         });
+    };
+
+    const handleViewDetails = async (payment) => {
+        try {
+            setSelectedPayment(payment);
+            const res = await billsService.getBillDetails(payment.billId);
+            const details = res.data;
+
+            setSelectedBill({
+                id: payment.billId,
+                accountNumber: payment.accountNumber,
+                period: payment.period,
+                amount: payment.amount,
+                isPaid: payment.isPaid,
+                items: details.billItems.map(item => ({
+                    service: item.serviceName,
+                    tariff: item.tariff,
+                    volume: item.consumption,
+                    amount: item.amount
+                }))
+            });
+
+            setDetailsModalOpen(true);
+        } catch (err) {
+            console.error('Error fetching bill details for payment history:', err);
+            setSnackbar({ open: true, message: ERROR_MESSAGES.BILL_DETAILS_LOAD_FAILED, severity: 'error' });
+        }
+    };
+
+    const handleCloseDetails = () => {
+        setDetailsModalOpen(false);
+        setSelectedBill(null);
+    };
+
+    const handleDownloadPdf = async (billId) => {
+        try {
+            const response = await billsService.getBillPdf(billId);
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `bill-${billId}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (err) {
+            console.error('Error downloading PDF:', err);
+            setSnackbar({ open: true, message: ERROR_MESSAGES.DOWNLOAD_RECEIPT_FAILED, severity: 'error' });
+        }
     };
 
     const formatCurrency = (amount) => {
@@ -299,11 +379,15 @@ const HistoryTab = ({ initialAccount }) => {
                                                     </GlassIconButton>
                                                 </Tooltip>
                                             )}
-                                            <Tooltip title="Детали">
-                                                <GlassIconButton size="small">
-                                                    <InfoIcon fontSize="small" />
-                                                </GlassIconButton>
-                                            </Tooltip>
+                                            {payment.status === 'Cancelled' ? (
+                                                <Typography>-</Typography>
+                                            ) : (
+                                                <Tooltip title="Детали">
+                                                    <GlassIconButton size="small" onClick={() => handleViewDetails(payment)}>
+                                                        <InfoIcon fontSize="small" />
+                                                    </GlassIconButton>
+                                                </Tooltip>
+                                            )}
                                         </StyledTableCell>
                                     </StyledTableRow>
                                 ))
@@ -312,6 +396,74 @@ const HistoryTab = ({ initialAccount }) => {
                     </Table>
                 </StyledTableContainer>
             </ContentSection>
+
+            {/* Модальное окно деталей */}
+            <GlassDialog 
+                open={detailsModalOpen} 
+                onClose={handleCloseDetails}
+                maxWidth="md"
+                fullWidth
+            >
+                <GlassDialogTitle>
+                    {selectedPayment ? `Детали оплаты счета ${formatDate(selectedPayment.date)}` : 'Детали'}
+                </GlassDialogTitle>
+                <DialogContent>
+                    {selectedBill && (
+                        <>
+                            <ModalInfoSection>
+                                <ModalInfoRow>
+                                    <Typography variant="body2" color="textSecondary">Лицевой счет</Typography>
+                                    <Typography variant="body1" fontWeight="600">{selectedBill.accountNumber}</Typography>
+                                </ModalInfoRow>
+                            </ModalInfoSection>
+                            
+                            <BillDetailsTable component={Paper} variant="outlined">
+                                <Table size="small">
+                                    <TableHead>
+                                        <TableRow>
+                                            <ModalTableCellHead>Услуга</ModalTableCellHead>
+                                            <ModalTableCellHead align="right">Тариф</ModalTableCellHead>
+                                            <ModalTableCellHead align="right">Объем</ModalTableCellHead>
+                                            <ModalTableCellHead align="right">Сумма</ModalTableCellHead>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {selectedBill.items && selectedBill.items.map((item, index) => (
+                                            <ModalTableRow key={index}>
+                                                <ModalTableCell>{item.service}</ModalTableCell>
+                                                <ModalTableCell align="right">{item.tariff}</ModalTableCell>
+                                                <ModalTableCell align="right">{item.volume}</ModalTableCell>
+                                                <ModalTableCell align="right">{formatCurrency(item.amount)}</ModalTableCell>
+                                            </ModalTableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </BillDetailsTable>
+                            
+                            <TotalAmount>
+                                <Typography variant="body1" color="textSecondary">
+                                    {selectedBill.isPaid ? 'Оплачено' : 'Итого к оплате'}
+                                </Typography>
+                                <Typography variant="h5" color="primary" fontWeight="700">
+                                    {formatCurrency(selectedBill.amount)}
+                                </Typography>
+                            </TotalAmount>
+                        </>
+                    )}
+                </DialogContent>
+                <GlassDialogActions>
+                    <GlassButton 
+                        onClick={() => handleDownloadPdf(selectedBill?.id)}
+                        startIcon={<DownloadIcon />}
+                        variant="text"
+                    >
+                        Скачать квитанцию
+                    </GlassButton>
+                    <GlassButton onClick={handleCloseDetails} variant="text">
+                        Закрыть
+                    </GlassButton>
+                </GlassDialogActions>
+            </GlassDialog>
 
             {/* Диалог подтверждения отмены */}
             <GlassDialog

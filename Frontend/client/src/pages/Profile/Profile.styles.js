@@ -93,6 +93,12 @@ export const UserEmail = styled('p')(({ theme }) => ({
     fontSize: '0.95rem',
 }));
 
+export const UserPhone = styled('p')(({ theme }) => ({
+    color: theme.palette.text.secondary,
+    margin: '0.25rem 0 0 0',
+    fontSize: '0.95rem',
+}));
+
 export const RegistrationDate = styled('p')(({ theme }) => ({
     color: theme.palette.text.secondary,
     fontSize: '0.85rem',

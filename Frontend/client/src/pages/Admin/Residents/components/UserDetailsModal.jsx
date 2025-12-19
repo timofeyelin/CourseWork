@@ -4,12 +4,13 @@ import {
     List, ListItemText, IconButton,
     Typography, CircularProgress
 } from '@mui/material';
-import { Delete, Add } from '@mui/icons-material';
+import { Delete, Add, Close } from '@mui/icons-material';
 import { adminService } from '../../../../api';
 import { GlassDialog, GlassDialogTitle, GlassDialogActions, GlassButton, GlassIconButton } from '../../../../components/common';
 import { RESIDENTS_MESSAGES } from '../../../../utils/constants';
 import { 
     ModalContentBox, 
+    ModalTitleBox,
     AddAccountBox, 
     StyledAccountInput, 
     SectionTitle, 
@@ -50,14 +51,21 @@ const UserDetailsModal = ({ open, onClose, user, onUpdate, setSnackbar }) => {
 
     return (
         <GlassDialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-            <GlassDialogTitle>Подробности пользователя</GlassDialogTitle>
+            <GlassDialogTitle>
+                <ModalTitleBox>
+                    <Typography variant="h5" fontWeight={700}>Подробности пользователя</Typography>
+                    <GlassIconButton onClick={onClose} sx={{ position: 'absolute', right: 8, top: 8 }} size="small">
+                        <Close />
+                    </GlassIconButton>
+                </ModalTitleBox>
+            </GlassDialogTitle>
             <DialogContent>
                 <ModalContentBox>
-                    <Typography variant="h6" gutterBottom>{user.fullName}</Typography>
+                    <Typography variant="h6" fontWeight={600} gutterBottom sx={{ mb: 1 }}>{user.fullName}</Typography>
                     <Typography variant="body2" color="textSecondary">Телефон: {user.phone}</Typography>
                 </ModalContentBox>
-                
-                <SectionTitle variant="h6">Привязанные лицевые счета</SectionTitle>
+
+                <SectionTitle variant="h6" sx={{ mt: 2 }}>Привязанные лицевые счета</SectionTitle>
                 
                 <AddAccountBox>
                     <StyledAccountInput

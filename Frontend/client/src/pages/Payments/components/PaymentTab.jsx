@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
     Paper, 
     Typography, 
@@ -24,6 +25,7 @@ import {
 } from '@mui/icons-material';
 import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill, GlassSelect, AppSnackbar, ErrorBox } from '../../../components/common';
 import { billsService, userService } from '../../../api';
+import { useAuth } from '../../../context/AuthContext';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../../utils/constants';
 import { paymentValidationSchema } from '../../../utils/validationSchemas';
 import {
@@ -60,6 +62,7 @@ const PaymentTab = ({ initialAccount }) => {
     const [error, setError] = useState(null);
     
     const [selectedAccount, setSelectedAccount] = useState('all');
+    const [searchParams, setSearchParams] = useSearchParams();
     
     const [detailsModalOpen, setDetailsModalOpen] = useState(false);
     const [selectedBill, setSelectedBill] = useState(null);
@@ -75,10 +78,10 @@ const PaymentTab = ({ initialAccount }) => {
         severity: 'success'
     });
 
+    const { refreshBalance } = useAuth();
+
     useEffect(() => {
-        if (initialAccount) {
-            setSelectedAccount(initialAccount);
-        }
+        setSelectedAccount(initialAccount || 'all');
     }, [initialAccount]);
 
     const fetchData = async () => {
@@ -118,7 +121,19 @@ const PaymentTab = ({ initialAccount }) => {
     }, []);
 
     const handleAccountFilterChange = (event) => {
-        setSelectedAccount(event.target.value);
+        const value = event.target.value;
+        setSelectedAccount(value);
+        try {
+            const newParams = new URLSearchParams(searchParams);
+            if (value === 'all') {
+                newParams.delete('account');
+            } else {
+                newParams.set('account', value);
+            }
+            setSearchParams(newParams);
+        } catch (e) {
+            console.warn('Failed to update search params for account', e);
+        }
     };
 
     const filteredBills = selectedAccount === 'all' 
@@ -176,6 +191,11 @@ const PaymentTab = ({ initialAccount }) => {
     };
 
     const handleOpenPayment = (bill) => {
+        if (!bill || Number(bill.amount) <= 0) {
+            setSnackbar({ open: true, message: 'Нельзя оплатить счет с нулевой суммой', severity: 'error' });
+            return;
+        }
+
         setSelectedBill(bill);
         setPaymentAmount(bill.amount);
         setPaymentModalOpen(true);
@@ -190,6 +210,11 @@ const PaymentTab = ({ initialAccount }) => {
 
     const handlePaymentSubmit = async () => {
         try {
+            if (!selectedBill || Number(selectedBill.amount) <= 0) {
+                setPaymentError('Нельзя оплатить счет с нулевой суммой');
+                return;
+            }
+
             paymentValidationSchema(paymentAmount, selectedBill.amount);
         } catch (validationErrors) {
             setPaymentError(validationErrors.amount);
@@ -212,6 +237,7 @@ const PaymentTab = ({ initialAccount }) => {
             
             handleClosePayment();
             fetchData();
+            try { await refreshBalance(); } catch (e) { console.warn('refreshBalance failed', e); }
         } catch (err) {
             console.error('Payment error:', err);
             setPaymentError(err.response?.data?.message || ERROR_MESSAGES.PAYMENT_FAILED);
@@ -242,6 +268,7 @@ const PaymentTab = ({ initialAccount }) => {
     }
 
     return (
+        <>
         <TabCard>
             {/* Заголовок страницы */}
             <HeaderSection>
@@ -312,7 +339,7 @@ const PaymentTab = ({ initialAccount }) => {
                                                     <DownloadIcon fontSize="small" />
                                                 </GlassIconButton>
                                             </Tooltip>
-                                            {!bill.isPaid && (
+                                            {!bill.isPaid && Number(bill.amount) > 0 && (
                                                 <Tooltip title="Оплатить">
                                                     <GlassIconButton 
                                                         size="small" 
@@ -375,7 +402,9 @@ const PaymentTab = ({ initialAccount }) => {
                             </BillDetailsTable>
                             
                             <TotalAmount>
-                                <Typography variant="body1" color="textSecondary">Итого к оплате</Typography>
+                                <Typography variant="body1" color="textSecondary">
+                                    {selectedBill?.isPaid ? 'Оплачено' : 'Итого к оплате'}
+                                </Typography>
                                 <Typography variant="h5" color="primary" fontWeight="700">
                                     {formatCurrency(selectedBill.amount)}
                                 </Typography>
@@ -498,15 +527,16 @@ const PaymentTab = ({ initialAccount }) => {
                     </GlassButton>
                 </GlassDialogActions>
             </GlassDialog>
-
-            {/* Снэкбар для уведомлений */}
-            <AppSnackbar
-                open={snackbar.open}
-                message={snackbar.message}
-                severity={snackbar.severity}
-                onClose={() => setSnackbar({ ...snackbar, open: false })}
-            />
         </TabCard>
+
+        {/* Снэкбар для уведомлений */}
+        <AppSnackbar
+            open={snackbar.open}
+            message={snackbar.message}
+            severity={snackbar.severity}
+            onClose={() => setSnackbar({ ...snackbar, open: false })}
+        />
+        </>
     );
 };
 

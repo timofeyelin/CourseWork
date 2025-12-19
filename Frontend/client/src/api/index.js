@@ -24,6 +24,11 @@ api.interceptors.response.use(
         const originalRequest = error.config;
 
         if (error.response && error.response.status === 401 && originalRequest && !originalRequest._isRetry) {
+            // Не пытаемся обновить токен, если ошибка произошла при попытке входа
+            if (originalRequest.url.includes('/auth/login')) {
+                return Promise.reject(error);
+            }
+
             originalRequest._isRetry = true;
 
             try {
@@ -80,7 +85,6 @@ export const authService = {
     logout() {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        window.location.href = '/';
     }
 };
 
@@ -99,6 +103,10 @@ export const userService = {
 
     async deleteAccount(accountId) {
         return await api.delete(`/user/accounts/${accountId}`);
+    }
+    ,
+    async updateProfile(data) {
+        return await api.put('/user/profile', data);
     }
 };
 
@@ -259,6 +267,13 @@ export const adminService = {
                 serialNumber
             }
         });
+    }
+    ,
+    async generateBillsNow(period, force = false) {
+        const params = {};
+        if (period) params.period = period;
+        if (force) params.force = true;
+        return await api.post('/admin/generate-bills-now', null, { params });
     }
 };
 

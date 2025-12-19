@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { MenuItem, IconButton, Badge, Divider, Popover } from '@mui/material';
-import { Notifications, AccountBalanceWallet, Person, Logout, Login } from '@mui/icons-material';
+import { MenuItem, IconButton, Badge, Divider, Popover, Box } from '@mui/material';
+import { Notifications, AccountBalanceWallet, Person, Logout, Login, Add as AddIcon } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { ROUTES } from '../../utils/constants';
 import { useNotifications } from '../../hooks/useNotifications';
@@ -9,6 +9,7 @@ import NotificationsPopover from './NotificationsPopover';
 import { GlassButton } from '../common';
 import LoginModal from '../Modals/LoginModal';
 import RegisterModal from '../Modals/RegisterModal';
+import PaymentModal from '../Modals/PaymentModal';
 import {
     StyledAppBar,
     StyledToolbar,
@@ -26,9 +27,16 @@ import {
 } from './Header.styles';
 
 const Header = () => {
-    const { user, isAuthenticated, logout, isLoginOpen, isRegisterOpen, openLogin, openRegister, closeModals } = useAuth();
+    const { user, isAuthenticated, isAdminOrOperator, isAdmin, isOperator, logout, isLoginOpen, isRegisterOpen, openLogin, openRegister, closeModals } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+
+    const { balance, debt, refreshBalance } = useAuth();
+    const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+
+    const handlePaymentSuccess = () => {
+        refreshBalance();
+    };
 
     const { 
         items: notifications, 
@@ -109,7 +117,6 @@ const Header = () => {
         { title: 'Главная', path: ROUTES.HOME },
     ];
 
-    const isAdminOrOperator = user?.role === 'Admin' || user?.role === 'Operator';
     if (!isAdminOrOperator) {
         userLinks.push(
             { title: 'Счетчики', path: ROUTES.METERS },
@@ -119,14 +126,14 @@ const Header = () => {
         );
     }
 
-    if (user?.role === 'Admin') {
+    if (isAdmin) {
         userLinks.push({ title: 'Жители', path: ROUTES.ADMIN_RESIDENTS });
         userLinks.push({ title: 'Аналитика', path: ROUTES.ADMIN_DASHBOARD });
         userLinks.push({ title: 'Категории заявок', path: ROUTES.ADMIN_CATEGORIES });
     }
 
-    if (user?.role === 'Operator') {
-        userLinks.push({ title: 'Объявления', path: ROUTES.ADMIN_ANNOUNCEMENTS });
+    if (isOperator) {
+        userLinks.push({ title: 'Объявления', path: ROUTES.OPERATOR_ANNOUNCEMENTS });
         userLinks.push({ title: 'Диспетчерская', path: ROUTES.OPERATOR_REQUESTS });
     }
 
@@ -164,9 +171,33 @@ const Header = () => {
                         {isAuthenticated ? (
                             <>
                                 {!isAdminOrOperator && (
-                                    <BalanceWidget>
+                                    <BalanceWidget sx={{ 
+                                        color: debt > 0 ? '#ff4d4d' : '#4caf50',
+                                        backgroundColor: debt > 0 ? 'rgba(255, 77, 77, 0.1)' : 'rgba(76, 175, 80, 0.1)',
+                                        marginRight: '15px',
+                                        paddingRight: '8px'
+                                    }}>
                                         <AccountBalanceWallet fontSize="small" />
-                                        0.00 ₽
+                                        {balance > 0 ? balance.toFixed(2) : '0.00'} ₽
+                                        <IconButton 
+                                            size="small" 
+                                            onClick={(e) => {
+                                                e.currentTarget.blur();
+                                                setIsPaymentOpen(true);
+                                            }}
+                                            sx={{ 
+                                                backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                                                color: 'inherit',
+                                                width: 24,
+                                                height: 24,
+                                                ml: 0.5,
+                                                '&:hover': {
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                                                }
+                                            }}
+                                        >
+                                            <AddIcon sx={{ fontSize: 16 }} />
+                                        </IconButton>
                                     </BalanceWidget>
                                 )}
                                 
@@ -267,6 +298,11 @@ const Header = () => {
                 open={isRegisterOpen} 
                 onClose={closeModals} 
                 onSwitchToLogin={openLogin} 
+            />
+            <PaymentModal 
+                open={isPaymentOpen} 
+                onClose={() => setIsPaymentOpen(false)} 
+                onSuccess={handlePaymentSuccess} 
             />
         </>
     );

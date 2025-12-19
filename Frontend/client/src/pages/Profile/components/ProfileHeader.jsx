@@ -8,6 +8,7 @@ import {
     StyledAvatar, 
     UserDetails, 
     UserEmail, 
+    UserPhone,
     RegistrationDate 
 } from '../Profile.styles';
 
@@ -32,6 +33,7 @@ const ProfileHeader = ({ profile, onEditProfile }) => {
                     <UserDetails>
                         <h1>{profile?.fullName || INFO_MESSAGES.DEFAULT_USER_NAME}</h1>
                         <UserEmail>{profile?.email}</UserEmail>
+                        {profile?.phone && <UserPhone>{profile.phone}</UserPhone>}
                         <RegistrationDate>
                             На сайте с {new Date(profile?.createdAt).toLocaleDateString('ru-RU')}
                         </RegistrationDate>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Checkbox, FormControlLabel, InputAdornment, IconButton } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../../api';
+import { useAuth } from '../../context/AuthContext';
 import { useFormValidation } from '../../hooks/useFormValidation';
 import { loginValidationSchema } from '../../utils/validationSchemas';
 import { ROUTES, ERROR_MESSAGES } from '../../utils/constants';
@@ -28,6 +28,7 @@ import { StyledDialog, ModalLoginCard } from './Modal.styles';
 
 const LoginModal = ({ open, onClose, onSwitchToRegister }) => {
     const navigate = useNavigate();
+    const { login } = useAuth();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -67,10 +68,8 @@ const LoginModal = ({ open, onClose, onSwitchToRegister }) => {
 
         setIsSubmitting(true);
         try {
-            await authService.login(formData.email, formData.password);
-            onClose();
+            await login(formData.email, formData.password);
             navigate(ROUTES.HOME);
-            window.location.reload();
         } catch (error) {
             const errorMessage = error.response?.data?.message || ERROR_MESSAGES.LOGIN_FAILED;
             setApiError(errorMessage);

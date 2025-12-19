@@ -13,6 +13,7 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Bill> Bills { get; set; }
     public DbSet<BillItem> BillItems { get; set; }
+    public DbSet<AccountBalance> AccountBalances { get; set; }
     public DbSet<Payment> Payment { get; set; }
     public DbSet<Request> Requests { get; set; }
     public DbSet<RequestComment> RequestComments { get; set; }
@@ -53,6 +54,23 @@ public class AppDbContext : DbContext, IAppDbContext
             entity.Property(a => a.Area).HasColumnType("decimal(18,2)"); // Точность для площади
             entity.Property(a => a.HouseType).HasMaxLength(100);
             entity.Property(a => a.UkName).HasMaxLength(150);
+        });
+
+        // Конфигурация для сущности AccountBalance
+        modelBuilder.Entity<AccountBalance>(entity =>
+        {
+            entity.HasKey(ab => ab.AccountBalanceId);
+            entity.Property(ab => ab.Balance).HasColumnType("decimal(18,2)");
+            entity.Property(ab => ab.Debt).HasColumnType("decimal(18,2)");
+            entity.Property(ab => ab.UpdatedAt).HasDefaultValueSql("now() at time zone 'utc'");
+
+            entity.HasOne(ab => ab.Account)
+                  .WithMany()
+                  .HasForeignKey(ab => ab.AccountId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // Уникальный индекс по AccountId — один баланс на лицевой счет
+            entity.HasIndex(ab => ab.AccountId).IsUnique();
         });
 
         // Конфигурация связи "один-ко-многим"

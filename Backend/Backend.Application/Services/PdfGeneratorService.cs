@@ -1,4 +1,6 @@
 using Backend.Domain.Entities;
+using Backend.Domain.Enums;
+using System.Linq;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -82,7 +84,9 @@ namespace Backend.Application.Services
                                 }
                             });
 
-                            column.Item().AlignRight().Text($"Итого к оплате: {bill.TotalAmount:C}").SemiBold().FontSize(14);
+                            var isPaid = bill.Payment != null && bill.Payment.Any(p => p.Status == PaymentStatus.Paid);
+                            var totalLabel = isPaid ? "Оплачено" : "Итого к оплате";
+                            column.Item().AlignRight().Text($"{totalLabel}: {bill.TotalAmount:C}").SemiBold().FontSize(14);
                         });
 
                     page.Footer()

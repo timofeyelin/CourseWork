@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { Typography, Button, CircularProgress } from '@mui/material';
 import { userService } from '../../api';
 import { ROUTES, ERROR_MESSAGES, SUCCESS_MESSAGES, INFO_MESSAGES } from '../../utils/constants';
@@ -14,7 +15,10 @@ import { AppSnackbar, ErrorBox } from '../../components/common';
 import ProfileHeader from './components/ProfileHeader';
 import AccountsList from './components/AccountsList';
 import AddAccountModal from './components/AddAccountModal';
-import DeleteAccountModal from './components/DeleteAccountModal';const Profile = () => {
+import DeleteAccountModal from './components/DeleteAccountModal';
+import ProfileEditModal from './components/ProfileEditModal';
+
+const Profile = () => {
     const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
     const [accounts, setAccounts] = useState([]);
@@ -37,6 +41,9 @@ import DeleteAccountModal from './components/DeleteAccountModal';const Profile =
         message: '',
         severity: 'success'
     });
+    const [openEditProfile, setOpenEditProfile] = useState(false);
+
+    const { isAdminOrOperator } = useAuth();
 
     const fetchProfileData = async () => {
         try {
@@ -50,11 +57,11 @@ import DeleteAccountModal from './components/DeleteAccountModal';const Profile =
             const profileRes = await userService.getProfile();
             setProfile(profileRes.data);
 
-            if (profileRes.data && profileRes.data.role && (profileRes.data.role === 'Admin' || profileRes.data.role === 'Operator')) {
-                setAccounts([]);
-            } else {
+            if (!(profileRes.data && (profileRes.data.role === 'Admin' || profileRes.data.role === 'Operator'))) {
                 const accountsRes = await userService.getAccounts();
                 setAccounts(accountsRes.data);
+            } else {
+                setAccounts([]);
             }
         } catch (err) {
             console.error('Error fetching profile data:', err);
@@ -73,8 +80,7 @@ import DeleteAccountModal from './components/DeleteAccountModal';const Profile =
     }, [navigate]);
 
     const handleEditProfile = () => {
-        // TODO: Сделать функционал редактирования профиля
-        alert(INFO_MESSAGES.EDIT_PROFILE_UNAVAILABLE);
+        setOpenEditProfile(true);
     };
 
     const handleOpenAddAccount = () => {
@@ -192,17 +198,17 @@ import DeleteAccountModal from './components/DeleteAccountModal';const Profile =
                     onEditProfile={handleEditProfile} 
                 />
 
-                {profile && profile.role && (profile.role === 'Admin' || profile.role === 'Operator') ? null : (
+                {!isAdminOrOperator ? (
                     <AccountsList 
                         accounts={accounts} 
                         onAddAccount={handleOpenAddAccount} 
                         onDeleteAccount={handleDeleteClick} 
                         navigate={navigate} 
                     />
-                )}
+                ) : null}
             </ProfileCard>
 
-                {!profile || (profile.role && (profile.role !== 'Admin' && profile.role !== 'Operator')) ? (
+                {!isAdminOrOperator ? (
                     <>
                         <AddAccountModal 
                             open={openAddAccount} 
@@ -228,6 +234,14 @@ import DeleteAccountModal from './components/DeleteAccountModal';const Profile =
                 message={snackbar.message}
                 severity={snackbar.severity}
                 onClose={handleCloseSnackbar}
+            />
+
+            <ProfileEditModal
+                open={openEditProfile}
+                onClose={() => setOpenEditProfile(false)}
+                initialProfile={profile}
+                onSaved={fetchProfileData}
+                setSnackbar={setSnackbar}
             />
         </ProfileContainer>
     );
