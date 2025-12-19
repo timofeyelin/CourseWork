@@ -32,7 +32,7 @@ namespace Backend.Api.Controllers
             {
                 MeterId = m.MeterId,
                 AccountId = m.AccountId,
-                AccountNumber = m.Account?.AccountNumber ?? "�/�",
+                AccountNumber = m.Account?.AccountNumber ?? "н/д",
                 Type = m.Type,
                 SerialNumber = m.SerialNumber,
                 InstallationDate = m.InstallationDate
@@ -133,16 +133,16 @@ namespace Backend.Api.Controllers
                 try
                 {
                     await _auditService.LogAsync(
-    userId,
-    "SubmitReading",
-    "MeterReading",
-    reading.ReadingId.ToString(),
-    $"�������: {meterId}, ��������: {request.Value}",
-    ct);
+                        userId,
+                        "SubmitReading",
+                        "MeterReading",
+                        reading.ReadingId.ToString(),
+                        $"Счётчик: {meterId}, Значение: {request.Value}",
+                        ct);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "�� ������� �������� �����");
+                    _logger.LogError(ex, "Не удалось записать аудит");
                 }
 
                 return Ok(dto);
@@ -160,6 +160,21 @@ namespace Backend.Api.Controllers
             try
             {
                 await _meterService.UpdateMeterReadingAsync(userId, meterId, readingId, request.Value, ct);
+
+                try
+                {
+                    await _auditService.LogAsync(
+                        userId,
+                        "UpdateReading",
+                        "MeterReading",
+                        readingId.ToString(),
+                        $"Счётчик: {meterId}, Новое значение: {request.Value}",
+                        ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Не удалось записать аудит");
+                }
 
                 return NoContent();
             }

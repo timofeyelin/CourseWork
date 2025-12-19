@@ -16,7 +16,9 @@ export const ROUTES = {
     FORGOT_PASSWORD: '/forgot-password',
     OPERATOR_REQUESTS: '/operator/requests',
     ADMIN_DASHBOARD: '/admin/dashboard',
-    ADMIN_CATEGORIES: '/admin/categories'
+    ADMIN_CATEGORIES: '/admin/categories',
+    ADMIN_AUDIT: '/admin/audit',
+    ADMIN_IMPORT: '/admin/import'
 }
 
 export const VALIDATION_MESSAGES = {
@@ -44,6 +46,7 @@ export const ERROR_MESSAGES = {
     REGISTRATION_FAILED: 'Ошибка регистрации. Попробуйте снова.',
     GENERIC_ERROR: 'Произошла ошибка. Попробуйте позже.',
     PROFILE_LOAD_FAILED: 'Не удалось загрузить данные профиля',
+    PROFILE_UPDATE_FAILED: 'Не удалось обновить профиль',
     ADD_ACCOUNT_FAILED: 'Не удалось добавить лицевой счет',
     DELETE_ACCOUNT_FAILED: 'Не удалось удалить лицевой счет',
     BILLS_LOAD_FAILED: 'Не удалось загрузить список счетов',

@@ -130,6 +130,8 @@ const Header = () => {
         userLinks.push({ title: 'Жители', path: ROUTES.ADMIN_RESIDENTS });
         userLinks.push({ title: 'Аналитика', path: ROUTES.ADMIN_DASHBOARD });
         userLinks.push({ title: 'Категории заявок', path: ROUTES.ADMIN_CATEGORIES });
+        userLinks.push({ title: 'Журнал аудита', path: ROUTES.ADMIN_AUDIT });
+        userLinks.push({ title: 'Импорт начислений', path: ROUTES.ADMIN_IMPORT });
     }
 
     if (isOperator) {

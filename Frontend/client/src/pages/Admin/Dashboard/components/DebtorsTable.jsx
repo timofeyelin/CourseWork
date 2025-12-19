@@ -4,15 +4,20 @@ import {
   Table,
   TableBody,
   TableHead,
-  TableRow,
   Chip,
   Skeleton,
   Box,
   Button,
-  TableSortLabel
 } from '@mui/material';
 import { Sort as SortIcon } from '@mui/icons-material';
-import { SectionContainer, StyledTableCell, RankCircle } from '../Dashboard.styles';
+import { 
+  SectionContainer, 
+  StyledTableContainer,
+  StyledTableHeadCell,
+  StyledTableRow,
+  StyledTableCell, 
+  RankCircle 
+} from '../Dashboard.styles';
 
 const DebtorsTable = ({ debtors, loading }) => {
   const [sortOrder, setSortOrder] = useState('desc'); // 'asc' | 'desc'
@@ -57,36 +62,36 @@ const DebtorsTable = ({ debtors, loading }) => {
         )}
       </Box>
 
-      <Box sx={{ overflowX: 'auto' }}>
+      <StyledTableContainer sx={{ overflowX: 'auto' }}>
         <Table>
           <TableHead>
-            <TableRow>
-              <StyledTableCell width={50}>#</StyledTableCell>
-              <StyledTableCell>Лицевой счет</StyledTableCell>
-              <StyledTableCell>Адрес</StyledTableCell>
-              <StyledTableCell>Собственник</StyledTableCell>
-              <StyledTableCell align="right">Долг</StyledTableCell>
-            </TableRow>
+            <StyledTableRow>
+              <StyledTableHeadCell width={50}>#</StyledTableHeadCell>
+              <StyledTableHeadCell>Лицевой счет</StyledTableHeadCell>
+              <StyledTableHeadCell>Адрес</StyledTableHeadCell>
+              <StyledTableHeadCell>Собственник</StyledTableHeadCell>
+              <StyledTableHeadCell align="right">Долг</StyledTableHeadCell>
+            </StyledTableRow>
           </TableHead>
 
           <TableBody>
             {loading ? (
               Array.from(new Array(5)).map((_, index) => (
-                <TableRow key={index}>
+                <StyledTableRow key={index}>
                   <StyledTableCell><Skeleton variant="circular" width={24} height={24} /></StyledTableCell>
                   <StyledTableCell><Skeleton width="80%" /></StyledTableCell>
                   <StyledTableCell><Skeleton width="60%" /></StyledTableCell>
                   <StyledTableCell><Skeleton width="50%" /></StyledTableCell>
                   <StyledTableCell align="right"><Skeleton width={80} /></StyledTableCell>
-                </TableRow>
+                </StyledTableRow>
               ))
             ) : sortedDebtors.length > 0 ? (
               sortedDebtors.map((debtor, index) => (
-                <TableRow key={`${debtor.accountNumber}-${debtor.address}`} hover>
+                <StyledTableRow key={`${debtor.accountNumber}-${debtor.address}`} hover>
                   <StyledTableCell>
                     <RankCircle index={index}>{index + 1}</RankCircle>
                   </StyledTableCell>
-                  <StyledTableCell fontWeight="bold" sx={{ color: 'primary.main' }}>
+                  <StyledTableCell sx={{ fontWeight: 'bold', color: 'primary.main' }}>
                     {debtor.accountNumber}
                   </StyledTableCell>
                   <StyledTableCell>{debtor.address}</StyledTableCell>
@@ -100,18 +105,18 @@ const DebtorsTable = ({ debtors, loading }) => {
                       sx={{ fontWeight: 'bold', minWidth: 100 }}
                     />
                   </StyledTableCell>
-                </TableRow>
+                </StyledTableRow>
               ))
             ) : (
-              <TableRow>
+              <StyledTableRow>
                 <StyledTableCell colSpan={5} align="center" sx={{ py: 4, color: 'text.secondary' }}>
                   Задолженностей не найдено
                 </StyledTableCell>
-              </TableRow>
+              </StyledTableRow>
             )}
           </TableBody>
         </Table>
-      </Box>
+      </StyledTableContainer>
     </SectionContainer>
   );
 };

@@ -119,7 +119,7 @@ const CreateRequestModal = ({
 
                     <Box>
                         <input
-                            accept="image/*,.pdf,.doc,.docx"
+                            accept=".jpg,.jpeg,.png,.pdf"
                             style={{ display: 'none' }}
                             id="raised-button-file"
                             multiple
@@ -131,7 +131,10 @@ const CreateRequestModal = ({
                             <FileUploadArea>
                                 <UploadIcon color="primary" fontSize="large" />
                                 <Typography variant="body2" color="textSecondary">
-                                    Нажмите для загрузки файлов (макс. 3)
+                                    Нажмите для загрузки файлов (макс. 3, до 5 МБ)
+                                </Typography>
+                                <Typography variant="caption" color="textSecondary">
+                                    Разрешены: JPG, PNG, PDF
                                 </Typography>
                             </FileUploadArea>
                         </label>

@@ -14,10 +14,14 @@ namespace Backend.Api.Controllers
     public class PaymentController : ControllerBase
     {
         private readonly IPaymentService _paymentService;
+        private readonly IAuditService _auditService;
+        private readonly ILogger<PaymentController> _logger;
 
-        public PaymentController(IPaymentService paymentService)
+        public PaymentController(IPaymentService paymentService, IAuditService auditService, ILogger<PaymentController> logger)
         {
             _paymentService = paymentService;
+            _auditService = auditService;
+            _logger = logger;
         }
 
         // POST: api/payment
@@ -30,6 +34,21 @@ namespace Backend.Api.Controllers
             {
                 var payment = await _paymentService.CreatePaymentAsync(userId, request.BillId, request.Amount, ct);
                 var paymentDto = MapToDto(payment);
+
+                try
+                {
+                    await _auditService.LogAsync(
+                        userId,
+                        "CreatePayment",
+                        "Payment",
+                        payment.PaymentId.ToString(),
+                        $"Счёт: {request.BillId}, Сумма: {request.Amount}",
+                        ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Не удалось записать аудит");
+                }
 
                 return CreatedAtAction(nameof(GetPayment), new { paymentId = payment.PaymentId }, paymentDto);
             }
@@ -89,6 +108,22 @@ namespace Backend.Api.Controllers
             try
             {
                 await _paymentService.CancelPaymentAsync(userId, paymentId, ct);
+
+                try
+                {
+                    await _auditService.LogAsync(
+                        userId,
+                        "CancelPayment",
+                        "Payment",
+                        paymentId.ToString(),
+                        "Платёж отменён",
+                        ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Не удалось записать аудит");
+                }
+
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
@@ -129,6 +164,22 @@ namespace Backend.Api.Controllers
             try
             {
                 var payment = await _paymentService.InitPaymentAsync(userId, request.Amount, request.Method, ct);
+
+                try
+                {
+                    await _auditService.LogAsync(
+                        userId,
+                        "InitPayment",
+                        "Payment",
+                        payment.PaymentId.ToString(),
+                        $"Сумма: {request.Amount}, Метод: {request.Method}",
+                        ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Не удалось записать аудит");
+                }
+
                 return Ok(new { 
                     paymentId = payment.PaymentId, 
                     testUrl = $"https://test-payment-gateway.com/pay?id={payment.PaymentId}&amount={payment.Amount}" 

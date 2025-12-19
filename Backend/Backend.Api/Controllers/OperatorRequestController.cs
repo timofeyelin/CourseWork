@@ -4,6 +4,7 @@ using Backend.Domain.Entities;
 using Backend.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace Backend.Api.Controllers
@@ -14,11 +15,17 @@ namespace Backend.Api.Controllers
     public class OperatorRequestController : ControllerBase
     {
         private readonly IRequestService _requestService;
+        private readonly IAuditService _auditService;
+        private readonly ILogger<OperatorRequestController> _logger;
 
-        public OperatorRequestController(IRequestService requestService)
+        public OperatorRequestController(IRequestService requestService, IAuditService auditService, ILogger<OperatorRequestController> logger)
         {
             _requestService = requestService;
+            _auditService = auditService;
+            _logger = logger;
         }
+
+        private int GetUserId() => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         [HttpGet]
         public async Task<ActionResult<List<OperatorRequestDto>>> GetRequests(
@@ -59,6 +66,26 @@ namespace Backend.Api.Controllers
                     deadline,
                     updateDeadline,
                     ct);
+
+                try
+                {
+                    var details = new List<string>();
+                    if (dto.Status.HasValue) details.Add($"Статус: {dto.Status}");
+                    if (dto.Priority.HasValue) details.Add($"Приоритет: {dto.Priority}");
+                    if (updateDeadline) details.Add($"Дедлайн: {(deadline.HasValue ? deadline.Value.ToString("dd.MM.yyyy") : "очищен")}");
+
+                    await _auditService.LogAsync(
+                        GetUserId(),
+                        "OperatorUpdateRequest",
+                        "Request",
+                        requestId.ToString(),
+                        string.Join(", ", details),
+                        ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Не удалось записать аудит");
+                }
 
                 return NoContent();
             }

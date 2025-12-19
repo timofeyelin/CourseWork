@@ -175,9 +175,9 @@ namespace Backend.Application.Services
             var incomingAccountNumbers = data.Select(x => x.AccountNumber).Distinct().ToList();
             var accountsDict = await _context.Accounts
                 .Where(a => incomingAccountNumbers.Contains(a.AccountNumber))
-                .ToDictionaryAsync(a => a.AccountNumber, a => a.AccountId, ct);
+                .ToDictionaryAsync(a => a.AccountNumber, a => a, ct);
 
-            var existingAccountIds = accountsDict.Values.ToList();
+            var existingAccountIds = accountsDict.Values.Select(a => a.AccountId).ToList();
 
             var existingBills = await _context.Bills
                 .Where(b => existingAccountIds.Contains(b.AccountId))
@@ -189,42 +189,93 @@ namespace Backend.Application.Services
                 .ToHashSet();
 
             var processedInCurrentBatch = new HashSet<(int, DateOnly)>();
+            var createdBills = new List<Bill>();
 
             foreach (var item in data)
             {
                 try
                 {
-                    if (!accountsDict.TryGetValue(item.AccountNumber, out var accountId))
+                    if (!accountsDict.TryGetValue(item.AccountNumber, out var account))
                     {
                         errorCount++;
                         continue;
                     }
 
-                    if (existingBillsSet.Contains((accountId, item.BillData.Period)))
+                    if (existingBillsSet.Contains((account.AccountId, item.BillData.Period)))
                     {
                         errorCount++;
                         continue;
                     }
 
-                    if (processedInCurrentBatch.Contains((accountId, item.BillData.Period)))
+                    if (processedInCurrentBatch.Contains((account.AccountId, item.BillData.Period)))
                     {
                         errorCount++;
                         continue;
                     }
 
                     var bill = item.BillData;
-                    bill.AccountId = accountId;
+                    bill.AccountId = account.AccountId;
                     bill.CreatedAt = DateTime.UtcNow;
 
                     _context.Bills.Add(bill);
 
-                    processedInCurrentBatch.Add((accountId, bill.Period));
+                    processedInCurrentBatch.Add((account.AccountId, bill.Period));
+                    createdBills.Add(bill);
 
                     successCount++;
                 }
                 catch (Exception ex)
                 {
                     errorCount++;
+                }
+            }
+
+            await _context.SaveChangesAsync(ct);
+
+            // Генерация PDF и уведомлений для созданных счетов
+            foreach (var bill in createdBills)
+            {
+                try
+                {
+                    var billWithDetails = await _context.Bills
+                        .Include(b => b.Account)
+                        .Include(b => b.BillItems)
+                        .FirstAsync(b => b.BillId == bill.BillId, ct);
+
+                    // Генерация PDF
+                    var pdfBytes = _pdfGeneratorService.GenerateBillPdf(billWithDetails);
+
+                    var fileName = $"bill_{bill.BillId}_{System.Guid.NewGuid()}.pdf";
+                    var webRootPath = _hostingEnvironment.WebRootPath ?? Path.Combine(_hostingEnvironment.ContentRootPath, "wwwroot");
+                    var directoryPath = Path.Combine(webRootPath, "bills");
+
+                    if (!Directory.Exists(directoryPath))
+                    {
+                        Directory.CreateDirectory(directoryPath);
+                    }
+
+                    var filePath = Path.Combine(directoryPath, fileName);
+                    await File.WriteAllBytesAsync(filePath, pdfBytes, ct);
+
+                    billWithDetails.PdfLink = $"/bills/{fileName}";
+                    _context.Bills.Update(billWithDetails);
+
+                    // Создание уведомления
+                    if (billWithDetails.Account != null && billWithDetails.Account.UserId.HasValue)
+                    {
+                        await _notificationService.CreateNotificationAsync(
+                            billWithDetails.Account.UserId.Value,
+                            NotificationType.Bill,
+                            "Новая квитанция",
+                            $"Сформирована квитанция за {bill.Period:MM.yyyy} на сумму {bill.TotalAmount} ₽",
+                            bill.BillId,
+                            ct
+                        );
+                    }
+                }
+                catch (Exception)
+                {
+                    // Ошибка генерации PDF - счет уже создан, пропускаем
                 }
             }
 

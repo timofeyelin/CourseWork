@@ -274,6 +274,19 @@ export const adminService = {
         if (period) params.period = period;
         if (force) params.force = true;
         return await api.post('/admin/generate-bills-now', null, { params });
+    },
+
+    async getAuditLogs(page = 1, pageSize = 20, fromDate = null, toDate = null, search = null) {
+        const params = { page, pageSize };
+        if (fromDate) params.fromDate = fromDate;
+        if (toDate) params.toDate = toDate;
+        if (search) params.search = search;
+        return await api.get('/admin/audit', { params });
+    },
+
+    async importBills(data) {
+        // data - это массив объектов (JSON)
+        return await api.post('/admin/import/bills', data);
     }
 };
 

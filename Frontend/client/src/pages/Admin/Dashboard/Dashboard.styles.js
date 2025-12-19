@@ -1,5 +1,5 @@
 import { styled } from '@mui/material/styles';
-import { Box, Paper, TableCell } from '@mui/material';
+import { Box, Paper, TableCell, TableRow } from '@mui/material';
 import { GlassCard } from '../../../components/common';
 
 export const PageContainer = styled('div')(({ theme }) => ({
@@ -92,12 +92,66 @@ export const SectionContainer = styled(Paper)(({ theme }) => ({
     gap: theme.spacing(2),
 }));
 
-export const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    borderBottom: '1px solid rgba(0,0,0,0.05)',
-    fontSize: '0.9rem',
+export const StyledTableContainer = styled(Box)(({ theme }) => ({
+    borderRadius: '20px',
+    overflow: 'hidden',
+    border: 'none',
+    background: 'rgba(255, 255, 255, 0.5)',
+    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05)',
+    '&::-webkit-scrollbar': {
+        width: '8px',
+        height: '8px',
+    },
+    '&::-webkit-scrollbar-track': {
+        background: 'rgba(0,0,0,0.05)',
+    },
+    '&::-webkit-scrollbar-thumb': {
+        background: 'rgba(0,0,0,0.1)',
+        borderRadius: '4px',
+        '&:hover': {
+            background: 'rgba(0,0,0,0.2)',
+        },
+    },
 }));
 
-export const RankCircle = styled(Box)(({ theme, index }) => {
+export const StyledTableHeadCell = styled(TableCell)(({ theme }) => ({
+    fontWeight: '800',
+    color: theme.palette.primary.main,
+    backgroundColor: 'rgba(2, 136, 209, 0.08)',
+    borderBottom: '2px solid rgba(2, 136, 209, 0.1)',
+    textAlign: 'center',
+    verticalAlign: 'middle',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    fontSize: '0.8rem',
+    padding: '20px 24px',
+}));
+
+export const StyledTableRow = styled(TableRow)(({ theme }) => ({
+    transition: 'all 0.2s ease',
+    '&:hover': {
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+        zIndex: 1,
+        position: 'relative',
+    },
+    '&:last-child td, &:last-child th': {
+        border: 0,
+    },
+}));
+
+export const StyledTableCell = styled(TableCell)(({ theme }) => ({
+    borderBottom: '1px solid rgba(0, 0, 0, 0.04)',
+    color: theme.palette.text.primary,
+    padding: '20px 24px',
+    fontSize: '0.95rem',
+    verticalAlign: 'middle',
+    textAlign: 'center',
+}));
+
+export const RankCircle = styled(Box, {
+    shouldForwardProp: (prop) => prop !== 'index',
+})(({ theme, index }) => {
     let color = theme.palette.grey[400];
     if (index === 0) color = '#FFD700'; // Gold
     if (index === 1) color = '#C0C0C0'; // Silver

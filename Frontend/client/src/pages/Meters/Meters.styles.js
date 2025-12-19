@@ -216,8 +216,6 @@ export const ModalTitleBox = styled(Box)(({ theme }) => ({
 
 export const ModalContentBox = styled(Box)(({ theme }) => ({
     padding: theme.spacing(3),
-    borderRadius: '12px',
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
 }));
 
 export const StyledAlert = styled(Alert)(({ theme }) => ({

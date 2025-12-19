@@ -17,6 +17,8 @@ import { useAuth } from './context/AuthContext';
 import { ROUTES } from './utils/constants';
 import { LoadingContainer, AppContainer, MainContent } from './App.styles';
 import AdminCategories from './pages/Admin/Categories/AdminCategories';
+import AdminAudit from './pages/Admin/Audit/AdminAudit';
+import AdminImport from './pages/Admin/Import/AdminImport';
 
 function App() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -50,6 +52,8 @@ function App() {
             <Route path={ROUTES.OPERATOR_REQUESTS} element={<RoleRoute allowedRoles={["Operator"]} element={<OperatorRequests/>} />}/>
             <Route path={ROUTES.ADMIN_DASHBOARD} element={<RoleRoute allowedRoles={["Admin"]} element={<Dashboard/>} />}/>
             <Route path={ROUTES.ADMIN_CATEGORIES} element={<RoleRoute allowedRoles={["Admin"]} element={<AdminCategories/>} />}/>
+            <Route path={ROUTES.ADMIN_AUDIT} element={<RoleRoute allowedRoles={["Admin"]} element={<AdminAudit/>} />}/>
+            <Route path={ROUTES.ADMIN_IMPORT} element={<RoleRoute allowedRoles={["Admin"]} element={<AdminImport/>} />}/>
           </Routes>
         </MainContent>
       </AppContainer>

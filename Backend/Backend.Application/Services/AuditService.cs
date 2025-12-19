@@ -30,18 +30,52 @@ namespace Backend.Application.Services
             await _context.SaveChangesAsync(ct);
         }
 
-        public async Task<List<AuditLog>> GetLogsAsync(int page, int pageSize, CancellationToken ct)
+        private IQueryable<AuditLog> ApplyFilters(IQueryable<AuditLog> query, DateTime? fromDate, DateTime? toDate, string? search)
         {
-            return await _context.AuditLogs
+            if (fromDate.HasValue)
+            {
+                query = query.Where(x => x.Timestamp >= fromDate.Value);
+            }
+
+            if (toDate.HasValue)
+            {
+                // Включаем весь день toDate
+                var endOfDay = toDate.Value.Date.AddDays(1);
+                query = query.Where(x => x.Timestamp < endOfDay);
+            }
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchLower = search.ToLower();
+                query = query.Where(x => 
+                    x.ActionType.ToLower().Contains(searchLower) ||
+                    x.EntityName.ToLower().Contains(searchLower) ||
+                    x.EntityId.ToLower().Contains(searchLower) ||
+                    (x.Details != null && x.Details.ToLower().Contains(searchLower))
+                );
+            }
+
+            return query;
+        }
+
+        public async Task<List<AuditLog>> GetLogsAsync(int page, int pageSize, DateTime? fromDate, DateTime? toDate, string? search, CancellationToken ct)
+        {
+            var query = _context.AuditLogs.AsQueryable();
+            query = ApplyFilters(query, fromDate, toDate, search);
+
+            return await query
                 .OrderByDescending(x => x.Timestamp)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync(ct);
         }
 
-        public async Task<int> GetTotalCountAsync(CancellationToken ct)
+        public async Task<int> GetTotalCountAsync(DateTime? fromDate, DateTime? toDate, string? search, CancellationToken ct)
         {
-            return await _context.AuditLogs.CountAsync(ct);
+            var query = _context.AuditLogs.AsQueryable();
+            query = ApplyFilters(query, fromDate, toDate, search);
+
+            return await query.CountAsync(ct);
         }
     }
 }

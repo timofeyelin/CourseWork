@@ -36,6 +36,21 @@ public class AuthController : ControllerBase
                 request.Phone
             );
 
+            try
+            {
+                await _auditService.LogAsync(
+                    user.UserId,
+                    "Register",
+                    "User",
+                    user.UserId.ToString(),
+                    $"Новый пользователь: {request.Email}",
+                    ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Не удалось записать аудит");
+            }
+
             return Ok(new { message = "Регистрация успешна", userId = user.UserId });
         }
         catch (InvalidOperationException ex)
