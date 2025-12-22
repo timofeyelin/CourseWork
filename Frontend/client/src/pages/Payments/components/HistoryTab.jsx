@@ -16,8 +16,8 @@ import {
     FilterList as FilterIcon,
     CreditCard as CardIcon,
     Cancel as CancelIcon,
-    Info as InfoIcon
-    , Download as DownloadIcon
+    Visibility as ViewIcon,
+    Download as DownloadIcon
 } from '@mui/icons-material';
 import { GlassButton, GlassIconButton, GlassDialog, GlassDialogTitle, GlassDialogActions, StatusPill, GlassSelect, GlassDatePicker, AppSnackbar } from '../../../components/common';
 import { paymentsService, billsService, userService } from '../../../api';
@@ -285,7 +285,7 @@ const HistoryTab = ({ initialAccount }) => {
     }
 
     if (error) {
-        return <ErrorBox message={error} onRetry={() => window.location.reload()} />;
+        return <ErrorBox message={error} onRetry={fetchData} />;
     }
 
     return (
@@ -384,7 +384,7 @@ const HistoryTab = ({ initialAccount }) => {
                                             ) : (
                                                 <Tooltip title="Детали">
                                                     <GlassIconButton size="small" onClick={() => handleViewDetails(payment)}>
-                                                        <InfoIcon fontSize="small" />
+                                                        <ViewIcon fontSize="small" />
                                                     </GlassIconButton>
                                                 </Tooltip>
                                             )}

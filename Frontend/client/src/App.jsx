@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { CircularProgress } from '@mui/material';
 import Home from './pages/Home';
 import Landing from './pages/Landing';
@@ -33,6 +34,7 @@ function App() {
 
   return (
     <Router>
+      <AuthEventsHandler />
       <AppContainer>
         <Header />
         <MainContent component="main">
@@ -59,6 +61,23 @@ function App() {
       </AppContainer>
     </Router>
   );
+}
+
+function AuthEventsHandler() {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  useEffect(() => {
+    const handler = () => {
+      try { logout(); } catch (e) { console.warn('logout handler failed', e); }
+      try { navigate('/'); } catch (e) { console.warn('navigate failed', e); }
+    };
+
+    window.addEventListener('auth:expired', handler);
+    return () => window.removeEventListener('auth:expired', handler);
+  }, [logout, navigate]);
+
+  return null;
 }
 
 export default App
