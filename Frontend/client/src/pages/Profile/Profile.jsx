@@ -187,7 +187,7 @@ const Profile = () => {
     }
 
     if (error) {
-        return <ErrorBox message={error} onRetry={() => window.location.reload()} />;
+        return <ErrorBox message={error} onRetry={fetchProfileData} />;
     }
 
     return (

@@ -54,12 +54,18 @@ api.interceptors.response.use(
 
                 return api.request(originalRequest);
 
-            } catch (refreshError) {
+                } catch (refreshError) {
 
                 console.log("Сессия истекла или ошибка обновления токена");
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('refreshToken');
-                window.location.href = '/';
+                // Триггерим событие, которое обработает навигацию внутри SPA
+                try {
+                    window.dispatchEvent(new CustomEvent('auth:expired'));
+                } catch (e) {
+                    // fallback: если CustomEvent не поддерживается, делаем полную навигацию
+                    window.location.href = '/';
+                }
                 return Promise.reject(refreshError);
             }
         }

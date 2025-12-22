@@ -264,7 +264,7 @@ const PaymentTab = ({ initialAccount }) => {
     }
 
     if (error) {
-        return <ErrorBox message={error} onRetry={() => window.location.reload()} />;
+        return <ErrorBox message={error} onRetry={fetchData} />;
     }
 
     return (
