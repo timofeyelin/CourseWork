@@ -35,18 +35,30 @@ namespace Backend.Application.Services
                 throw new ArgumentException("Сумма платежа должна быть больше нуля и не может превышать сумму счета.");
             }
 
-            var accountId = bill.Account?.AccountId;
-            decimal currentBalance = 0m;
-            if (accountId != null)
+            var billAccountId = bill.Account?.AccountId;
+            if (billAccountId == null)
             {
-                var accBal = await _context.AccountBalances.FirstOrDefaultAsync(ab => ab.AccountId == accountId, ct);
-                if (accBal != null)
-                {
-                    currentBalance = accBal.Balance;
-                }
+                throw new InvalidOperationException("Лицевой счет для квитанции не найден.");
             }
 
-            if (currentBalance < amount)
+            // В системе баланс ведется по лицевым счетам, но для пользователя это единый "кошелек".
+            // Поэтому при оплате квитанции проверяем суммарный баланс по всем лицевым счетам пользователя.
+            var userAccountIds = await _context.Accounts
+                .Where(a => a.UserId == userId)
+                .Select(a => a.AccountId)
+                .ToListAsync(ct);
+
+            if (!userAccountIds.Any())
+            {
+                throw new KeyNotFoundException("Лицевой счет не найден.");
+            }
+
+            var balances = await _context.AccountBalances
+                .Where(ab => userAccountIds.Contains(ab.AccountId))
+                .ToListAsync(ct);
+
+            var totalBalance = balances.Sum(b => b.Balance);
+            if (totalBalance < amount)
             {
                 throw new ArgumentException("Недостаточно средств на счёте.");
             }
@@ -62,25 +74,32 @@ namespace Backend.Application.Services
 
             _context.Payment.Add(payment);
 
-            if (accountId != null)
+            // Списание делаем из общего кошелька пользователя: сначала с лицевого счета квитанции,
+            // затем с остальных счетов с положительным балансом.
+            decimal remaining = amount;
+
+            var orderedBalances = balances
+                .OrderByDescending(b => b.AccountId == billAccountId.Value)
+                .ThenByDescending(b => b.Balance)
+                .ToList();
+
+            foreach (var accBal in orderedBalances)
             {
-                var accBal = await _context.AccountBalances.FirstOrDefaultAsync(ab => ab.AccountId == accountId, ct);
-                if (accBal != null)
-                {
-                    accBal.Balance -= amount;
-                    if (accBal.Balance < 0) accBal.Debt = Math.Abs(accBal.Balance);
-                    accBal.UpdatedAt = DateTime.UtcNow;
-                }
-                else
-                {
-                   _context.AccountBalances.Add(new Domain.Entities.AccountBalance
-                    {
-                        AccountId = accountId.Value,
-                        Balance = 0 - amount,
-                        Debt = amount,
-                        UpdatedAt = DateTime.UtcNow
-                    });
-                }
+                if (remaining <= 0) break;
+                if (accBal.Balance <= 0) continue;
+
+                var debit = Math.Min(accBal.Balance, remaining);
+                accBal.Balance -= debit;
+                accBal.UpdatedAt = DateTime.UtcNow;
+                if (accBal.Balance >= 0) accBal.Debt = 0;
+                remaining -= debit;
+            }
+
+            if (remaining > 0)
+            {
+                // На всякий случай (например, если в БД нет строк баланса по счетам) — не допускаем
+                // списание, если не смогли распределить сумму по балансам.
+                throw new InvalidOperationException("Не удалось списать средства: баланс не согласован.");
             }
 
             await _context.SaveChangesAsync(ct);
