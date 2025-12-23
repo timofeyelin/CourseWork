@@ -1,0 +1,21 @@
+import api from './index';
+
+export const authService = {
+    async register(userData) {
+        return await api.post('/auth/register', userData);
+    },
+
+    async login(email, password) {
+        const response = await api.post('/auth/login', { emailOrPhone: email, password });
+        if (response.data.accessToken) {
+            localStorage.setItem('accessToken', response.data.accessToken);
+            localStorage.setItem('refreshToken', response.data.refreshToken);
+        }
+        return response.data;
+    },
+
+    logout() {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+    }
+};

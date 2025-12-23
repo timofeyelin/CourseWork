@@ -7,7 +7,7 @@ import Profile from './pages/Profile';
 import Payments from './pages/Payments';
 import MetersPage from './pages/Meters';
 import Requests from './pages/Requests/Requests';
-import AdminAnnouncements from './pages/Admin/Announcements/AdminAnnouncements';
+import OperatorAnnouncements from './pages/Operator/Announcements/OperatorAnnouncements';
 import Dashboard from './pages/Admin/Dashboard/Dashboard';
 import Residents from './pages/Admin/Residents';
 import Header from './components/Header';
@@ -47,7 +47,7 @@ function App() {
             <Route path={ROUTES.DOCUMENTS} element={isAuthenticated ? <Documents/> : <Navigate to={ROUTES.HOME} />}/>
             <Route path={ROUTES.METERS} element={isAuthenticated ? <MetersPage/> : <Navigate to={ROUTES.HOME} />}/>
             <Route path={ROUTES.REQUESTS} element={isAuthenticated ? <Requests/> : <Navigate to={ROUTES.HOME} />}/>
-            <Route path={ROUTES.OPERATOR_ANNOUNCEMENTS} element={<RoleRoute allowedRoles={["Operator"]} element={<AdminAnnouncements/>} />}/>
+            <Route path={ROUTES.OPERATOR_ANNOUNCEMENTS} element={<RoleRoute allowedRoles={["Operator"]} element={<OperatorAnnouncements/>} />}/>
             <Route path={ROUTES.ADMIN_RESIDENTS} element={<RoleRoute allowedRoles={["Admin"]} element={<Residents/>} />}/>
             <Route path={ROUTES.BILLS} element={<Navigate to={`${ROUTES.PAYMENTS}?tab=pay`} replace />}/>
             <Route path={ROUTES.PAYMENT_HISTORY} element={<Navigate to={`${ROUTES.PAYMENTS}?tab=history`} replace />}/>

@@ -49,7 +49,6 @@ const LoginModal = ({ open, onClose, onSwitchToRegister }) => {
             setTouched({});
             clearAllErrors();
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open]);
 
     const handleChange = (e) => {

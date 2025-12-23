@@ -10,7 +10,7 @@ namespace Backend.Application.Interfaces
         Task MarkAsPaidAsync(int paymentId, string transactionId,CancellationToken ct);
         Task<List<Payment>> GetUserPaymentsAsync(int userId, CancellationToken ct);
         Task CancelPaymentAsync(int userId, int paymentId, CancellationToken ct);
-        Task<BalanceDetailsDto> GetBalanceAsync(int userId, CancellationToken ct);
-        Task<Payment> InitPaymentAsync(int userId, decimal amount, string method, CancellationToken ct);
+        Task<BalanceDetailsDto> GetBalanceAsync(int userId, int? accountId, CancellationToken ct);
+        Task<Payment> InitPaymentAsync(int userId, int? accountId, decimal amount, string method, CancellationToken ct);
     }
 }

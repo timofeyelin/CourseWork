@@ -11,8 +11,10 @@ import {
 } from '../Home.styles';
 
 const StatsWidgets = ({ balanceData, openRequestsCount, onPaymentClick }) => {
-    const { user } = useAuth();
+    const { user, accounts, selectedAccountId } = useAuth();
     const isAdminOrOperator = user?.role === 'Admin' || user?.role === 'Operator';
+    
+    const selectedAccount = accounts?.find(acc => acc.id === selectedAccountId);
 
     if (isAdminOrOperator) return null;
 
@@ -20,11 +22,19 @@ const StatsWidgets = ({ balanceData, openRequestsCount, onPaymentClick }) => {
         <WidgetsGrid>
             <WidgetCard color="#0288D1">
                 <WidgetHeader>
-                    <WidgetTitle>Баланс</WidgetTitle>
+                    <Box>
+                        <WidgetTitle>Баланс</WidgetTitle>
+                        {selectedAccount && (
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                                Л/С: {selectedAccount.accountNumber}
+                            </Typography>
+                        )}
+                    </Box>
                     <WidgetIcon color="#0288D1">
                         <AccountBalanceWallet />
                     </WidgetIcon>
                 </WidgetHeader>
+                
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                     <Box>
                         <WidgetValue color={balanceData.debt > 0 ? "#d32f2f" : "#2e7d32"}>

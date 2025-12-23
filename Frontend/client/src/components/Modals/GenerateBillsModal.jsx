@@ -10,7 +10,7 @@ import {
     ModalIconWrapper,
     ModalSubtitle,
     ModalCloseButton
-} from '../../pages/Admin/Announcements/AdminAnnouncements.styles';
+} from '../../pages/Operator/Announcements/OperatorAnnouncements.styles';
 
 const GenerateBillsModal = ({ open, onClose, onResult }) => {
     const [selectedDate, setSelectedDate] = useState(null);

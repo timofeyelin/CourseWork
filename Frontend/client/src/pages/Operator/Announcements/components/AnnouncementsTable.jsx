@@ -13,7 +13,7 @@ import {
     StyledTableRow,
     StyledTableCell,
     StyledTableHeadCell
-} from '../AdminAnnouncements.styles';
+} from '../OperatorAnnouncements.styles';
 import { ANNOUNCEMENT_TYPES, ANNOUNCEMENT_TYPE_LABELS } from '../../../../utils/constants'; // <-- Импорт констант
 
 const AnnouncementsTable = ({ announcements, onDeleteClick, onEditClick }) => {

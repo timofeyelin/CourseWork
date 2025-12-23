@@ -35,30 +35,18 @@ namespace Backend.Application.Services
                 throw new ArgumentException("Сумма платежа должна быть больше нуля и не может превышать сумму счета.");
             }
 
-            var billAccountId = bill.Account?.AccountId;
-            if (billAccountId == null)
+            var accountId = bill.Account?.AccountId;
+            decimal currentBalance = 0m;
+            if (accountId != null)
             {
-                throw new InvalidOperationException("Лицевой счет для квитанции не найден.");
+                var accBal = await _context.AccountBalances.FirstOrDefaultAsync(ab => ab.AccountId == accountId, ct);
+                if (accBal != null)
+                {
+                    currentBalance = accBal.Balance;
+                }
             }
 
-            // В системе баланс ведется по лицевым счетам, но для пользователя это единый "кошелек".
-            // Поэтому при оплате квитанции проверяем суммарный баланс по всем лицевым счетам пользователя.
-            var userAccountIds = await _context.Accounts
-                .Where(a => a.UserId == userId)
-                .Select(a => a.AccountId)
-                .ToListAsync(ct);
-
-            if (!userAccountIds.Any())
-            {
-                throw new KeyNotFoundException("Лицевой счет не найден.");
-            }
-
-            var balances = await _context.AccountBalances
-                .Where(ab => userAccountIds.Contains(ab.AccountId))
-                .ToListAsync(ct);
-
-            var totalBalance = balances.Sum(b => b.Balance);
-            if (totalBalance < amount)
+            if (currentBalance < amount)
             {
                 throw new ArgumentException("Недостаточно средств на счёте.");
             }
@@ -74,32 +62,25 @@ namespace Backend.Application.Services
 
             _context.Payment.Add(payment);
 
-            // Списание делаем из общего кошелька пользователя: сначала с лицевого счета квитанции,
-            // затем с остальных счетов с положительным балансом.
-            decimal remaining = amount;
-
-            var orderedBalances = balances
-                .OrderByDescending(b => b.AccountId == billAccountId.Value)
-                .ThenByDescending(b => b.Balance)
-                .ToList();
-
-            foreach (var accBal in orderedBalances)
+            if (accountId != null)
             {
-                if (remaining <= 0) break;
-                if (accBal.Balance <= 0) continue;
-
-                var debit = Math.Min(accBal.Balance, remaining);
-                accBal.Balance -= debit;
-                accBal.UpdatedAt = DateTime.UtcNow;
-                if (accBal.Balance >= 0) accBal.Debt = 0;
-                remaining -= debit;
-            }
-
-            if (remaining > 0)
-            {
-                // На всякий случай (например, если в БД нет строк баланса по счетам) — не допускаем
-                // списание, если не смогли распределить сумму по балансам.
-                throw new InvalidOperationException("Не удалось списать средства: баланс не согласован.");
+                var accBal = await _context.AccountBalances.FirstOrDefaultAsync(ab => ab.AccountId == accountId, ct);
+                if (accBal != null)
+                {
+                    accBal.Balance -= amount;
+                    if (accBal.Balance < 0) accBal.Debt = Math.Abs(accBal.Balance);
+                    accBal.UpdatedAt = DateTime.UtcNow;
+                }
+                else
+                {
+                   _context.AccountBalances.Add(new Domain.Entities.AccountBalance
+                    {
+                        AccountId = accountId.Value,
+                        Balance = 0 - amount,
+                        Debt = amount,
+                        UpdatedAt = DateTime.UtcNow
+                    });
+                }
             }
 
             await _context.SaveChangesAsync(ct);
@@ -203,13 +184,19 @@ namespace Backend.Application.Services
             await _context.SaveChangesAsync(ct);
         }
 
-        public async Task<BalanceDetailsDto> GetBalanceAsync(int userId, CancellationToken ct)
+        public async Task<BalanceDetailsDto> GetBalanceAsync(int userId, int? accountId, CancellationToken ct)
         {
-            var accounts = await _context.Accounts
+            var query = _context.Accounts
                 .Include(a => a.Bills)
                 .ThenInclude(b => b.Payment)
-                .Where(a => a.UserId == userId)
-                .ToListAsync(ct);
+                .Where(a => a.UserId == userId);
+
+            if (accountId.HasValue)
+            {
+                query = query.Where(a => a.AccountId == accountId.Value);
+            }
+
+            var accounts = await query.ToListAsync(ct);
 
             if (!accounts.Any())
             {
@@ -269,11 +256,25 @@ namespace Backend.Application.Services
             };
         }
 
-        public async Task<Payment> InitPaymentAsync(int userId, decimal amount, string method, CancellationToken ct)
+        public async Task<Payment> InitPaymentAsync(int userId, int? accountId, decimal amount, string method, CancellationToken ct)
         {
-             var account = await _context.Accounts
-                .FirstOrDefaultAsync(a => a.UserId == userId, ct)
-                ?? throw new KeyNotFoundException("Лицевой счет не найден.");
+            Domain.Entities.Account? account = null;
+
+            if (accountId.HasValue)
+            {
+                account = await _context.Accounts
+                   .FirstOrDefaultAsync(a => a.UserId == userId && a.AccountId == accountId.Value, ct);
+            }
+            else
+            {
+                account = await _context.Accounts
+                   .FirstOrDefaultAsync(a => a.UserId == userId, ct);
+            }
+
+            if (account == null)
+            {
+                throw new KeyNotFoundException("Лицевой счет не найден.");
+            }
 
             if (amount <= 0)
             {
