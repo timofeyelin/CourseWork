@@ -11,6 +11,21 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Account> Accounts { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<Bill> Bills { get; set; }
+    public DbSet<BillItem> BillItems { get; set; }
+    public DbSet<AccountBalance> AccountBalances { get; set; }
+    public DbSet<Payment> Payment { get; set; }
+    public DbSet<Request> Requests { get; set; }
+    public DbSet<RequestComment> RequestComments { get; set; }
+    public DbSet<RequestAttachment> RequestAttachments { get; set; }
+    public DbSet<Meter> Meters { get; set; }
+    public DbSet<MeterReading> MeterReadings { get; set; }
+    public DbSet<Announcement> Announcements { get; set; }
+    public DbSet<AnnouncementRead> AnnouncementReads { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
+    public DbSet<AuditLog> AuditLogs { get; set; }
+      public DbSet<RequestCategory> RequestCategories => Set<RequestCategory>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -41,6 +56,23 @@ public class AppDbContext : DbContext, IAppDbContext
             entity.Property(a => a.UkName).HasMaxLength(150);
         });
 
+        // Конфигурация для сущности AccountBalance
+        modelBuilder.Entity<AccountBalance>(entity =>
+        {
+            entity.HasKey(ab => ab.AccountBalanceId);
+            entity.Property(ab => ab.Balance).HasColumnType("decimal(18,2)");
+            entity.Property(ab => ab.Debt).HasColumnType("decimal(18,2)");
+            entity.Property(ab => ab.UpdatedAt).HasDefaultValueSql("now() at time zone 'utc'");
+
+            entity.HasOne(ab => ab.Account)
+                  .WithMany()
+                  .HasForeignKey(ab => ab.AccountId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // Уникальный индекс по AccountId — один баланс на лицевой счет
+            entity.HasIndex(ab => ab.AccountId).IsUnique();
+        });
+
         // Конфигурация связи "один-ко-многим"
         // У одного User может быть много Accounts
         modelBuilder.Entity<User>()
@@ -56,5 +88,143 @@ public class AppDbContext : DbContext, IAppDbContext
             entity.Property(r => r.Token).IsRequired();
             entity.Property(r => r.ExpiresAt).IsRequired();
         });
+
+        modelBuilder.Entity<Request>(entity =>
+        {
+            entity.HasKey(r => r.RequestId);
+
+            entity.Property(r => r.CategoryId)
+                  .IsRequired();
+    
+            entity.Property(r => r.Description)
+                  .IsRequired();
+
+            entity.Property(r => r.Rating)
+                  .HasColumnType("integer");
+
+            entity.HasOne(r => r.Account)
+                  .WithMany()
+                  .HasForeignKey(r => r.AccountId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            
+             entity.HasOne(r => r.Category)
+                  .WithMany(c => c.Requests)
+                  .HasForeignKey(r => r.CategoryId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<RequestComment>(entity =>
+        {
+            entity.HasKey(c => c.CommentId);
+
+            entity.Property(c => c.Text)
+                  .IsRequired();
+
+            entity.HasOne(c => c.Request)
+                  .WithMany(r => r.Comments)
+                  .HasForeignKey(c => c.RequestId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(c => c.Author)
+                  .WithMany()
+                  .HasForeignKey(c => c.AuthorId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<RequestAttachment>(entity =>
+        {
+            entity.HasKey(a => a.AttachmentId);
+
+            entity.Property(a => a.FileUri)
+                  .IsRequired();
+
+            entity.Property(a => a.FileType)
+                  .IsRequired()
+                  .HasMaxLength(256);
+
+            entity.HasOne(a => a.Request)
+                  .WithMany(r => r.Attachments)
+                  .HasForeignKey(a => a.RequestId);
+        });
+
+        // Конфигурация Meter
+        modelBuilder.Entity<Meter>(entity =>
+        {
+            entity.HasKey(m => m.MeterId);
+
+            entity.Property(m => m.SerialNumber).IsRequired().HasMaxLength(50);
+
+            entity.HasOne(m => m.Account)
+                  .WithMany()
+                  .HasForeignKey(m => m.AccountId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Конфигурация MeterReading
+        modelBuilder.Entity<MeterReading>(entity =>
+        {
+            entity.HasKey(mr => mr.ReadingId);
+            entity.Property(mr => mr.Value).HasPrecision(18, 4);
+
+            // Связь с Meter
+            entity.HasOne(mr => mr.Meter)
+                  .WithMany(m => m.Readings)
+                  .HasForeignKey(mr => mr.MeterId)
+
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Announcement>(entity =>
+        {
+            entity.HasKey(a => a.AnnouncementId);
+            entity.Property(a => a.Title).IsRequired().HasMaxLength(200);
+            entity.Property(a => a.Content).IsRequired();
+
+            // Связь с AnnouncementRead (каскадное удаление)
+            entity.HasMany(a => a.Reads)
+                  .WithOne(ar => ar.Announcement)
+                  .HasForeignKey(ar => ar.AnnouncementId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<AnnouncementRead>(entity =>
+        {
+            entity.HasKey(ar => ar.Id);
+
+            
+            entity.HasOne(ar => ar.User)
+                  .WithMany()
+                  .HasForeignKey(ar => ar.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+        });
+
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(n => n.NotificationId);
+
+            entity.Property(n => n.Title).IsRequired().HasMaxLength(200);
+            entity.Property(n => n.Text).IsRequired();
+            
+            // При удалении пользователя удаляем и его уведомления
+            entity.HasOne(n => n.User)
+                  .WithMany()
+                  .HasForeignKey(n => n.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<RequestCategory>()
+            .HasData(
+                new RequestCategory { Id = 1, Name = "Сантехника" },
+                new RequestCategory { Id = 2, Name = "Электрика" },
+                new RequestCategory { Id = 3, Name = "Лифт" },
+                new RequestCategory { Id = 4, Name = "Уборка" }
+            );
+
+        modelBuilder.Entity<Request>()
+            .HasOne(r => r.Category)
+            .WithMany(c => c.Requests)
+            .HasForeignKey(r => r.CategoryId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
