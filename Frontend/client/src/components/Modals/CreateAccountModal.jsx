@@ -17,7 +17,7 @@ import {
     ModalIconWrapper,
     ModalSubtitle,
     ModalCloseButton
-} from '../../pages/Admin/Announcements/AdminAnnouncements.styles';
+} from '../../pages/Operator/Announcements/OperatorAnnouncements.styles';
 
 const CreateAccountModal = ({ open, onClose, onSuccess }) => {
     const [formData, setFormData] = useState({

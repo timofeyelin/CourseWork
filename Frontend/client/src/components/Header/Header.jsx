@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { MenuItem, IconButton, Badge, Divider, Popover, Box } from '@mui/material';
-import { Notifications, AccountBalanceWallet, Person, Logout, Login, Add as AddIcon } from '@mui/icons-material';
+import { MenuItem, IconButton, Badge, Divider, Popover, Box, Menu } from '@mui/material';
+import { Notifications, AccountBalanceWallet, Person, Logout, Login, Add as AddIcon, KeyboardArrowDown } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { ROUTES } from '../../utils/constants';
 import { useNotifications } from '../../hooks/useNotifications';
@@ -31,8 +31,22 @@ const Header = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const { balance, debt, refreshBalance } = useAuth();
+    const { balance, debt, refreshBalance, selectAccount, selectedAccountId, accounts } = useAuth();
     const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+    const [accountMenuAnchor, setAccountMenuAnchor] = useState(null);
+
+    const handleAccountMenuOpen = (event) => {
+        setAccountMenuAnchor(event.currentTarget);
+    };
+
+    const handleAccountMenuClose = () => {
+        setAccountMenuAnchor(null);
+    };
+
+    const handleAccountSelect = (accountId) => {
+        selectAccount(accountId);
+        handleAccountMenuClose();
+    };
 
     const handlePaymentSuccess = () => {
         refreshBalance();
@@ -200,6 +214,37 @@ const Header = () => {
                                         >
                                             <AddIcon sx={{ fontSize: 16 }} />
                                         </IconButton>
+                                        {accounts.length > 0 && (
+                                            <>
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={handleAccountMenuOpen}
+                                                    sx={{
+                                                        ml: 0.5,
+                                                        color: 'inherit',
+                                                        width: 24,
+                                                        height: 24,
+                                                    }}
+                                                >
+                                                    <KeyboardArrowDown sx={{ fontSize: 16 }} />
+                                                </IconButton>
+                                                <Menu
+                                                    anchorEl={accountMenuAnchor}
+                                                    open={Boolean(accountMenuAnchor)}
+                                                    onClose={handleAccountMenuClose}
+                                                >
+                                                    {accounts.map(account => (
+                                                        <MenuItem 
+                                                            key={account.id}
+                                                            selected={selectedAccountId === account.id}
+                                                            onClick={() => handleAccountSelect(account.id)}
+                                                        >
+                                                            {account.accountNumber}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Menu>
+                                            </>
+                                        )}
                                     </BalanceWidget>
                                 )}
                                 
@@ -305,6 +350,7 @@ const Header = () => {
                 open={isPaymentOpen} 
                 onClose={() => setIsPaymentOpen(false)} 
                 onSuccess={handlePaymentSuccess} 
+                accountId={selectedAccountId}
             />
         </>
     );

@@ -1,15 +1,42 @@
-import React from 'react';
-import { DialogContent, CircularProgress, IconButton, MenuItem } from '@mui/material';
+import { 
+    DialogContent, 
+    CircularProgress,
+    IconButton,
+} from '@mui/material';
 import { Close as CloseIcon, Campaign as CampaignIcon } from '@mui/icons-material';
-import { GlassButton, GlassDialog, GlassDialogTitle, GlassDialogActions, GlassInput, GlassSelect } from '../../../../components/common';
-import { FormContainer, ModalHeader, ModalIconWrapper, ModalSubtitle, ModalCloseButton } from '../AdminAnnouncements.styles';
+import { MenuItem } from '@mui/material';
+import { 
+    GlassButton, 
+    GlassDialog, 
+    GlassDialogTitle, 
+    GlassDialogActions,
+    GlassInput, 
+    GlassSelect 
+} from '../../../../components/common';
+import {
+    FormContainer,
+    ModalHeader,
+    ModalIconWrapper,
+    ModalSubtitle,
+    ModalCloseButton
+} from '../OperatorAnnouncements.styles';
 import { ANNOUNCEMENT_TYPES, ANNOUNCEMENT_TYPE_LABELS } from '../../../../utils/constants';
 
-const EditAnnouncementModal = ({ open, onClose, announcement, onChange, onSubmit, submitting }) => {
-    if (!announcement) return null;
-
+const CreateAnnouncementModal = ({ 
+    open, 
+    onClose, 
+    formData, 
+    onInputChange, 
+    onSubmit, 
+    submitting 
+}) => {
     return (
-        <GlassDialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+        <GlassDialog 
+            open={open} 
+            onClose={onClose}
+            maxWidth="sm"
+            fullWidth
+        >
             <ModalHeader>
                 <ModalCloseButton>
                     <IconButton aria-label="close" onClick={onClose} size="large">
@@ -19,8 +46,10 @@ const EditAnnouncementModal = ({ open, onClose, announcement, onChange, onSubmit
                 <ModalIconWrapper>
                     <CampaignIcon color="primary" />
                 </ModalIconWrapper>
-                <GlassDialogTitle>Редактировать объявление</GlassDialogTitle>
-                <ModalSubtitle>Измените заголовок, содержание и тип объявления.</ModalSubtitle>
+                <GlassDialogTitle>Новое объявление</GlassDialogTitle>
+                <ModalSubtitle>
+                    Создайте уведомление для жителей. Аварии и отключения будут отображаться вверху главной страницы.
+                </ModalSubtitle>
             </ModalHeader>
 
             <DialogContent>
@@ -28,18 +57,17 @@ const EditAnnouncementModal = ({ open, onClose, announcement, onChange, onSubmit
                     <GlassInput
                         label="Заголовок"
                         name="title"
-                        value={announcement.title}
-                        onChange={onChange}
+                        value={formData.title}
+                        onChange={onInputChange}
                         fullWidth
                         required
                     />
                     
-                    {/* ЗАМЕНА ЧЕКБОКСА НА SELECT */}
                     <GlassSelect
                         label="Тип объявления"
                         name="type"
-                        value={announcement.type} // Теперь используем type
-                        onChange={onChange}
+                        value={formData.type}
+                        onChange={onInputChange}
                         fullWidth
                     >
                         <MenuItem value={ANNOUNCEMENT_TYPES.INFO}>
@@ -56,8 +84,8 @@ const EditAnnouncementModal = ({ open, onClose, announcement, onChange, onSubmit
                     <GlassInput
                         label="Содержание"
                         name="content"
-                        value={announcement.content}
-                        onChange={onChange}
+                        value={formData.content}
+                        onChange={onInputChange}
                         fullWidth
                         multiline
                         rows={6}
@@ -67,13 +95,20 @@ const EditAnnouncementModal = ({ open, onClose, announcement, onChange, onSubmit
             </DialogContent>
 
             <GlassDialogActions>
-                <GlassButton onClick={onClose} variant="text">Отмена</GlassButton>
-                <GlassButton onClick={onSubmit} variant="contained" color="primary" disabled={submitting}>
-                    {submitting ? <CircularProgress size={20} color="inherit" /> : 'Сохранить'}
+                <GlassButton onClick={onClose} variant="text">
+                    Отмена
+                </GlassButton>
+                <GlassButton 
+                    onClick={onSubmit}
+                    variant="contained"
+                    color="primary"
+                    disabled={submitting}
+                >
+                    {submitting ? <CircularProgress size={20} color="inherit" /> : 'Опубликовать'}
                 </GlassButton>
             </GlassDialogActions>
         </GlassDialog>
     );
 };
 
-export default EditAnnouncementModal;
+export default CreateAnnouncementModal;

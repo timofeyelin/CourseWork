@@ -4,5 +4,6 @@ namespace Backend.Api.Dtos
     {
         public decimal Amount { get; set; }
         public string Method { get; set; } = string.Empty;
+        public int? AccountId { get; set; }
     }
 }

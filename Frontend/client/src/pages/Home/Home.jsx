@@ -133,7 +133,9 @@ const Home = () => {
                     <StatsWidgets 
                         balanceData={{ balance, debt }} 
                         openRequestsCount={openRequestsCount} 
-                        onPaymentClick={() => setIsPaymentOpen(true)}
+                        onPaymentClick={() => {
+                            setIsPaymentOpen(true);
+                        }}
                     />
 
                     {/* Баннеры теперь получают отфильтрованные по типу новости */}
@@ -153,7 +155,9 @@ const Home = () => {
 
                     <PaymentModal 
                         open={isPaymentOpen} 
-                        onClose={() => setIsPaymentOpen(false)} 
+                        onClose={() => {
+                            setIsPaymentOpen(false);
+                        }} 
                         onSuccess={() => refreshBalance()} 
                     />
 

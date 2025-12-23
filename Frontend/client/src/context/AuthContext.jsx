@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+    const [accounts, setAccounts] = useState([]);
 
     const checkAuth = async () => {
         const token = localStorage.getItem('accessToken');
@@ -18,26 +19,32 @@ export const AuthProvider = ({ children }) => {
                 const response = await userService.getProfile();
                 setUser(response.data);
                 setIsAuthenticated(true);
+                setIsLoading(false);
+                return response.data;
             } catch (error) {
                 console.error('Auth check failed:', error);
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('refreshToken');
                 setUser(null);
                 setIsAuthenticated(false);
+                setIsLoading(false);
+                return null;
             }
         } else {
             setIsAuthenticated(false);
             setUser(null);
+            setIsLoading(false);
+            return null;
         }
-        setIsLoading(false);
     };
 
     const [balance, setBalance] = useState(0);
     const [debt, setDebt] = useState(0);
+    const [selectedAccountId, setSelectedAccountId] = useState(null);
 
-    const refreshBalance = async () => {
+    const refreshBalance = async (accountId = selectedAccountId) => {
         try {
-            const data = await paymentService.getBalance();
+            const data = await paymentService.getBalance(accountId);
             setBalance(data.balance ?? 0);
             setDebt(data.debt ?? 0);
         } catch (e) {
@@ -45,20 +52,49 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const selectAccount = async (accountId) => {
+        setSelectedAccountId(accountId);
+        await refreshBalance(accountId);
+    };
+
+    const fetchAccounts = async () => {
+        try {
+            const response = await userService.getAccounts();
+            const fetchedAccounts = response.data || [];
+            setAccounts(fetchedAccounts);
+
+            if (fetchedAccounts.length > 0) {
+                const currentAccountExists = fetchedAccounts.some(acc => acc.id === selectedAccountId);
+                if (!selectedAccountId || !currentAccountExists) {
+                    await selectAccount(fetchedAccounts[0].id);
+                }
+            } else {
+                setSelectedAccountId(null);
+                setBalance(0);
+                setDebt(0);
+            }
+        } catch (error) {
+            console.error('Failed to fetch accounts:', error);
+        }
+    };
+
     useEffect(() => {
         (async () => {
-            await checkAuth();
-            const token = localStorage.getItem('accessToken');
-            if (token) await refreshBalance();
+            const userData = await checkAuth();
+            if (userData && userData.role !== 'Admin' && userData.role !== 'Operator') {
+                await fetchAccounts();
+            }
         })();
     }, []);
 
     const login = async (email, password) => {
         try {
             await authService.login(email, password);
-            await checkAuth();
+            const userData = await checkAuth();
             closeModals();
-            await refreshBalance();
+            if (userData && userData.role !== 'Admin' && userData.role !== 'Operator') {
+                await fetchAccounts();
+            }
             return true;
         } catch (error) {
             throw error;
@@ -100,6 +136,10 @@ export const AuthProvider = ({ children }) => {
             isRegisterOpen,
             balance,
             debt,
+            accounts,
+            fetchAccounts,
+            selectedAccountId,
+            selectAccount,
             refreshBalance,
             isAdmin,
             isOperator,

@@ -24,12 +24,12 @@ import {
     HeaderSection,
     PageTitle,
     ContentSection
-} from './AdminAnnouncements.styles';
+} from './OperatorAnnouncements.styles';
 import AnnouncementsTable from './components/AnnouncementsTable';
 import CreateAnnouncementModal from './components/CreateAnnouncementModal';
 import EditAnnouncementModal from './components/EditAnnouncementModal';
 
-const AdminAnnouncements = () => {
+const OperatorAnnouncements = () => {
     const { user, isAuthenticated } = useAuth();
     const navigate = useNavigate();
     const [announcements, setAnnouncements] = useState([]);
@@ -254,4 +254,4 @@ const AdminAnnouncements = () => {
     );
 };
 
-export default AdminAnnouncements;
+export default OperatorAnnouncements;

@@ -142,12 +142,12 @@ namespace Backend.Api.Controllers
 
         // GET: api/payments/balance
         [HttpGet("balance")]
-        public async Task<ActionResult<BalanceDetailsDto>> GetBalance(CancellationToken ct)
+        public async Task<ActionResult<BalanceDetailsDto>> GetBalance([FromQuery] int? accountId, CancellationToken ct)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             try
             {
-                var balance = await _paymentService.GetBalanceAsync(userId, ct);
+                var balance = await _paymentService.GetBalanceAsync(userId, accountId, ct);
                 return Ok(balance);
             }
             catch (KeyNotFoundException ex)
@@ -163,7 +163,7 @@ namespace Backend.Api.Controllers
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             try
             {
-                var payment = await _paymentService.InitPaymentAsync(userId, request.Amount, request.Method, ct);
+                var payment = await _paymentService.InitPaymentAsync(userId, request.AccountId, request.Amount, request.Method, ct);
 
                 try
                 {
@@ -172,7 +172,7 @@ namespace Backend.Api.Controllers
                         "InitPayment",
                         "Payment",
                         payment.PaymentId.ToString(),
-                        $"Сумма: {request.Amount}, Метод: {request.Method}",
+                        $"Сумма: {request.Amount}, Метод: {request.Method}, Счет: {request.AccountId}",
                         ct);
                 }
                 catch (Exception ex)

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { MenuItem, IconButton } from '@mui/material';
+import { MenuItem, IconButton, Typography } from '@mui/material';
+import { useAuth } from '../../context/AuthContext';
 import { GlassInput, GlassSelect, GlassButton, GlassDialogTitle } from '../common';
 import {
     StyledAlert,
@@ -15,7 +16,7 @@ import {
     ModalIconWrapper,
     ModalSubtitle,
     ModalCloseButton
-} from '../../pages/Admin/Announcements/AdminAnnouncements.styles';
+} from '../../pages/Operator/Announcements/OperatorAnnouncements.styles';
 import { paymentService } from '../../api/payments';
 
 const PAYMENT_METHODS = [
@@ -23,7 +24,11 @@ const PAYMENT_METHODS = [
     { value: 'SBP', label: 'СБП' },
 ];
 
-const PaymentModal = ({ open, onClose, onSuccess }) => {
+const PaymentModal = ({ open, onClose, onSuccess, accountId }) => {
+    const { selectedAccountId, accounts } = useAuth();
+    const targetAccountId = accountId || selectedAccountId;
+    const targetAccount = accounts?.find(acc => acc.id === targetAccountId);
+
     const [amount, setAmount] = useState('');
     const [method, setMethod] = useState('Card');
     const [error, setError] = useState(null);
@@ -49,12 +54,12 @@ const PaymentModal = ({ open, onClose, onSuccess }) => {
         }
 
         try {
-            const response = await paymentService.initPayment(numAmount, method);
+            const response = await paymentService.initPayment(numAmount, method, targetAccountId);
             console.log('Payment URL:', response.testUrl);
             
             if (onSuccess) onSuccess();
             onClose();
-            alert(`Переход на оплату: ${response.testUrl}`);
+            // window.open(response.testUrl, '_blank');
 
         } catch (err) {
             setError('Не удалось инициировать оплату, попробуйте позже');
@@ -82,6 +87,11 @@ const PaymentModal = ({ open, onClose, onSuccess }) => {
                         <AccountBalanceWalletIcon color="primary" />
                     </ModalIconWrapper>
                     <GlassDialogTitle>Пополнение баланса</GlassDialogTitle>
+                    {targetAccount && (
+                        <Typography variant="subtitle1" align="center" sx={{ color: 'text.secondary', mb: 1 }}>
+                            Лицевой счет: {targetAccount.accountNumber}
+                        </Typography>
+                    )}
                     <ModalSubtitle>Введите сумму и выберите способ оплаты</ModalSubtitle>
                 </ModalHeader>
 

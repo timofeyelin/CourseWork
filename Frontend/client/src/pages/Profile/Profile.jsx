@@ -21,7 +21,7 @@ import ProfileEditModal from './components/ProfileEditModal';
 const Profile = () => {
     const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
-    const [accounts, setAccounts] = useState([]);
+    const { isAdminOrOperator, fetchAccounts, accounts } = useAuth();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -43,8 +43,6 @@ const Profile = () => {
     });
     const [openEditProfile, setOpenEditProfile] = useState(false);
 
-    const { isAdminOrOperator } = useAuth();
-
     const fetchProfileData = async () => {
         try {
             const token = localStorage.getItem('accessToken');
@@ -58,10 +56,7 @@ const Profile = () => {
             setProfile(profileRes.data);
 
             if (!(profileRes.data && (profileRes.data.role === 'Admin' || profileRes.data.role === 'Operator'))) {
-                const accountsRes = await userService.getAccounts();
-                setAccounts(accountsRes.data);
-            } else {
-                setAccounts([]);
+                await fetchAccounts();
             }
         } catch (err) {
             console.error('Error fetching profile data:', err);
@@ -115,8 +110,7 @@ const Profile = () => {
             });
             
             handleCloseAddAccount();
-            const accountsRes = await userService.getAccounts();
-            setAccounts(accountsRes.data);
+            await fetchAccounts();
         } catch (err) {
             console.error('Ошибка при добавлении счета:', err);
             if (err.response || err.message) {
@@ -159,8 +153,7 @@ const Profile = () => {
                 severity: 'success'
             });
 
-            const accountsRes = await userService.getAccounts();
-            setAccounts(accountsRes.data);
+            await fetchAccounts();
             handleCloseDeleteConfirmation();
         } catch (err) {
             console.error('Error deleting account:', err);

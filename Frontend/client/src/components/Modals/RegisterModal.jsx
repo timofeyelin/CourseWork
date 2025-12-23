@@ -64,7 +64,6 @@ const RegisterModal = ({ open, onClose, onSwitchToLogin }) => {
             setTouched({});
             clearAllErrors();
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open]);
 
     const handleChange = (e) => {
