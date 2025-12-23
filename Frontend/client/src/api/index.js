@@ -5,6 +5,21 @@ const api = axios.create({
     baseURL: API_BASE_URL,
 });
 
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+    failedQueue.forEach(prom => {
+        if (error) {
+            prom.reject(error);
+        } else {
+            prom.resolve(token);
+        }
+    });
+
+    failedQueue = [];
+};
+
 // Перехватчик для добавления токена авторизации ко всем запросам
 api.interceptors.request.use(
     (config) => {
@@ -29,7 +44,19 @@ api.interceptors.response.use(
                 return Promise.reject(error);
             }
 
+            if (isRefreshing) {
+                return new Promise((resolve, reject) => {
+                    failedQueue.push({ resolve, reject });
+                }).then(token => {
+                    originalRequest.headers['Authorization'] = 'Bearer ' + token;
+                    return api(originalRequest);
+                }).catch(err => {
+                    return Promise.reject(err);
+                });
+            }
+
             originalRequest._isRetry = true;
+            isRefreshing = true;
 
             try {
                 const accessToken = localStorage.getItem('accessToken');
@@ -49,12 +76,14 @@ api.interceptors.response.use(
 
                 localStorage.setItem('accessToken', newAccessToken);
                 localStorage.setItem('refreshToken', newRefreshToken);
+                
+                processQueue(null, newAccessToken);
+
                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-
-
                 return api.request(originalRequest);
 
-                } catch (refreshError) {
+            } catch (refreshError) {
+                processQueue(refreshError, null);
 
                 console.log("Сессия истекла или ошибка обновления токена");
                 localStorage.removeItem('accessToken');
@@ -67,6 +96,8 @@ api.interceptors.response.use(
                     window.location.href = '/';
                 }
                 return Promise.reject(refreshError);
+            } finally {
+                isRefreshing = false;
             }
         }
         // Если это не 401 или уже пробовали обновить — возвращаем ошибку
