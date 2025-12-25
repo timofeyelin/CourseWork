@@ -131,16 +131,22 @@ const RegisterModal = ({ open, onClose, onSwitchToLogin }) => {
                 const serverMsg = resp.data?.message || resp.data?.error || '';
                 const msg = String(serverMsg).toLowerCase();
 
-                const isDuplicateEmail = resp.status === 409
-                    || resp.status === 400 && (msg.includes('email') && (msg.includes('уже') || msg.includes('существ')))
-                    || msg.includes('уже существует')
-                    || msg.includes('уже используется')
-                    || (msg.includes('email') && msg.includes('существ'));
+                const isDuplicatePhone = resp.status === 409
+                    || (resp.status === 400 && ((msg.includes('телефон') || msg.includes('номер')) && (msg.includes('уже') || msg.includes('использ'))))
+                    || (msg.includes('телефон') && msg.includes('существ'))
+                    || (msg.includes('номер') && msg.includes('существ'));
 
-                if (isDuplicateEmail) {
-                    errorMessage = ERROR_MESSAGES.EMAIL_ALREADY_EXISTS;
-                } else if (serverMsg) {
-                    errorMessage = serverMsg;
+                if (isDuplicatePhone) {
+                    errorMessage = ERROR_MESSAGES.PHONE_ALREADY_EXISTS;
+                } else {
+                    const isDuplicateEmail = resp.status === 409
+                        || (resp.status === 400 && (msg.includes('email') && (msg.includes('уже') || msg.includes('существ') || msg.includes('использ'))));
+
+                    if (isDuplicateEmail) {
+                        errorMessage = ERROR_MESSAGES.EMAIL_ALREADY_EXISTS;
+                    } else if (serverMsg) {
+                        errorMessage = serverMsg;
+                    }
                 }
             }
 
