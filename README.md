@@ -941,7 +941,7 @@ npm run build
 **@timofeyelin**
 **@Beq4ch**
 **@Splashy34**
-**@Respect151511""
+**@Respect151511**
 **@glebkz**
 ## 📄 Лицензия
 
