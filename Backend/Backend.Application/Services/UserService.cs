@@ -25,6 +25,17 @@ namespace Backend.Application.Services
                 throw new InvalidOperationException($"Пользователь с email '{email}' уже существует");
             }
 
+            if (!string.IsNullOrWhiteSpace(phone))
+            {
+                var phoneExists = await _context.Users
+                    .AnyAsync(u => u.Phone == phone, ct);
+
+                if (phoneExists)
+                {
+                    throw new InvalidOperationException($"Пользователь с телефоном '{phone}' уже существует");
+                }
+            }
+
             var passwordHash = BCrypt.Net.BCrypt.EnhancedHashPassword(password, workFactor: 13);
             var user = new User
             {
