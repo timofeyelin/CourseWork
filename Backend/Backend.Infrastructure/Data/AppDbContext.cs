@@ -40,6 +40,7 @@ public class AppDbContext : DbContext, IAppDbContext
             entity.Property(u => u.PasswordHash).IsRequired();
             entity.Property(u => u.FullName).IsRequired().HasMaxLength(200);
             entity.Property(u => u.Phone).HasMaxLength(20);
+            entity.Property(u => u.Phone).IsRequired();
             entity.Property(u => u.CreatedAt).HasDefaultValueSql("now() at time zone 'utc'");
         });
 

@@ -211,7 +211,7 @@ const RegisterModal = ({ open, onClose, onSwitchToLogin }) => {
 
                     <FormField>
                         <FieldLabel variant='body2'>
-                            Номер телефона
+                            Номер телефона <RequiredStar>*</RequiredStar>
                         </FieldLabel>
                         <GlassInput
                             fullWidth
