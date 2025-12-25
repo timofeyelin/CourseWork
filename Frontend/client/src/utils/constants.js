@@ -44,6 +44,7 @@ export const VALIDATION_MESSAGES = {
 export const ERROR_MESSAGES = {
     LOGIN_FAILED: 'Ошибка входа. Проверьте пароль.',
     REGISTRATION_FAILED: 'Ошибка регистрации. Попробуйте снова.',
+    EMAIL_ALREADY_EXISTS: 'Пользователь с таким имейлом уже существует',
     GENERIC_ERROR: 'Произошла ошибка. Попробуйте позже.',
     PROFILE_LOAD_FAILED: 'Не удалось загрузить данные профиля',
     PROFILE_UPDATE_FAILED: 'Не удалось обновить профиль',

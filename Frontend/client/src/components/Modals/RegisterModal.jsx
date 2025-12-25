@@ -125,7 +125,25 @@ const RegisterModal = ({ open, onClose, onSwitchToLogin }) => {
             onClose();
             onSwitchToLogin();
         } catch (error) {
-            const errorMessage = error.response?.data?.message || ERROR_MESSAGES.REGISTRATION_FAILED;
+            let errorMessage = ERROR_MESSAGES.REGISTRATION_FAILED;
+            const resp = error.response;
+            if (resp) {
+                const serverMsg = resp.data?.message || resp.data?.error || '';
+                const msg = String(serverMsg).toLowerCase();
+
+                const isDuplicateEmail = resp.status === 409
+                    || resp.status === 400 && (msg.includes('email') && (msg.includes('уже') || msg.includes('существ')))
+                    || msg.includes('уже существует')
+                    || msg.includes('уже используется')
+                    || (msg.includes('email') && msg.includes('существ'));
+
+                if (isDuplicateEmail) {
+                    errorMessage = ERROR_MESSAGES.EMAIL_ALREADY_EXISTS;
+                } else if (serverMsg) {
+                    errorMessage = serverMsg;
+                }
+            }
+
             setApiError(errorMessage);
         } finally {
             setIsSubmitting(false);

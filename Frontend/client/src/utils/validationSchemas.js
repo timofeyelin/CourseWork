@@ -49,8 +49,10 @@ export const registerValidationSchema = (data) => {
         }
     }
 
-    // Валидация телефона (необязательное поле)
-    if (data.phone && data.phone.trim() !== '') {
+    // Валидация телефона (обязательное поле)
+    if (!data.phone || data.phone.trim() === '') {
+        errors.phone = VALIDATION_MESSAGES.REQUIRED;
+    } else {
         const phoneRegex = /^(\+7|8)?[\s\-]?\(?[489][0-9]{2}\)?[\s\-]?[0-9]{3}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$/;
         if (!phoneRegex.test(data.phone)) {
             errors.phone = VALIDATION_MESSAGES.INVALID_PHONE;
