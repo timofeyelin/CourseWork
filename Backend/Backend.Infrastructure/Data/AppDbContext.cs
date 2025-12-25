@@ -35,6 +35,7 @@ public class AppDbContext : DbContext, IAppDbContext
         {
             entity.HasKey(u => u.UserId);
             entity.HasIndex(u => u.Email).IsUnique(); // Уникальный email
+            entity.HasIndex(u => u.Phone).IsUnique(); // Уникальный телефон
 
             entity.Property(u => u.Email).IsRequired().HasMaxLength(256);
             entity.Property(u => u.PasswordHash).IsRequired();
